@@ -1,0 +1,22 @@
+{
+    "editor.formatOnSave": true,
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "sameLine",
+    "C_Cpp.formatting": "vcFormat",
+    "files.associations": {
+        "*.tcc": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/.pio": true,
+        "**/.vscode": true
+    },
+    "CppHelper.HeaderGuardPattern": "{FILE}_H_"
+}
