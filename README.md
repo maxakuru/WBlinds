@@ -6,6 +6,13 @@ Wifi controller for smart blinds.
 * MQTT API
 * HTTP/REST API
 * Handles halting on home detection
+* > Work in progress
+
+## Setup
+1. Configure `src/Credentials.h.ex` and rename to `src/Credentials.h`
+2. Configure pins in `src/main.cpp`
+3. Setup `platformio.ini` to your liking
+4. Build & flash
 
 ## APIs
 
@@ -43,6 +50,9 @@ body="{\"pos\":50,\"speed\":10,\"accel\":10}"
 Where `pos`, `speed` are percentages and `accel` is Hz.
 
 ## TODO
+- [ ] Parameterize pins
+- [ ] Saving settings to SPIFFS
+- [ ] Dashboard for configuration at runtime
 - [ ] AP wifi setup
 - [ ] Servo brake & relay for minimizing power consumption
 - [ ] Add schematic, PCB
