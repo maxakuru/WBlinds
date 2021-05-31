@@ -4,6 +4,7 @@
 #include "motor.h"
 #include <ArduinoJson.h>
 #include "defines.h"
+#include "state.h"
 
 class BlindsAPI {
 

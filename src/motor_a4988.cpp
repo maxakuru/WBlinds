@@ -232,11 +232,14 @@ int8_t MotorA4988::moveTo(int32_t pos) {
     return -1;
   }
 
+  State::getInstance()->set<State::kPosition>(State::Key::kPosition, pos);
+
   return stepper->moveTo(pos);
 }
 
 int8_t MotorA4988::moveTo(int32_t pos, uint32_t speed_hz) {
   stepper->setSpeedInHz(speed_hz);
+  State::getInstance()->set<State::kSpeed>(State::Key::kSpeed, speed_hz);
   return this->moveTo(pos);
 }
 

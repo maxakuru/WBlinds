@@ -37,10 +37,16 @@ PubSubClient mqttClient(client);
 const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
 uint32_t _lastOTACheck = 0;
 
+// State save interval, only occurs if state is dirty
+const uint16_t STATE_SAVE_INTERVAL = 10000; // ms
+uint32_t _lastStateSave = 0;
+
 MotorA4988 motor(STEP_PIN, DIR_PIN, EN_PIN, SLP_PIN, RST_PIN, MS1_PIN, MS2_PIN, MS3_PIN, CORD_LENGTH_MM, CORD_DIAMETER_MM, AXIS_DIAMETER_MM, STEPS_PER_REV);
 
 BlindsHTTPAPI httpAPI(&server, httpPort);
 BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
+
+State* state;
 
 int homeSwitchState = LOW;
 void IRAM_ATTR onHomePinChange() {
@@ -58,14 +64,8 @@ void setup() {
   delay(100);
   Serial.println("Setup...");
 
-  auto state = State::getInstance();
-  state->load();
-  state->getInstance();
-
   pinMode(HOME_SWITCH_PIN, INPUT_PULLDOWN);
   attachInterrupt(digitalPinToInterrupt(HOME_SWITCH_PIN), onHomePinChange, CHANGE);
-
-
 
   motor.init();
   motor.setResolution(stdBlinds::resolution_t::kSixteenth);
@@ -81,6 +81,9 @@ void setup() {
   Serial.print("Connected to the WiFi network, IP: ");
   Serial.println(WiFi.localIP());
 
+  state = State::getInstance();
+  state->load();
+
   _lastOTACheck = millis();
   OTAinit();
 
@@ -93,8 +96,16 @@ void setup() {
 void loop() {
   httpAPI.loop();
   mqttAPI.loop();
+  if ((millis() - STATE_SAVE_INTERVAL) > _lastStateSave) {
+    _lastStateSave = millis();
+    if (state != nullptr && state->isDirty()) {
+      state->save();
+    }
+  }
   if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck) {
     _lastOTACheck = millis();
     OTAloopHandler();
   }
+
+
 }
