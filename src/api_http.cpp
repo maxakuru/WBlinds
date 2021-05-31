@@ -1,5 +1,4 @@
 #include "api_http.h"
-#include <ArduinoJson.h>
 
 // Media types
 const char* MT_JSON = "application/json";
@@ -8,14 +7,12 @@ const char* MT_TEXT = "text/html";
 // Errors
 const char* errPrefix = "{\"error\":\"";
 const char* errSuffix = "\"}";
-const char* ERR_INVALID_JSON = "Invalid json";
-const char* ERR_NO_OP = "Expecting op";
-const char* ERR_UNKNOWN_OP = "Unknown op";
 char errStr[100] = "";
 
 BlindsHTTPAPI::BlindsHTTPAPI(WebServer* server, const uint16_t port) {
    Serial.println("[BlindsHTTPAPI] constructor");
    this->server = server;
+   this->port = port;
 }
 
 void BlindsHTTPAPI::init(BlindsMotor* motor) {
@@ -26,7 +23,7 @@ void BlindsHTTPAPI::init(BlindsMotor* motor) {
          this->handlePOST();
       }
    );
-   server->begin(80);
+   server->begin(this->port);
 }
 
 void BlindsHTTPAPI::loop() {
@@ -42,34 +39,10 @@ char* errorJson(const char* msg) {
 
 void BlindsHTTPAPI::handlePOST() {
    Serial.println("[BlindsHTTPAPI] HTTP POST");
-   DynamicJsonDocument root(1024);
-   DeserializationError error = deserializeJson(root, server->arg("plain"));
-   if (error) {
-      char* err = errorJson(ERR_INVALID_JSON);
-      server->send(400, MT_JSON, err);
-      return;
+   auto errCode = doOperation(server->arg("plain").c_str());
+   if (errCode == stdBlinds::error_code_t::NoError) {
+      return server->send(200, MT_TEXT, "Ok");
    }
-   else {
-      if (!root.containsKey("op")) {
-         char* err = errorJson(ERR_NO_OP);
-         server->send(400, MT_JSON, err);
-         return;
-      }
-      const char* op = root["op"];
-      if (strcmp(op, "run_forward") == 0) {
-         this->motor->runForward();
-      }
-      else if (strcmp(op, "run_backward") == 0) {
-         this->motor->runBackward();
-      }
-      else if (strcmp(op, "stop") == 0) {
-         this->motor->stop();
-      }
-      else {
-         char* err = errorJson(ERR_UNKNOWN_OP);
-         server->send(400, MT_JSON, err);
-         return;
-      }
-      server->send(200, MT_TEXT);
-   }
+   char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
+   server->send(400, MT_JSON, err);
 }

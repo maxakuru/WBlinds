@@ -17,12 +17,13 @@ private:
    const char* user;
    const char* password;
    const char* name;
-   char* forwardTopic;
-   char* backwardTopic;
+   char* upTopic;
+   char* downTopic;
    char* stopTopic;
    char* sleepTopic;
+   char* moveTopic;
    char* toSubscribe;
-   void handleMessage(const char* topic, byte* payload, unsigned int length);
+   void handleMessage(const char* topic, byte* payload, uint32_t length);
    void reconnect();
    void initTopics(const char* name);
 };

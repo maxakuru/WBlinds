@@ -1,11 +1,11 @@
 #include "api_mqtt.h"
 #include <ArduinoJson.h>
 
-const char* forwardTopicSuffix = "/forward";
-const char* backwardTopicSuffix = "/backward";
+const char* upTopicSuffix = "/up";
+const char* downTopicSuffix = "/down";
 const char* stopTopicSuffix = "/stop";
 const char* sleepTopicSuffix = "/sleep";
-
+const char* moveTopicSuffix = "/move";
 
 BlindsMQTTAPI::BlindsMQTTAPI(
    PubSubClient* client,
@@ -34,15 +34,15 @@ BlindsMQTTAPI::BlindsMQTTAPI(
 }
 
 void BlindsMQTTAPI::initTopics(const char* name) {
-   char* ft = new char[strlen(name) + strlen(forwardTopicSuffix) + 1]();
-   strcpy(ft, name);
-   strcat(ft, forwardTopicSuffix);
-   this->forwardTopic = ft;
+   char* ut = new char[strlen(name) + strlen(upTopicSuffix) + 1]();
+   strcpy(ut, name);
+   strcat(ut, upTopicSuffix);
+   this->upTopic = ut;
 
-   char* bt = new char[strlen(name) + strlen(backwardTopicSuffix) + 1]();
-   strcpy(bt, name);
-   strcat(bt, backwardTopicSuffix);
-   this->backwardTopic = bt;
+   char* dt = new char[strlen(name) + strlen(downTopicSuffix) + 1]();
+   strcpy(dt, name);
+   strcat(dt, downTopicSuffix);
+   this->downTopic = dt;
 
    char* st = new char[strlen(name) + strlen(stopTopicSuffix) + 1]();
    strcpy(st, name);
@@ -53,6 +53,11 @@ void BlindsMQTTAPI::initTopics(const char* name) {
    strcpy(slt, name);
    strcat(slt, sleepTopicSuffix);
    this->sleepTopic = slt;
+
+   char* mt = new char[strlen(name) + strlen(moveTopicSuffix) + 1]();
+   strcpy(mt, name);
+   strcat(mt, moveTopicSuffix);
+   this->moveTopic = mt;
 
    // Subscribe to all topics under the device name
    char* ts = new char[strlen(name) + 3]();
@@ -78,31 +83,25 @@ void BlindsMQTTAPI::init(BlindsMotor* motor) {
  * @param payload
  * @param length
  */
-void BlindsMQTTAPI::handleMessage(const char* topic, byte* payload, unsigned int length) {
+void BlindsMQTTAPI::handleMessage(const char* topic, byte* payload, uint32_t length) {
    Serial.print("[BlindsMQTTAPI] Handling message: '");
    Serial.print(topic);
-   Serial.print("' with payload: ");
-   for (int i = 0; i < length; i++) {
-      Serial.print((char)payload[i]);
-   }
-   Serial.println();
-
-   if (strcmp(topic, stopTopic) == 0) {
-      this->motor->stop();
-   }
-   else if (strcmp(topic, forwardTopic) == 0) {
-      this->motor->runForward();
-   }
-   else if (strcmp(topic, backwardTopic) == 0) {
-      this->motor->runBackward();
-   }
-   else if (strcmp(topic, sleepTopic) == 0) {
-      bool state = false;
-      if (length > 0) {
-         state = true;
+   Serial.println("'");
+   int tLen = strlen(topic);
+   int afterSlash = 0;
+   for (int i = tLen; i >= 0; i--) {
+      if (topic[i] == '/') {
+         afterSlash = i + 1;
+         break;
       }
-      this->motor->setSleep(state);
    }
+
+   int partLen = tLen - afterSlash;
+   char part[partLen];
+   memcpy(part, topic + afterSlash, partLen);
+   part[partLen] = 0;
+
+   doOperation(part, payload, length);
 }
 
 void BlindsMQTTAPI::loop() {

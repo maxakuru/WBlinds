@@ -12,6 +12,7 @@ public:
    void loop() override;
 private:
    WebServer* server;
+   uint16_t port;
    void handlePOST();
 };
 

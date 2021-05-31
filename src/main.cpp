@@ -8,6 +8,7 @@
 #include "api_http.h"
 #include "api_mqtt.h"
 #include <Credentials.h>
+#include "state.h"
 
 // Pin config
 #define DIR_PIN 18
@@ -20,6 +21,12 @@
 #define MS3_PIN 17
 #define HOME_SWITCH_PIN 4 // microswitch pin for homing
 
+// Dimensions
+#define CORD_LENGTH_MM 1651
+#define CORD_DIAMETER_MM 0.1
+#define AXIS_DIAMETER_MM 15
+#define STEPS_PER_REV 200
+
 // HTTP/MQTT config
 const uint8_t httpPort = 80;
 WebServer server;
@@ -30,7 +37,7 @@ PubSubClient mqttClient(client);
 const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
 uint32_t _lastOTACheck = 0;
 
-MotorA4988 motor(STEP_PIN, DIR_PIN, EN_PIN, SLP_PIN, RST_PIN, MS1_PIN, MS2_PIN, MS3_PIN);
+MotorA4988 motor(STEP_PIN, DIR_PIN, EN_PIN, SLP_PIN, RST_PIN, MS1_PIN, MS2_PIN, MS3_PIN, CORD_LENGTH_MM, CORD_DIAMETER_MM, AXIS_DIAMETER_MM, STEPS_PER_REV);
 
 BlindsHTTPAPI httpAPI(&server, httpPort);
 BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
@@ -38,7 +45,6 @@ BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQT
 int homeSwitchState = LOW;
 void IRAM_ATTR onHomePinChange() {
   int newState = digitalRead(HOME_SWITCH_PIN);
-
   if (newState != homeSwitchState) {
     homeSwitchState = newState;
     if (homeSwitchState == HIGH && motor.isInit()) {
@@ -49,15 +55,22 @@ void IRAM_ATTR onHomePinChange() {
 
 void setup() {
   Serial.begin(115200);
+  delay(100);
   Serial.println("Setup...");
+
+  auto state = State::getInstance();
+  state->load();
+  state->getInstance();
 
   pinMode(HOME_SWITCH_PIN, INPUT_PULLDOWN);
   attachInterrupt(digitalPinToInterrupt(HOME_SWITCH_PIN), onHomePinChange, CHANGE);
 
+
+
   motor.init();
   motor.setResolution(stdBlinds::resolution_t::kSixteenth);
-  motor.stepper->setSpeedInUs(1000); // the parameter is us/step
-  motor.stepper->setAcceleration(1000);
+  motor.stepper->setSpeedInHz(1000); // the parameter is us/step
+  motor.stepper->setAcceleration(INT32_MAX);
 
   // setup wifi
   WiFi.begin(WIFI_SSID, WIFI_PW);
@@ -70,6 +83,8 @@ void setup() {
 
   _lastOTACheck = millis();
   OTAinit();
+
+  motor.setResolution(stdBlinds::resolution_t::kSixteenth);
 
   httpAPI.init(&motor);
   mqttAPI.init(&motor);
