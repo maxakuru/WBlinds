@@ -19,7 +19,7 @@ MotorA4988::MotorA4988(
   this->axisDiameter_mm = axisDiameter_mm;
   this->stepsPerRev = stepsPerRev;
 
-  this->_resolution = stdBlinds::resolution_t::kFull;
+  this->_resolution = WBlinds::resolution_t::kFull;
   this->maxTurns = calculateMaxTurns(axisDiameter_mm, cordDiameter_mm, cordLength_mm);
   setResolution(_resolution);
   _setMaximumPosition();
@@ -34,11 +34,13 @@ MotorA4988::MotorA4988(
   // Not reset
   digitalWrite(this->pinReset, HIGH);
 
+  // Not asleep
   _isAsleep = false;
   digitalWrite(this->pinSleep, HIGH);
 
-  _isEnabled = true;
-  digitalWrite(this->pinEnable, LOW);
+  // Using auto enable, initially disabled
+  _isEnabled = false;
+  digitalWrite(this->pinEnable, HIGH);
 }
 
 /**
@@ -54,8 +56,12 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
 
   stepper->setDirectionPin(this->pinDir);
   stepper->setEnablePin(this->pinEnable);
-  stepper->enableOutputs();
+  stepper->disableOutputs();
   stepper->setAutoEnable(true);
+
+  // restore state
+  auto state = State::getInstance();
+  stepper->setCurrentPosition(state->getPosition());
 
   _isInit = true;
 }
@@ -97,19 +103,19 @@ bool MotorA4988::isEnabled() {
  *
  * @param resolution
  */
-void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
+void MotorA4988::setResolution(const WBlinds::resolution_t resolution) {
   Serial.println("[MotorA4988] setResolution()");
 
   digitalWrite(this->pinms1, LOW);
   digitalWrite(this->pinms2, LOW);
   digitalWrite(this->pinms3, LOW);
-  if (resolution > stdBlinds::resolution_t::kFull && resolution != stdBlinds::resolution_t::kQuarter) {
+  if (resolution > WBlinds::resolution_t::kFull && resolution != WBlinds::resolution_t::kQuarter) {
     digitalWrite(this->pinms1, HIGH);
   }
-  if (resolution > stdBlinds::resolution_t::kHalf) {
+  if (resolution > WBlinds::resolution_t::kHalf) {
     digitalWrite(this->pinms2, HIGH);
   }
-  if (resolution == stdBlinds::resolution_t::kSixteenth) {
+  if (resolution == WBlinds::resolution_t::kSixteenth) {
     digitalWrite(this->pinms3, HIGH);
   }
   if (_resolution != resolution) {
@@ -232,14 +238,14 @@ int8_t MotorA4988::moveTo(int32_t pos) {
     return -1;
   }
 
-  State::getInstance()->set<State::kPosition>(State::Key::kPosition, pos);
+  State::getInstance()->setPosition(pos);
 
   return stepper->moveTo(pos);
 }
 
 int8_t MotorA4988::moveTo(int32_t pos, uint32_t speed_hz) {
   stepper->setSpeedInHz(speed_hz);
-  State::getInstance()->set<State::kSpeed>(State::Key::kSpeed, speed_hz);
+  State::getInstance()->setSpeed(speed_hz);
   return this->moveTo(pos);
 }
 

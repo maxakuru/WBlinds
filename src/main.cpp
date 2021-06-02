@@ -2,13 +2,14 @@
 #include <WiFi.h>
 #include "motor_a4988.h"
 #include "OTAUpdate.h"
-#include <WebServer.h>
+// #include <WebServer.h>
 #include <WiFiClient.h>
 #include <PubSubClient.h>
 #include "api_http.h"
 #include "api_mqtt.h"
 #include <Credentials.h>
 #include "state.h"
+#include "defines.h"
 
 // Pin config
 #define DIR_PIN 18
@@ -29,7 +30,7 @@
 
 // HTTP/MQTT config
 const uint8_t httpPort = 80;
-WebServer server;
+// WebServer server;
 WiFiClient client;
 PubSubClient mqttClient(client);
 
@@ -41,9 +42,15 @@ uint32_t _lastOTACheck = 0;
 const uint16_t STATE_SAVE_INTERVAL = 10000; // ms
 uint32_t _lastStateSave = 0;
 
+// Heap check
+uint32_t _lastHeapCheck = 0;
+uint32_t lastHeap = 0;
+
 MotorA4988 motor(STEP_PIN, DIR_PIN, EN_PIN, SLP_PIN, RST_PIN, MS1_PIN, MS2_PIN, MS3_PIN, CORD_LENGTH_MM, CORD_DIAMETER_MM, AXIS_DIAMETER_MM, STEPS_PER_REV);
 
-BlindsHTTPAPI httpAPI(&server, httpPort);
+BlindsHTTPAPI httpAPI(httpPort);
+// BlindsHTTPAPI httpAPI(&server, httpPort);
+
 BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
 
 State* state;
@@ -68,7 +75,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(HOME_SWITCH_PIN), onHomePinChange, CHANGE);
 
   motor.init();
-  motor.setResolution(stdBlinds::resolution_t::kSixteenth);
+  motor.setResolution(WBlinds::resolution_t::kSixteenth);
   motor.stepper->setSpeedInHz(1000); // the parameter is us/step
   motor.stepper->setAcceleration(INT32_MAX);
 
@@ -82,19 +89,20 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   state = State::getInstance();
-  state->load();
 
   _lastOTACheck = millis();
   OTAinit();
 
-  motor.setResolution(stdBlinds::resolution_t::kSixteenth);
+  motor.setResolution(WBlinds::resolution_t::kSixteenth);
 
   httpAPI.init(&motor);
   mqttAPI.init(&motor);
+
+  lastHeap = ESP.getFreeHeap();
 }
 
 void loop() {
-  httpAPI.loop();
+  // httpAPI.loop();
   mqttAPI.loop();
   if ((millis() - STATE_SAVE_INTERVAL) > _lastStateSave) {
     _lastStateSave = millis();
@@ -106,6 +114,15 @@ void loop() {
     _lastOTACheck = millis();
     OTAloopHandler();
   }
-
-
+  if (millis() - _lastHeapCheck > 5000) {
+    uint32_t heap = ESP.getFreeHeap();
+    if (heap < 9000 && lastHeap < 9000) {
+      forceReconnect = true;
+    }
+    lastHeap = heap;
+    _lastHeapCheck = millis();
+  }
+  if (doReboot) {
+    // reset();
+  }
 }

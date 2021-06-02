@@ -4,7 +4,13 @@
 .vscode/launch.json
 .vscode/ipch
 src/Credentials.h
-scripts/build.html.js
 node_modules
 .DS_Store
 *.log
+
+# temporary
+scripts/build.html.js
+src/html_other.h
+src/html_ui.h
+src/html_settings.h
+data/*

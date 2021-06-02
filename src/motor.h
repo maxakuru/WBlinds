@@ -8,7 +8,7 @@
 class BlindsMotor {
 public:
     virtual ~BlindsMotor() {}
-    virtual void setResolution(const stdBlinds::resolution_t resolution) = 0;
+    virtual void setResolution(const WBlinds::resolution_t resolution) = 0;
     virtual void setSleep(const bool shouldSleep) = 0;
     virtual void setEnabled(const bool isEnabled) = 0;
     virtual void init() = 0;

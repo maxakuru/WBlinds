@@ -43,7 +43,8 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "bitset": "cpp"
     },
     "search.exclude": {
         "**/node_modules": true,

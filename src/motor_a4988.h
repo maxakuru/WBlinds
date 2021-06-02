@@ -27,7 +27,7 @@ public:
     uint16_t stepsPerRev
   );
   ~MotorA4988() override {}
-  void setResolution(const stdBlinds::resolution_t resolution) override;
+  void setResolution(const WBlinds::resolution_t resolution) override;
   void setSleep(const bool shouldSleep) override;
   void setEnabled(const bool isEnabled) override;
   void init() override;
@@ -68,7 +68,7 @@ private:
   bool _isInit;
   bool _isAsleep;
   bool _isEnabled;
-  stdBlinds::resolution_t _resolution;
+  WBlinds::resolution_t _resolution;
   void _setMaximumPosition();
 };
 

@@ -10,7 +10,7 @@ public:
       const char* host, const uint16_t port, const char* user, const char* password, const char* name);
    ~BlindsMQTTAPI() override {}
    void init(BlindsMotor* motor) override;
-   void loop() override;
+   void loop();
 private:
    uint8_t connectRetryCount = 0;
    PubSubClient* client;
