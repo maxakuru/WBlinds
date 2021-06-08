@@ -22,12 +22,9 @@ private:
    bool handleFileRead(AsyncWebServerRequest* request, String path);
    void getState(AsyncWebServerRequest* request, bool fromFile);
    void updateState(AsyncWebServerRequest* request, JsonVariant& json);
-   void serveIndexOrWelcome(AsyncWebServerRequest* request);
-   void serveSettings(AsyncWebServerRequest* request, bool post);
+   // void serveSettings(AsyncWebServerRequest* request, bool post);
    void serveOps(AsyncWebServerRequest* request, bool post);
-   void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
    void handleSettingsSet(AsyncWebServerRequest* request, byte subPage);
-   // String msgProcessor(const String& var);
 };
 
 #endif  // API_HTTP_H_

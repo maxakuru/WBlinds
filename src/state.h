@@ -11,6 +11,8 @@ extern DynamicJsonDocument stateDoc;
 extern DynamicJsonDocument settingsDoc;
 extern char deviceName[256];
 extern char mDnsName[256];
+extern char mqttHost[256];
+extern char mqttTopic[256];
 
 struct StateData {
     int32_t pos;
@@ -18,9 +20,14 @@ struct StateData {
     uint32_t accel;
 };
 
-struct SettingsData {
+struct SettingsDataGeneral {
     char* deviceName;
     char* mDnsName;
+    uint8_t pinDir;
+    bool emitSyncData;
+};
+
+struct SettingsDataHardware {
     uint8_t pinDir;
     uint8_t pinEn;
     uint8_t pinSleep;
@@ -33,6 +40,13 @@ struct SettingsData {
     uint32_t cordDiameter;
     uint32_t axisDiameter;
     uint16_t stepsPerRev;
+};
+
+struct SettingsDataMQTT {
+    bool enabled;
+    char* host;
+    uint16_t port;
+    char* topic;
 };
 
 class State {
@@ -87,8 +101,13 @@ public:
     void setStepsPerRev(uint16_t v);
 private:
     StateData data;
-    SettingsData settings;
+    SettingsDataGeneral settingsGeneral;
+    SettingsDataHardware settingsHardware;
+    SettingsDataMQTT settingsMQTT;
+
     void init();
+    void updateDirty(bool);
+    void setClean();
     bool _isInit;
     bool _isDirty;
     bool _settingsDirty;
@@ -104,10 +123,12 @@ private:
             speed : 1000,
             accel : INT32_MAX,
         };
-        settings = {
+        settingsGeneral = {
             deviceName: deviceName,
             mDnsName : mDnsName,
-            pinDir : 0,
+        };
+        settingsHardware = {
+            pinDir: 0,
             pinEn : 1,
             pinSleep : 0,
             pinReset : 0,
@@ -119,6 +140,12 @@ private:
             cordDiameter : 0,
             axisDiameter : 0,
             stepsPerRev : 0
+        };
+        settingsMQTT = {
+            enabled: true,
+            host : mqttHost,
+            port : 1883,
+            topic : mqttTopic
         };
         load();
     };

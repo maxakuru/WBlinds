@@ -4,8 +4,7 @@
 #include <map>
 #include "Arduino.h"
 #include "html_ui.h"
-#include "html_settings.h"
-#include "html_other.h"
+// #include "html_fixtures.h"
 
 namespace WBlinds {
 

@@ -3,6 +3,7 @@
     // for the documentation about the extensions.json format
     "recommendations": [
         "cschlosser.doxdocgen",
+        "dbaeumer.vscode-eslint",
         "ms-vscode.cpptools",
         "platformio.platformio-ide"
     ]

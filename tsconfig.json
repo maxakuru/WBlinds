@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "ES2015",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "allowSyntheticDefaultImports": true,
+        "lib": [
+            "ES2015",
+            "DOM",
+            "ES2020"
+        ],
+        "target": "ES6"
+    },
+    "include": [
+        "web/**/*",
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

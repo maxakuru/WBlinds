@@ -1,5 +1,18 @@
 {
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
+    "javascript.format.enable": false,
+    "eslint.format.enable": true,
+    "eslint.codeActionsOnSave.mode": "all",
+    "eslint.alwaysShowStatus": true,
+    "eslint.options": {
+        "extensions": [
+            ".js",
+            ".ts"
+        ]
+    },
+    "eslint.validate": [
+        "javascript",
+    ],
     "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "sameLine",
     "C_Cpp.formatting": "vcFormat",
     "files.associations": {
@@ -53,5 +66,8 @@
         "**/.pio": true,
         "**/.vscode": true
     },
-    "CppHelper.HeaderGuardPattern": "{FILE}_H_"
+    "CppHelper.HeaderGuardPattern": "{FILE}_H_",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
 }
