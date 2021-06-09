@@ -9,6 +9,7 @@ import pkg from "./package.json";
 import gzipPlugin from "rollup-plugin-gzip";
 // import embedCSS from "rollup-plugin-embed-css";
 import postcss from "rollup-plugin-postcss";
+import path from "path";
 
 const { parsed: env } = require("dotenv-flow").config();
 const dev = env.MODE !== "deploy";
@@ -43,6 +44,14 @@ if (!dev) {
   //     // additionalFiles: ["./public/index.htm", "./public/index.css"],
   //   })
   // );
+} else {
+  plugins.push({
+    name: "watch-external",
+    buildStart() {
+      this.addWatchFile(path.resolve(__dirname, "web/index.html"));
+      this.addWatchFile(path.resolve(__dirname, "web/index.css"));
+    },
+  });
 }
 
 export default {

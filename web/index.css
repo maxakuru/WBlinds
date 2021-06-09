@@ -11,7 +11,7 @@ html {
 body {
 	margin: 0;
 	background-color: #111;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;;
 	font-size: 17px;
 	font-weight: 400;
 	color: #fff;
@@ -140,7 +140,7 @@ h4 {
 	/* justify-content: space-around; */
 }
 
-.tile.em {
+.em {
 	opacity: 0;
 }
 
@@ -252,6 +252,14 @@ li.s {
 	padding: 23px 23px 0 23px;
 	height: calc(100% - (63px + 23px));
 	overflow-y: scroll;
+}
+
+#card {
+	height: 100%;
+    position: fixed;
+    width: 100%;
+    top: 0;
+	background: #ffffff78;
 }
 
 .overlay {
