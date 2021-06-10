@@ -10,14 +10,14 @@ export function _Component<T, U>(
     console.log("ctx: ", ctx);
     const node = elem.getElementsByTagName("body").item(0).firstChild;
     const api: _Component<T> = ctx.init.call(ctx, node) as _Component<T>;
-    api.node = node;
+    api.node = node as HTMLElement;
     return api;
   };
 }
 
 export type _Component<T> = {
-  // template: () => string;
-  node: ChildNode;
+  node: HTMLElement;
+  // TODO: add onClick(), destroy() to share
 } & T;
 
 export type Component<T, U = void> = (

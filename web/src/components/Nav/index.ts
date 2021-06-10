@@ -1,15 +1,17 @@
-import { _Component, Component } from "./Component";
-import html from "./Nav.html";
+import { _Component, Component } from "../Component";
+import template from "./Nav.html";
+import "./Nav.css";
 
 type ClickHandler = (index: number) => unknown;
 interface NavAPI {
   onClick: (handler: ClickHandler) => void;
   currentIndex(): number;
+  destroy(): void;
 }
 
-const Nav: Component<NavAPI> = function () {
-  const clickHandlers: ClickHandler[] = [];
-  let i = 0;
+const _Nav: Component<NavAPI> = function () {
+  let _i = 0;
+  let _clickHandlers: ClickHandler[] = [];
 
   this.init = function (elem: HTMLElement) {
     console.log("elem: ", elem);
@@ -17,26 +19,30 @@ const Nav: Component<NavAPI> = function () {
     console.log("buttons: ", buttons);
     buttons.forEach((b, index) => {
       b.addEventListener("click", () => {
-        i = index;
+        _i = index;
         buttons.forEach((b2, i2) => {
-          if (i2 === i) {
+          if (i2 === _i) {
             b2.classList.add("sel");
           } else {
             b2.classList.remove("sel");
           }
         });
-        clickHandlers.map((c) => c.call(undefined, index));
+        _clickHandlers.map((c) => c.call(undefined, index));
       });
     });
 
     return {
       onClick: (h) => {
-        clickHandlers.push(h);
+        _clickHandlers.push(h);
       },
-      currentIndex: () => i,
+      currentIndex: () => _i,
+      destroy: () => {
+        _clickHandlers = [];
+      },
     };
   };
-  return html;
+  return template;
 };
 
-export default _Component(Nav);
+export type Nav = _Component<NavAPI>;
+export const Nav = _Component(_Nav);

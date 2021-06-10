@@ -1,18 +1,23 @@
-import { getElement } from "../util";
-import { ComponentCtx, _Component, Component } from "../components/Component";
-import html from "./Home.html";
-import { State } from "../state";
-import Tile from "../components/Tile";
+import { getElement } from "../../util";
+import { _Component, Component } from "../../components/Component";
+import template from "./Home.html";
+import { State } from "../../state";
+import { Tile } from "../../components";
 
-interface HomeAPI {
-  temp?: boolean;
+type DeviceClickHandler = (device: any) => void;
+export interface HomeAPI {
+  onDeviceClick: (handler: DeviceClickHandler) => void;
+  destroy(): void;
 }
 
 const DEVICE_TILE = "device";
 const PRESET_TILE = "preset";
 
-const Home: Component<HomeAPI> = function () {
-  const loading = true;
+const _Home: Component<HomeAPI> = function () {
+  let _loading = true;
+  let _tiles: Tile[] = [];
+  let _deviceClickHandlers: DeviceClickHandler[] = [];
+
   this.init = function (elem: HTMLElement) {
     // initially spinner is showing,
     // rest is hidden in a div
@@ -26,12 +31,13 @@ const Home: Component<HomeAPI> = function () {
     // });
 
     function loaded() {
-      if (!loading) return;
+      if (!_loading) return;
       const spinner = getElement("hl");
       spinner.style.display = "none";
 
       const content = getElement("hlc");
       content.classList.remove("hide");
+      _loading = false;
     }
 
     function getAllTiles(type: "preset" | "device"): {
@@ -71,11 +77,22 @@ const Home: Component<HomeAPI> = function () {
         if (!v) continue;
         const t = Tile({
           id: `tile-${k}`,
+          name: (v as any).name || k,
           ...(v as any),
         });
+        t.onClick((data) => handleTileClick(type, data));
+        _tiles.push(t);
         container.appendChild(t.node);
       }
       padTiles(type);
+    }
+
+    function handleTileClick(type: "device" | "preset", data: any) {
+      if (type === "device") {
+        _deviceClickHandlers.forEach((h) => h(data));
+      } else {
+        // TODO: handle preset click
+      }
     }
 
     State.observe(PRESET_TILE + "s", ({ value, prev }) => {
@@ -93,10 +110,18 @@ const Home: Component<HomeAPI> = function () {
     });
 
     return {
-      temp: true,
+      onDeviceClick: (h: DeviceClickHandler) => {
+        _deviceClickHandlers.push(h);
+      },
+      destroy: () => {
+        _deviceClickHandlers = [];
+        _tiles.forEach((t) => t.destroy());
+        _tiles = [];
+      },
     };
   };
-  return html;
+  return template;
 };
 
-export default _Component(Home);
+export type Home = _Component<HomeAPI>;
+export const Home = _Component(_Home);

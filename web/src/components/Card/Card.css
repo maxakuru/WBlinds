@@ -1,0 +1,11 @@
+#card {
+	height: 100%;
+    position: fixed;
+    width: 100%;
+    top: 100%;
+	background: #ffffff78;
+}
+
+#card.an {
+    transition: 0.2s top ease-in-out;
+}

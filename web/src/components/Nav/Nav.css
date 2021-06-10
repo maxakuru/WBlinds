@@ -1,0 +1,14 @@
+#nav {
+	background: #00000080;
+	height: 63px;
+	display: flex;
+}
+
+.navc {
+	justify-content: space-evenly;
+	align-self: center;
+}
+
+.navc .sel {
+	color: #DB8B1D;
+}

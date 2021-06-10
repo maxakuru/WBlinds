@@ -48,8 +48,12 @@ if (!dev) {
   plugins.push({
     name: "watch-external",
     buildStart() {
-      this.addWatchFile(path.resolve(__dirname, "web/index.html"));
-      this.addWatchFile(path.resolve(__dirname, "web/index.css"));
+      this.addWatchFile(path.resolve(__dirname, "web/**/*.css"));
+      this.addWatchFile(path.resolve(__dirname, "web/**/*.html"));
+      this.addWatchFile(path.resolve(__dirname, "postcss.config.js"));
+      this.addWatchFile(path.resolve(__dirname, "tsconfig.json"));
+      if (!dev) this.addWatchFile(path.resolve(__dirname, ".env"));
+      else this.addWatchFile(path.resolve(__dirname, ".env.dev"));
     },
   });
 }
