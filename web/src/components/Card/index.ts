@@ -1,6 +1,7 @@
 import { _Component, Component } from "../Component";
 import template from "./Card.html";
 import "./Card.css";
+import { Slider } from "../Slider";
 
 export interface CardAPI {
   temp?: any;
@@ -26,6 +27,9 @@ const _Card: Component<CardAPI, CardProps> = function ({ temp }: CardProps) {
 
   this.init = function (elem: HTMLElement) {
     toggleAnimations(true);
+
+    const slider = Slider({ id: "position", label: "Position", value: "50" });
+    elem.appendChild(slider.node);
 
     const onPress = (coords: Coords) => {
       lastCoords = coords;

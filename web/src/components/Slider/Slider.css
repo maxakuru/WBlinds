@@ -1,0 +1,33 @@
+.sc {
+	padding: 20px;
+}
+
+.slider {
+	background: linear-gradient(to right, #DB8B1D 0%, #DB8B1D 50%, #606060 50%, #606060 100%);
+	border-radius: 8px;
+	height: 7px;
+	width: 75%;
+	outline: none;
+	-webkit-appearance: none;
+}
+
+.slider {
+	border-radius: 15px;
+	height: 6px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 100%;
+	outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px;
+	height: 16px;
+	background: white;
+	box-shadow: black;
+	border-radius: 50%;
+	cursor: pointer;
+}

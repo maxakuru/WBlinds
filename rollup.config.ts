@@ -37,13 +37,12 @@ plugins.push(
 );
 
 if (!dev) {
-  plugins.push(compiler());
-  // plugins.push(embedCSS({ helper: "*.ts", include: "./web/**/*.css" }));
-  // plugins.push(
-  //   gzipPlugin({
-  //     // additionalFiles: ["./public/index.htm", "./public/index.css"],
-  //   })
-  // );
+  plugins.push(
+    compiler({
+      language_in: "ECMASCRIPT_2019",
+      language_out: "ECMASCRIPT_2019",
+    })
+  );
 } else {
   plugins.push({
     name: "watch-external",

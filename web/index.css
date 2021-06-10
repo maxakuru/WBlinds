@@ -140,6 +140,20 @@ li.s {
 	display: flex;
 }
 
+.fC {
+	display: flex;
+	flex-direction: column;
+}
+
+.fR {
+	display: flex;
+	flex-direction: row;
+}
+
+.fSB {
+	justify-content: space-between;
+}
+
 .wrap {
 	flex-wrap: wrap;
 }

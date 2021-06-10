@@ -11,8 +11,13 @@
     "build": "rollup -c rollup.config.ts",
     "build:cpp": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' ts-node ./scripts/build.html.ts"
   },
+  "resolutions": {
+    "@ampproject/rollup-plugin-closure-compiler/acorn": "8.3.0",
+    "@ampproject/rollup-plugin-closure-compiler/acorn-walk": "8.1.0"
+
+  },
   "dependencies": {
-    "@ampproject/rollup-plugin-closure-compiler": "^0.26.0",
+    "@ampproject/rollup-plugin-closure-compiler": "0.26.0",
     "@rollup/plugin-html": "^0.2.3",
     "@rollup/plugin-typescript": "^8.2.1",
     "clean-css": "^4.2.3",
@@ -31,6 +36,7 @@
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-replace": "^2.4.2",
     "@types/fetch-mock": "^7.3.3",
+    "@types/node": "^15.12.2",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "autoprefixer": "^10.2.6",
