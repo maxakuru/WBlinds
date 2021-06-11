@@ -6,6 +6,13 @@ import * as zlib from "zlib";
 
 const UINT16_MAX = 65535;
 
+const log = (...msgs: any[]) => {
+  console.log("[build.ui]", ...msgs);
+};
+const warn = (...msgs: any[]) => {
+  console.warn("[build.ui]", ...msgs);
+};
+
 interface Spec {
   name: string;
   filePath: string;
@@ -29,47 +36,35 @@ writeChunks(
       gzip: true,
     },
   ],
-  "src/html_ui.h"
+  "src/ui_index.h"
 );
 
 // TODO: Add favicon
-// writeChunks(
-//   "public",
-//   [
-//     {
-//       file: "favicon.ico",
-//       name: "favicon",
-//       method: "binary",
-//       gzip: true,
-//     },
-//   ],
-//   "src/html_fixtures.h"
-// );
+writeChunks(
+  [
+    {
+      filePath: pathResolve(__dirname, "../public/bg.jpg"),
+      name: "IMG_background",
+      prepend: "=====(",
+      append: ")=====",
+      method: "binary",
+      inline: false,
+      gzip: true,
+    },
+  ],
+  "src/ui_fixtures.h"
+);
 
-function hexdump(buffer: Buffer) {
-  const lines = [];
-
-  for (let i = 0; i < buffer.length; i += 16) {
-    const block = buffer.slice(i, i + 16); // cut buffer into blocks of 16
-    const hexArray = [];
-
-    for (const value of block) {
-      hexArray.push("0x" + value.toString(16).padStart(2, "0"));
-    }
-
-    const hexString = hexArray.join(", ");
-    const line = `  ${hexString}`;
-    lines.push(line);
-  }
-
-  return lines.join(",\n");
+function hexDump(buffer: Buffer): string {
+  return [...new Uint8Array(buffer)]
+    .map((x) => "0x" + x.toString(16).padStart(2, "0"))
+    .join(",");
 }
 
 function inlineFile(srcFilePath: string, opts?: any): Promise<string> {
-  console.debug("Inlining file: ", srcFilePath);
+  log("Inlining file: ", srcFilePath);
   return new Promise((resolve, reject) => {
     new Inliner(srcFilePath, opts, function (err: Error, result: string) {
-      console.log("inlineFile result: ", result);
       if (err) {
         return reject(err);
       }
@@ -79,6 +74,7 @@ function inlineFile(srcFilePath: string, opts?: any): Promise<string> {
 }
 
 function gzipFile(input: Buffer | string): Promise<Buffer> {
+  log("Full size: ", input.length);
   return new Promise((resolve, reject) => {
     zlib.gzip(
       input,
@@ -87,7 +83,7 @@ function gzipFile(input: Buffer | string): Promise<Buffer> {
         if (error) {
           return reject(error);
         }
-        console.log("gzipped: ", result);
+        log("Gzipped size: ", result.length);
         resolve(result);
       }
     );
@@ -116,15 +112,15 @@ async function specToChunk(s: Spec) {
   if (method == "plaintext") {
     buf = typeof buf === "string" ? buf : buf.toString("utf-8");
     chunk += `
- const char ${name}[] PROGMEM = R"${prepend || ""}${buf}${append || ""}";
+ const uint8_t ${name}[] PROGMEM = R"${prepend || ""}${buf}${append || ""}";
  
  `;
   } else if (method == "binary") {
     buf = typeof buf === "string" ? Buffer.from(buf) : buf;
-    const result = hexdump(buf);
+    const result = hexDump(buf);
     chunk += `
  const ${result.length > UINT16_MAX ? "uint32_t" : "uint16_t"} ${name}_L = ${
-      result.length
+      buf.length
     };
  const uint8_t ${name}[] PROGMEM = {
  ${result}
@@ -132,7 +128,7 @@ async function specToChunk(s: Spec) {
  
  `;
   } else {
-    console.warn("Unknown method: " + method);
+    warn("Unknown method: " + method);
     return undefined;
   }
 
@@ -142,7 +138,7 @@ async function specToChunk(s: Spec) {
 async function writeChunks(specs: Spec[], outFile: string) {
   const ps = specs.map(async (s) => {
     const { filePath, name } = s;
-    console.debug(`[scripts/build.html] Reading ${filePath} as ${name}`);
+    log(`Reading ${filePath} as ${name}`);
     return specToChunk(s).catch((error) => {
       throw {
         name,
@@ -160,17 +156,11 @@ async function writeChunks(specs: Spec[], outFile: string) {
       }
 
       const { name, filePath, error } = result.reason;
-      console.error(
-        `[scripts/build.html] Failed to build ${name} from ${filePath}`,
-        error
-      );
+      warn(`Failed to build ${name} from ${filePath}`, error);
       return "";
     })
     .join("");
 
-  console.info(
-    `[scripts/build.html] Writing ${output.length} characters into ${outFile}`
-  );
-
+  log(`Writing ${output.length} characters into ${outFile}`);
   await writeFile(outFile, output);
 }

@@ -6,8 +6,6 @@ import typescript from "@rollup/plugin-typescript";
 import replace from "@rollup/plugin-replace";
 import html from "rollup-plugin-html";
 import pkg from "./package.json";
-import gzipPlugin from "rollup-plugin-gzip";
-// import embedCSS from "rollup-plugin-embed-css";
 import postcss from "rollup-plugin-postcss";
 import path from "path";
 
@@ -68,7 +66,6 @@ export default {
     },
   },
   // external: (id) => {
-  //   console.log("id: ", id);
   //   return id in deps;
   // },
   plugins,

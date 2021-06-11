@@ -27,6 +27,12 @@ void BlindsHTTPAPI::init(BlindsMotor* motor) {
       }
    );
 
+   server.on("/bg.jpg", HTTP_GET,
+      [this](AsyncWebServerRequest* request) {
+         this->serveBackground(request);
+      }
+   );
+
    server.on("/state.json", HTTP_GET,
       [this](AsyncWebServerRequest* request) {
          this->getState(request, true);
@@ -76,11 +82,24 @@ void getSettingsJS(byte subPage, char* dest) {
 }
 
 void BlindsHTTPAPI::serveIndex(AsyncWebServerRequest* request) {
-   if (handleFileRead(request, "/index.htm")) return;
+   if (handleFileRead(request, "/index.html")) return;
 
    if (handleIfNoneMatchCacheHeader(request)) return;
 
-   AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
+   AsyncWebServerResponse* response = request->beginResponse_P(200, WBlinds::MT_HTML, PAGE_index, PAGE_index_L);
+
+   response->addHeader(F("Content-Encoding"), "gzip");
+   setStaticContentCacheHeaders(response);
+
+   request->send(response);
+}
+
+void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
+   if (handleFileRead(request, "/bg.jpg")) return;
+
+   if (handleIfNoneMatchCacheHeader(request)) return;
+
+   AsyncWebServerResponse* response = request->beginResponse_P(200, WBlinds::MT_JPG, IMG_background, IMG_background_L);
 
    response->addHeader(F("Content-Encoding"), "gzip");
    setStaticContentCacheHeaders(response);
@@ -91,7 +110,7 @@ void BlindsHTTPAPI::serveIndex(AsyncWebServerRequest* request) {
 void BlindsHTTPAPI::getState(AsyncWebServerRequest* request, bool fromFile) {
    if (fromFile) {
       if (!handleFileRead(request, "/state.json")) {
-         return request->send(404, WBlinds::MT_TEXT, "Not found");
+         return request->send(404, WBlinds::MT_HTML, "Not found");
       }
       return request->send(500);
    };
@@ -103,7 +122,7 @@ void BlindsHTTPAPI::updateState(AsyncWebServerRequest* request, JsonVariant& jso
    JsonObject obj = json.as<JsonObject>();
    auto errCode = State::getInstance()->loadFromObject(obj);
    if (errCode == WBlinds::error_code_t::NoError) {
-      return request->send(200, WBlinds::MT_TEXT, "Ok");
+      return request->send(200, WBlinds::MT_HTML, "Ok");
    }
    char* err = errorJson(WBlinds::ErrorMessage[errCode]);
    return request->send(400, WBlinds::MT_JSON, err);
@@ -159,7 +178,7 @@ void BlindsHTTPAPI::serveOps(AsyncWebServerRequest* request, bool post) {
    if (post) {
       auto errCode = doOperation(request->arg("plain").c_str());
       if (errCode == WBlinds::error_code_t::NoError) {
-         return request->send_P(200, WBlinds::MT_TEXT, "Ok");
+         return request->send_P(200, WBlinds::MT_HTML, "Ok");
       }
       char* err = errorJson(WBlinds::ErrorMessage[errCode]);
       return request->send(400, WBlinds::MT_JSON, err);
@@ -167,8 +186,12 @@ void BlindsHTTPAPI::serveOps(AsyncWebServerRequest* request, bool post) {
    request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
 }
 
-void BlindsHTTPAPI::handleSettingsSet(AsyncWebServerRequest* request, byte subPage) {
-   Serial.println("[HTTP] handleSettingsSet()");
-   //0: menu 1: wifi 2: leds 3: ui 4: sync 5: time 6: sec 7: DMX 8: usermods
-   if (subPage < 1 || subPage >8) return;
+void BlindsHTTPAPI::updateSettings(AsyncWebServerRequest* request) {
+   Serial.println("[HTTP] updateSettings()");
+   // TODO:
+}
+
+void BlindsHTTPAPI::getSettings(AsyncWebServerRequest* request) {
+   Serial.println("[HTTP] getSettings()");
+   // TODO:
 }

@@ -17,14 +17,20 @@ private:
    uint16_t port;
    void handlePOST();
    void serveIndex(AsyncWebServerRequest* request);
+   void serveBackground(AsyncWebServerRequest* request);
+
    void setStaticContentCacheHeaders(AsyncWebServerResponse* response);
    bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
+
    bool handleFileRead(AsyncWebServerRequest* request, String path);
+
    void getState(AsyncWebServerRequest* request, bool fromFile);
    void updateState(AsyncWebServerRequest* request, JsonVariant& json);
-   // void serveSettings(AsyncWebServerRequest* request, bool post);
+
    void serveOps(AsyncWebServerRequest* request, bool post);
-   void handleSettingsSet(AsyncWebServerRequest* request, byte subPage);
+
+   void getSettings(AsyncWebServerRequest* request);
+   void updateSettings(AsyncWebServerRequest* request);
 };
 
 #endif  // API_HTTP_H_

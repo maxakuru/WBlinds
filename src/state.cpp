@@ -21,6 +21,21 @@ bool State::isDirty() {
     return _isDirty;
 }
 
+void State::Attach(Observer* observer) {
+    _observers.push_back(observer);
+}
+void State::Detach(Observer* observer) {
+    _observers.remove(observer);
+}
+void State::Notify() {
+    Serial.println("Notify");
+    std::list<Observer*>::iterator iterator = _observers.begin();
+    while (iterator != _observers.end()) {
+        (*iterator)->handleStateChange(data);
+        ++iterator;
+    }
+}
+
 String State::serialize() {
     stateDoc["pos"] = data.pos;
     stateDoc["speed"] = data.speed;
@@ -125,29 +140,25 @@ WBlinds::error_code_t State::setFieldsFromJSON(JsonObject& obj, bool makesDirty)
         uint32_t v = obj["accel"];
         Serial.print("loaded accel: ");
         Serial.println(v);
-        if (makesDirty && data.accel != v && !_isDirty) {
-            _isDirty = true;
-        }
+        updateDirty(makesDirty && data.accel != v && !_isDirty);
         data.accel = v;
     }
     if (obj.containsKey("speed")) {
         int32_t v = obj["speed"];
         Serial.print("loaded speed: ");
         Serial.println(v);
-        if (makesDirty && data.speed != v && !_isDirty) {
-            _isDirty = true;
-        }
+        updateDirty(makesDirty && data.speed != v && !_isDirty);
         data.speed = v;
     }
     if (obj.containsKey("pos")) {
         int32_t v = obj["pos"];
         Serial.print("loaded pos: ");
         Serial.println(v);
-        if (makesDirty && data.pos != v && !_isDirty) {
-            _isDirty = true;
-        }
+        updateDirty(makesDirty && data.pos != v && !_isDirty);
         data.pos = v;
     }
+
+    this->Notify();
 
     return err;
 }

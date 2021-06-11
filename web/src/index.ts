@@ -32,6 +32,7 @@ export default function (ns: WBlindsNamespace): void {
 
     currentIndex = nextIndex;
     currentTab?.destroy?.();
+    console.log("currentTab.node: ", currentTab?.node);
     currentTab?.node.remove();
 
     // change app screen
@@ -47,14 +48,16 @@ export default function (ns: WBlindsNamespace): void {
       }
       // Routines
       case 1: {
+        currentTab = null;
         break;
       }
       // Settings
       case 2: {
+        currentTab = null;
         break;
       }
     }
-    app.appendChild(currentTab.node);
+    currentTab && app.appendChild(currentTab.node);
   }
   handleTabChange(0);
 

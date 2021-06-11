@@ -177,7 +177,7 @@ li.s {
 	background-size: cover;
 	opacity: 1;
 	transition: opacity 2s;
-	background-image: url("bg.jpeg");
+	background-image: url("bg.jpg");
 }
 
 #app {

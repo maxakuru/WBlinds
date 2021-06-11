@@ -57,7 +57,11 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "random": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "list": "cpp",
+        "iostream": "cpp",
+        "regex": "cpp",
+        "string": "cpp"
     },
     "search.exclude": {
         "**/node_modules": true,

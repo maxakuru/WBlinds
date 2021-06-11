@@ -6,6 +6,7 @@
 #include "SPIFFS.h"
 #include <ArduinoJson.h>
 #include "defines.h"
+#include <list>
 
 extern DynamicJsonDocument stateDoc;
 extern DynamicJsonDocument settingsDoc;
@@ -49,7 +50,21 @@ struct SettingsDataMQTT {
     char* topic;
 };
 
-class State {
+class Observer {
+ public:
+  virtual ~Observer(){};
+  virtual void handleStateChange(const StateData &newState) = 0;
+};
+
+class Subject {
+ public:
+  virtual ~Subject(){};
+  virtual void Attach(Observer *observer) = 0;
+  virtual void Detach(Observer *observer) = 0;
+  virtual void Notify() = 0;
+};
+
+class State : Subject {
 public:
     static State* instance;
     static State* getInstance();
@@ -61,6 +76,11 @@ public:
     String serializeSettings();
     WBlinds::error_code_t loadFromJSONString(String jsonStr);
     WBlinds::error_code_t loadFromObject(JsonObject& jsonObj);
+
+    // Observer
+    void Attach(Observer* observer) override;
+    void Detach(Observer* observer) override;
+    void Notify() override;
 
     // Getters
     int32_t getPosition();
@@ -113,6 +133,9 @@ private:
     bool _settingsDirty;
     WBlinds::error_code_t setFieldsFromJSON(JsonObject& obj, bool makesDirty);
     WBlinds::error_code_t setSettingsFromJSON(JsonObject& obj, bool shouldSave);
+
+    // observers
+    std::list<Observer*> _observers;
 
     State() {
         _isDirty = false;

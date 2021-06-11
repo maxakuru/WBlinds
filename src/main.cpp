@@ -10,6 +10,7 @@
 #include <Credentials.h>
 #include "state.h"
 #include "defines.h"
+#include "udp_notifier.h"
 
 // Pin config
 #define DIR_PIN 18
@@ -33,6 +34,8 @@ const uint8_t httpPort = 80;
 // WebServer server;
 WiFiClient client;
 PubSubClient mqttClient(client);
+
+UDPNotifier* udpNotifier;
 
 // OTA Update config
 const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
@@ -89,6 +92,7 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   state = State::getInstance();
+  udpNotifier = new UDPNotifier(*state);
 
   _lastOTACheck = millis();
   OTAinit();

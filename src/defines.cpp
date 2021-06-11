@@ -1,6 +1,8 @@
 #include "defines.h"
 
 const char* VERSION = "0.0.1";
+const byte MAGIC_NUMBER[4] = { 0xFE, 0xED, 0xDA, 0xBB };
+
 
 namespace WBlinds {
     const char* ERR_INVALID_JSON = "Invalid json";
@@ -17,8 +19,19 @@ namespace WBlinds {
 
     // Media types
     const char* MT_JSON = "application/json";
-    const char* MT_TEXT = "text/html";
+    const char* MT_HTML = "text/html";
+    const char* MT_JPG = "image/jpeg";
 }
+
+std::map<WBlinds::datagram_t, const uint8_t> DatagramSize = {
+    {WBlinds::datagram_t::Hello, 128},
+    {WBlinds::datagram_t::Acknowledge, 128},
+    {WBlinds::datagram_t::JoinGroup, 128},
+    {WBlinds::datagram_t::LeaveGroup, 128},
+    {WBlinds::datagram_t::Ping, 128},
+    {WBlinds::datagram_t::Pong, 128},
+    {WBlinds::datagram_t::UpdateState, 128}
+};
 
 bool forceReconnect = false;
 bool wifiLock = false;
