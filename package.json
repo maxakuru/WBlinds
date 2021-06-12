@@ -1,7 +1,7 @@
 {
   "name": "wblinds",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "web/index.ts",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/maxakuru/WBlinds"
@@ -10,8 +10,7 @@
     "build:dev": "cross-env NODE_ENV=dev rollup -w -c rollup.config.ts",
     "build": "rollup -c rollup.config.ts",
     "build:ui": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"] }' ts-node ./scripts/build.ui.ts",
-    "pull:homekit": "python3 ./scripts/pull.homekit.py",
-    "pull:homekit:bu": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"] }' ts-node ./scripts/pull.homekit.ts"
+    "pull:homekit": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"] }' ts-node ./scripts/pull.homekit.ts"
 
   },
   "resolutions": {
