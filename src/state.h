@@ -17,6 +17,7 @@ extern char mqttTopic[256];
 
 struct StateData {
     int32_t pos;
+    int32_t targetPos;
     uint32_t speed;
     uint32_t accel;
 };
@@ -74,8 +75,8 @@ public:
     void saveSettings();
     String serialize();
     String serializeSettings();
-    WBlinds::error_code_t loadFromJSONString(String jsonStr);
-    WBlinds::error_code_t loadFromObject(JsonObject& jsonObj);
+    stdBlinds::error_code_t loadFromJSONString(String jsonStr);
+    stdBlinds::error_code_t loadFromObject(JsonObject& jsonObj);
 
     // Observer
     void Attach(Observer* observer) override;
@@ -84,6 +85,7 @@ public:
 
     // Getters
     int32_t getPosition();
+    int32_t getTargetPosition();
     uint32_t getSpeed();
     uint32_t getAccel();
     char* getDeviceName();
@@ -103,6 +105,7 @@ public:
 
     // Setters
     void setPosition(int32_t v);
+    void setTargetPosition(int32_t v);
     void setSpeed(uint32_t v);
     void setAccel(uint32_t v);
     void setDeviceName(char* v);
@@ -131,8 +134,8 @@ private:
     bool _isInit;
     bool _isDirty;
     bool _settingsDirty;
-    WBlinds::error_code_t setFieldsFromJSON(JsonObject& obj, bool makesDirty);
-    WBlinds::error_code_t setSettingsFromJSON(JsonObject& obj, bool shouldSave);
+    stdBlinds::error_code_t setFieldsFromJSON(JsonObject& obj, bool makesDirty);
+    stdBlinds::error_code_t setSettingsFromJSON(JsonObject& obj, bool shouldSave);
 
     // observers
     std::list<Observer*> _observers;
@@ -143,6 +146,7 @@ private:
         _isInit = false;
         data = {
             pos: 0,
+            targetPos: 0,
             speed : 1000,
             accel : INT32_MAX,
         };

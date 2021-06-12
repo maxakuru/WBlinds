@@ -4,9 +4,10 @@
 #include <map>
 #include "Arduino.h"
 #include "ui_index.h"
-#include "ui_fixtures.h"
+// #include "ui_fixtures.h"
+#include "esp32-hal-log.h"
 
-namespace WBlinds {
+namespace stdBlinds {
 
     enum class resolution_t {
         kFull = 1,
@@ -41,7 +42,7 @@ namespace WBlinds {
     extern const char* MT_HTML;
 }
 
-extern std::map<WBlinds::datagram_t, const uint8_t> DatagramSize;
+extern std::map<stdBlinds::datagram_t, const uint8_t> DatagramSize;
 extern const byte MAGIC_NUMBER[4];
 extern const char* VERSION;
 extern String messageHead;

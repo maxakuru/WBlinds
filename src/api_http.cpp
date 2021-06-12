@@ -8,13 +8,13 @@ char errStr[100] = "";
 AsyncWebServer server(80);
 
 BlindsHTTPAPI::BlindsHTTPAPI(const uint16_t port) {
-   Serial.println("[BlindsHTTPAPI] constructor");
+   ESP_LOGI(TAG, "constructor");
    // this->server = server;
    this->port = port;
 }
 
 void BlindsHTTPAPI::init(BlindsMotor* motor) {
-   Serial.println("[BlindsHTTPAPI] init");
+   ESP_LOGI(TAG);
    this->motor = motor;
    // server->on("/", HTTP_POST,
    //    [this]() {
@@ -27,11 +27,11 @@ void BlindsHTTPAPI::init(BlindsMotor* motor) {
       }
    );
 
-   server.on("/bg.jpg", HTTP_GET,
-      [this](AsyncWebServerRequest* request) {
-         this->serveBackground(request);
-      }
-   );
+   // server.on("/bg.jpg", HTTP_GET,
+   //    [this](AsyncWebServerRequest* request) {
+   //       this->serveBackground(request);
+   //    }
+   // );
 
    server.on("/state.json", HTTP_GET,
       [this](AsyncWebServerRequest* request) {
@@ -66,6 +66,12 @@ void BlindsHTTPAPI::init(BlindsMotor* motor) {
    //    }
    // );
 
+   server.onNotFound(
+      [this](AsyncWebServerRequest* request) {
+         this->handleNotFound(request);
+      }
+   );
+
    server.begin();
    // server.begin(this->port);
 }
@@ -86,7 +92,7 @@ void BlindsHTTPAPI::serveIndex(AsyncWebServerRequest* request) {
 
    if (handleIfNoneMatchCacheHeader(request)) return;
 
-   AsyncWebServerResponse* response = request->beginResponse_P(200, WBlinds::MT_HTML, PAGE_index, PAGE_index_L);
+   AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, PAGE_index, PAGE_index_L);
 
    response->addHeader(F("Content-Encoding"), "gzip");
    setStaticContentCacheHeaders(response);
@@ -94,38 +100,42 @@ void BlindsHTTPAPI::serveIndex(AsyncWebServerRequest* request) {
    request->send(response);
 }
 
-void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
-   if (handleFileRead(request, "/bg.jpg")) return;
-
-   if (handleIfNoneMatchCacheHeader(request)) return;
-
-   AsyncWebServerResponse* response = request->beginResponse_P(200, WBlinds::MT_JPG, IMG_background, IMG_background_L);
-
-   response->addHeader(F("Content-Encoding"), "gzip");
-   setStaticContentCacheHeaders(response);
-
-   request->send(response);
+void BlindsHTTPAPI::handleNotFound(AsyncWebServerRequest* request) {
+   request->send(404, stdBlinds::MT_HTML);
 }
+
+// void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
+//    if (handleFileRead(request, "/bg.jpg")) return;
+
+//    if (handleIfNoneMatchCacheHeader(request)) return;
+
+//    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_JPG, IMG_background, IMG_background_L);
+
+//    response->addHeader(F("Content-Encoding"), "gzip");
+//    setStaticContentCacheHeaders(response);
+
+//    request->send(response);
+// }
 
 void BlindsHTTPAPI::getState(AsyncWebServerRequest* request, bool fromFile) {
    if (fromFile) {
       if (!handleFileRead(request, "/state.json")) {
-         return request->send(404, WBlinds::MT_HTML, "Not found");
+         return request->send(404, stdBlinds::MT_HTML, "Not found");
       }
       return request->send(500);
    };
-   request->send(200, WBlinds::MT_JSON, State::getInstance()->serialize());
+   request->send(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
 }
 
 void BlindsHTTPAPI::updateState(AsyncWebServerRequest* request, JsonVariant& json) {
-   Serial.println("[HTTP] updateState()");
+   ESP_LOGI(TAG);
    JsonObject obj = json.as<JsonObject>();
    auto errCode = State::getInstance()->loadFromObject(obj);
-   if (errCode == WBlinds::error_code_t::NoError) {
-      return request->send(200, WBlinds::MT_HTML, "Ok");
+   if (errCode == stdBlinds::error_code_t::NoError) {
+      return request->send(200, stdBlinds::MT_HTML, "Ok");
    }
-   char* err = errorJson(WBlinds::ErrorMessage[errCode]);
-   return request->send(400, WBlinds::MT_JSON, err);
+   char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
+   return request->send(400, stdBlinds::MT_JSON, err);
 }
 
 
@@ -148,11 +158,11 @@ String getContentType(AsyncWebServerRequest* request, String filename) {
 }
 
 bool BlindsHTTPAPI::handleFileRead(AsyncWebServerRequest* request, String path) {
-   Serial.println("[HTTP] handleFileRead()");
+   ESP_LOGI(TAG);
    if (path.endsWith("/")) path += "index.html";
    String contentType = getContentType(request, path);
    if (SPIFFS.exists(path)) {
-      Serial.println("[HTTP] handleFileRead(), exists");
+      ESP_LOGI(TAG, "exists");
       request->send(SPIFFS, path, contentType);
       return true;
    }
@@ -174,24 +184,24 @@ void BlindsHTTPAPI::setStaticContentCacheHeaders(AsyncWebServerResponse* respons
 }
 
 void BlindsHTTPAPI::serveOps(AsyncWebServerRequest* request, bool post) {
-   Serial.println("[BlindsHTTPAPI] HTTP POST");
+   ESP_LOGI(TAG, "HTTP POST");
    if (post) {
       auto errCode = doOperation(request->arg("plain").c_str());
-      if (errCode == WBlinds::error_code_t::NoError) {
-         return request->send_P(200, WBlinds::MT_HTML, "Ok");
+      if (errCode == stdBlinds::error_code_t::NoError) {
+         return request->send_P(200, stdBlinds::MT_HTML, "Ok");
       }
-      char* err = errorJson(WBlinds::ErrorMessage[errCode]);
-      return request->send(400, WBlinds::MT_JSON, err);
+      char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
+      return request->send(400, stdBlinds::MT_JSON, err);
    }
    request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
 }
 
 void BlindsHTTPAPI::updateSettings(AsyncWebServerRequest* request) {
-   Serial.println("[HTTP] updateSettings()");
+   ESP_LOGI(TAG);
    // TODO:
 }
 
 void BlindsHTTPAPI::getSettings(AsyncWebServerRequest* request) {
-   Serial.println("[HTTP] getSettings()");
+   ESP_LOGI(TAG);
    // TODO:
 }

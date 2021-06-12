@@ -28,7 +28,7 @@ void State::Detach(Observer* observer) {
     _observers.remove(observer);
 }
 void State::Notify() {
-    Serial.println("Notify");
+    ESP_LOGI(TAG);
     std::list<Observer*>::iterator iterator = _observers.begin();
     while (iterator != _observers.end()) {
         (*iterator)->handleStateChange(data);
@@ -104,18 +104,15 @@ void State::load() {
     }
 }
 
-WBlinds::error_code_t State::setSettingsFromJSON(JsonObject& obj, bool shouldSave) {
-    WBlinds::error_code_t err = WBlinds::error_code_t::NoError;
+stdBlinds::error_code_t State::setSettingsFromJSON(JsonObject& obj, bool shouldSave) {
+    stdBlinds::error_code_t err = stdBlinds::error_code_t::NoError;
 
     if (obj.containsKey("deviceName")) {
         const char* v = obj["deviceName"];
-        Serial.print("loaded deviceName: ");
-        Serial.println(v);
+        ESP_LOGI(TAG, "loaded name: %s", v);
         int nameLen = strlen(v) + 1;
-        Serial.print("length deviceName: ");
-        Serial.println(nameLen);
         if (nameLen > 256) {
-            err = WBlinds::error_code_t::InvalidJson;
+            err = stdBlinds::error_code_t::InvalidJson;
         }
         else {
             if (!shouldSave && strcmp(settingsGeneral.deviceName, v) != 0) {
@@ -133,29 +130,32 @@ WBlinds::error_code_t State::setSettingsFromJSON(JsonObject& obj, bool shouldSav
     return err;
 }
 
-WBlinds::error_code_t State::setFieldsFromJSON(JsonObject& obj, bool makesDirty) {
-    WBlinds::error_code_t err = WBlinds::error_code_t::NoError;
+stdBlinds::error_code_t State::setFieldsFromJSON(JsonObject& obj, bool makesDirty) {
+    stdBlinds::error_code_t err = stdBlinds::error_code_t::NoError;
 
     if (obj.containsKey("accel")) {
         uint32_t v = obj["accel"];
-        Serial.print("loaded accel: ");
-        Serial.println(v);
+        ESP_LOGI(TAG, "loaded accel: %i", v);
         updateDirty(makesDirty && data.accel != v && !_isDirty);
         data.accel = v;
     }
     if (obj.containsKey("speed")) {
         int32_t v = obj["speed"];
-        Serial.print("loaded speed: ");
-        Serial.println(v);
+        ESP_LOGI(TAG, "loaded speed: %i", v);
         updateDirty(makesDirty && data.speed != v && !_isDirty);
         data.speed = v;
     }
     if (obj.containsKey("pos")) {
         int32_t v = obj["pos"];
-        Serial.print("loaded pos: ");
-        Serial.println(v);
+        ESP_LOGI(TAG, "loaded pos: %i", v);
         updateDirty(makesDirty && data.pos != v && !_isDirty);
         data.pos = v;
+    }
+    if (obj.containsKey("tPos")) {
+        int32_t v = obj["tPos"];
+        ESP_LOGI(TAG, "loaded tPos: %i", v);
+        updateDirty(makesDirty && data.targetPos != v && !_isDirty);
+        data.targetPos = v;
     }
 
     this->Notify();
@@ -163,15 +163,15 @@ WBlinds::error_code_t State::setFieldsFromJSON(JsonObject& obj, bool makesDirty)
     return err;
 }
 
-WBlinds::error_code_t State::loadFromObject(JsonObject& jsonObj) {
-    Serial.println("[State] loadFromObject()");
+stdBlinds::error_code_t State::loadFromObject(JsonObject& jsonObj) {
+    ESP_LOGI(TAG);
     return setFieldsFromJSON(jsonObj, true);
 }
 
-WBlinds::error_code_t State::loadFromJSONString(String jsonStr) {
+stdBlinds::error_code_t State::loadFromJSONString(String jsonStr) {
     DeserializationError error = deserializeJson(stateDoc, jsonStr);
     if (error) {
-        return WBlinds::error_code_t::InvalidJson;
+        return stdBlinds::error_code_t::InvalidJson;
     }
 
     JsonObject obj = stateDoc.as<JsonObject>();
@@ -179,11 +179,12 @@ WBlinds::error_code_t State::loadFromJSONString(String jsonStr) {
 }
 
 void State::save() {
-    Serial.println("[State] save()");
+    ESP_LOGI(TAG);
     // TODO: sanitize
     stateDoc["accel"] = data.accel;
     stateDoc["pos"] = data.pos;
     stateDoc["speed"] = data.speed;
+    // TODO:? save target pos
 
     File stateFile = SPIFFS.open("/state.json", "w");
     serializeJson(stateDoc, stateFile);
@@ -197,11 +198,10 @@ void State::saveSettings() {
 }
 
 void State::init() {
-    Serial.println("[State] init()");
+   ESP_LOGI(TAG);
     if (_isInit) return;
-    Serial.println("[State] init() cont");
     if (!SPIFFS.begin(true)) {
-        Serial.println("[State] Failed to mount file system");
+        ESP_LOGE(TAG, "Failed to mount file system");
         return;
     }
     _isInit = true;
@@ -220,6 +220,9 @@ void State::setClean() {
 // Getters
 int32_t State::getPosition() {
     return data.pos;
+}
+int32_t State::getTargetPosition() {
+    return data.targetPos;
 }
 uint32_t State::getSpeed() {
     return data.speed;
@@ -272,87 +275,92 @@ uint16_t State::getStepsPerRev() {
 
 // Setters
 void State::setPosition(int32_t v) {
-    Serial.println("Set position");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(data.pos != v);
     data.pos = v;
 }
+void State::setTargetPosition(int32_t v) {
+    ESP_LOGI(TAG, "set: %i", v);
+    updateDirty(data.targetPos != v);
+    data.targetPos = v;
+}
 void State::setSpeed(uint32_t v) {
-    Serial.println("Set speed");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(data.speed != v);
     data.speed = v;
 }
 void State::setAccel(uint32_t v) {
-    Serial.println("Set accel");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(data.accel != v);
     data.accel = v;
 }
 void State::setDeviceName(char* v) {
-    Serial.println("Set devicename");
+    ESP_LOGI(TAG, "set: %s", v);
     updateDirty(strcmp(settingsGeneral.deviceName, v) != 0);
     settingsGeneral.deviceName = v;
 }
 void State::setmDnsName(char* v) {
-    Serial.println("Set devicename");
+    ESP_LOGI(TAG, "set: %s", v);
     updateDirty(strcmp(settingsGeneral.mDnsName, v) != 0);
     settingsGeneral.deviceName = v;
 }
 void State::setDirectionPin(uint8_t v) {
-    Serial.println("Set dir pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinDir != v);
     settingsHardware.pinDir = v;
 }
 void State::setEnablePin(uint8_t v) {
-    Serial.println("Set enable pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinEn != v);
     settingsHardware.pinEn = v;
 }
 void State::setSleepPin(uint8_t v) {
-    Serial.println("Set sleep pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinSleep != v);
     settingsHardware.pinSleep = v;
 }
 void State::setResetPin(uint8_t v) {
-    Serial.println("Set reset pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinReset != v);
     settingsHardware.pinReset = v;
 }
 void State::setMs1Pin(uint8_t v) {
-    Serial.println("Set ms1 pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinMs1 != v);
     settingsHardware.pinMs1 = v;
 }
 void State::setMs2Pin(uint8_t v) {
-    Serial.println("Set ms2 pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinMs2 != v);
     settingsHardware.pinMs2 = v;
 }
 void State::setMs3Pin(uint8_t v) {
-    Serial.println("Set ms3 pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinMs3 != v);
     settingsHardware.pinMs3 = v;
 }
 void State::setHomeSwitchPin(uint8_t v) {
-    Serial.println("Set home pin");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.pinHomeSw != v);
     settingsHardware.pinHomeSw = v;
 }
 void State::setCordLength(uint32_t v) {
-    Serial.println("Set cord length");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.cordLength != v);
     settingsHardware.cordLength = v;
 }
 void State::setCordDiameter(uint32_t v) {
-    Serial.println("Set cord diameter");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.cordDiameter != v);
     settingsHardware.cordDiameter = v;
 }
 void State::setAxisDiameter(uint32_t v) {
-    Serial.println("Set axis diameter");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.cordDiameter != v);
     settingsHardware.cordDiameter = v;
 }
 void State::setStepsPerRev(uint16_t v) {
-    Serial.println("Set steps per rev");
+    ESP_LOGI(TAG, "set: %i", v);
     updateDirty(settingsHardware.stepsPerRev != v);
     settingsHardware.stepsPerRev = v;
 }

@@ -15,7 +15,7 @@ BlindsMQTTAPI::BlindsMQTTAPI(
    const char* password,
    const char* name
 ) {
-   Serial.println("[BlindsMQTTAPI] constructor");
+   ESP_LOGI(TAG, "constructor");
 
    this->client = client;
    this->name = name;
@@ -72,7 +72,7 @@ void BlindsMQTTAPI::initTopics(const char* name) {
  * @param motor
  */
 void BlindsMQTTAPI::init(BlindsMotor* motor) {
-   Serial.println("[BlindsMQTTAPI] init");
+   ESP_LOGI(TAG, "init");
    this->motor = motor;
 }
 
@@ -84,9 +84,7 @@ void BlindsMQTTAPI::init(BlindsMotor* motor) {
  * @param length
  */
 void BlindsMQTTAPI::handleMessage(const char* topic, byte* payload, uint32_t length) {
-   Serial.print("[BlindsMQTTAPI] Handling message: '");
-   Serial.print(topic);
-   Serial.println("'");
+   ESP_LOGI(TAG, "Handling message: %s", topic);
    int tLen = strlen(topic);
    int afterSlash = 0;
    for (int i = tLen; i >= 0; i--) {
@@ -113,20 +111,16 @@ void BlindsMQTTAPI::loop() {
 
 void BlindsMQTTAPI::reconnect() {
    while (!client->connected()) {
-      Serial.print("[BlindsMQTTAPI] Connecting...");
+      ESP_LOGI(TAG, "Connecting...");
       if (client->connect(name, user, password)) {
          connectRetryCount = 0;
-         Serial.println(" Connected.");
+         ESP_LOGI(" Connected.");
          client->subscribe(toSubscribe);
       }
       else {
          connectRetryCount = std::min(connectRetryCount + 1, UINT8_MAX);
          auto d = std::max(5000 * connectRetryCount, 1000);
-         Serial.print(" Failed. state=");
-         Serial.print(client->state());
-         Serial.print(" trying again in ");
-         Serial.print(d / 1000);
-         Serial.println(" seconds.");
+         ESP_LOGE(TAG, " Failed. state=%i trying again in %i seconds.", client->state(), d / 1000);
          delay(d);
       }
    }

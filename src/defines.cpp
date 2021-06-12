@@ -4,7 +4,7 @@ const char* VERSION = "0.0.1";
 const byte MAGIC_NUMBER[4] = { 0xFE, 0xED, 0xDA, 0xBB };
 
 
-namespace WBlinds {
+namespace stdBlinds {
     const char* ERR_INVALID_JSON = "Invalid json";
     const char* ERR_NO_OP = "Expecting op";
     const char* ERR_UNKNOWN_OP = "Unknown op";
@@ -23,14 +23,14 @@ namespace WBlinds {
     const char* MT_JPG = "image/jpeg";
 }
 
-std::map<WBlinds::datagram_t, const uint8_t> DatagramSize = {
-    {WBlinds::datagram_t::Hello, 128},
-    {WBlinds::datagram_t::Acknowledge, 128},
-    {WBlinds::datagram_t::JoinGroup, 128},
-    {WBlinds::datagram_t::LeaveGroup, 128},
-    {WBlinds::datagram_t::Ping, 128},
-    {WBlinds::datagram_t::Pong, 128},
-    {WBlinds::datagram_t::UpdateState, 128}
+std::map<stdBlinds::datagram_t, const uint8_t> DatagramSize = {
+    {stdBlinds::datagram_t::Hello, 128},
+    {stdBlinds::datagram_t::Acknowledge, 128},
+    {stdBlinds::datagram_t::JoinGroup, 128},
+    {stdBlinds::datagram_t::LeaveGroup, 128},
+    {stdBlinds::datagram_t::Ping, 128},
+    {stdBlinds::datagram_t::Pong, 128},
+    {stdBlinds::datagram_t::UpdateState, 128}
 };
 
 bool forceReconnect = false;

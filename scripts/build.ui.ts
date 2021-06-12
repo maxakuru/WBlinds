@@ -1,3 +1,7 @@
+/**
+ * Script to build, inline, gzip UI source.
+ */
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Inliner = require("inliner");
 import { writeFile, readFile } from "fs/promises";

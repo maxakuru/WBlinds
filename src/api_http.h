@@ -21,6 +21,7 @@ private:
 
    void setStaticContentCacheHeaders(AsyncWebServerResponse* response);
    bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
+   void handleNotFound(AsyncWebServerRequest* request);
 
    bool handleFileRead(AsyncWebServerRequest* request, String path);
 
