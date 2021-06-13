@@ -6,14 +6,12 @@
 #include "defines.h"
 #include "state.h"
 
-class BlindsAPI {
+class BlindsAPI: virtual protected StateObserver {
 
 public:
-    virtual ~BlindsAPI() {}
-    virtual void init(BlindsMotor* motor) = 0;
-    // virtual void loop() = 0;
+    virtual ~BlindsAPI() {};
+    virtual void init() = 0;
 protected:
-    BlindsMotor* motor;
     stdBlinds::error_code_t doOperation(const char* op, byte* jsonData, uint32_t length) {
         if (length < 2) {
             return doOperation(op, nullptr);
@@ -40,64 +38,53 @@ protected:
         return doOperation(op, &jsonDoc);
     }
     stdBlinds::error_code_t doOperation(const char* op, DynamicJsonDocument* jsonDoc) {
+        EventFlags flags;
         if (strcmp(op, "up") == 0) {
-            this->motor->runUp();
+            flags.moveUp_ = true;
         }
         else if (strcmp(op, "down") == 0) {
-            this->motor->runDown();
+            flags.moveDown_ = true;
         }
         else if (strcmp(op, "stop") == 0) {
             bool immediate = false;
             if (jsonDoc != nullptr && jsonDoc->containsKey("immediate")) {
                 immediate = (*jsonDoc)["immediate"];
             }
-            this->motor->stop(immediate);
+            if(immediate){
+                flags.moveStop_ = true;
+                // TODO:
+                // flags.moveStopImmediate_ = true;
+            } else{
+                flags.moveStop_ = true;
+            }
         }
         else if (strcmp(op, "sleep") == 0) {
-            this->motor->setSleep(true);
+            // TODO:
+            // flags.opSleep_ = true;
         }
         else if (strcmp(op, "disable") == 0) {
-            this->motor->setEnabled(false);
+            // TODO:
+            // flags.opDisable_ = true;
         }
         else if (strcmp(op, "move") == 0) {
             if (jsonDoc == nullptr) {
                 return stdBlinds::error_code_t::InvalidJson;
             }
+            auto state = State::getInstance();
             if (jsonDoc->containsKey("pos")) {
                 int32_t pct = (*jsonDoc)["pos"];
-                bool hasSpeed = jsonDoc->containsKey("speed");
-                bool hasAccel = jsonDoc->containsKey("accel");
+                state->setTargetPosition(pct);
+                flags.targetPos_ = true;
 
-                if (hasSpeed && hasAccel) {
+                if (jsonDoc->containsKey("speed")) {
                     int32_t speed = (*jsonDoc)["speed"];
+                    state->setSpeed(speed);
+                    flags.speed_ = true;
+                }
+                if (jsonDoc->containsKey("accel")) {
                     int32_t accel = (*jsonDoc)["accel"];
-                    this->motor->moveToPercent(pct, speed, accel);
-
-                }
-                else if (hasSpeed) {
-                    int32_t speed = (*jsonDoc)["speed"];
-                    this->motor->moveToPercent(pct, speed);
-                }
-                else {
-                    this->motor->moveToPercent(pct);
-                }
-            }
-            else if (jsonDoc->containsKey("step")) {
-                uint8_t pos = (*jsonDoc)["step"];
-                bool hasSpeed = jsonDoc->containsKey("speed");
-                bool hasAccel = jsonDoc->containsKey("accel");
-
-                if (hasSpeed && hasAccel) {
-                    int32_t speed = (*jsonDoc)["speed"];
-                    int32_t accel = (*jsonDoc)["accel"];
-                    this->motor->moveTo(pos, speed, accel);
-                }
-                else if (hasSpeed) {
-                    int32_t speed = (*jsonDoc)["speed"];
-                    this->motor->moveTo(pos, speed);
-                }
-                else {
-                    this->motor->moveTo(pos);
+                    state->setAccel(accel);
+                    flags.accel_ = true;
                 }
             }
             else {

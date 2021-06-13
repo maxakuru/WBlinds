@@ -13,26 +13,10 @@
 
 WBlinds* WBlinds::instance = 0;
 
-// Pin config defaults
-#define DIR_PIN 18
-#define STEP_PIN 19
-#define SLP_PIN 21
-#define EN_PIN 23
-#define RST_PIN 3
-#define MS1_PIN 1
-#define MS2_PIN 5
-#define MS3_PIN 17
-#define HOME_SWITCH_PIN 4 // microswitch pin for homing
-
-// Dimensions
-#define CORD_LENGTH_MM 1651
-#define CORD_DIAMETER_MM 0.1
-#define AXIS_DIAMETER_MM 15
-#define STEPS_PER_REV 200
+State* state;
 
 // HTTP/MQTT config
 const uint8_t httpPort = 80;
-// WebServer server;
 WiFiClient client;
 PubSubClient mqttClient(client);
 
@@ -47,46 +31,56 @@ uint32_t _lastOTACheck = 0;
 const uint16_t STATE_SAVE_INTERVAL = 10000; // ms
 uint32_t _lastStateSave = 0;
 
+// Tick event
+const uint16_t TICK_INTERVAL = 1000; // ms
+uint32_t _lastTick = 0;
+
 // Heap check
 uint32_t _lastHeapCheck = 0;
 uint32_t lastHeap = 0;
 
-MotorA4988 motor(STEP_PIN, DIR_PIN, EN_PIN, SLP_PIN, RST_PIN, MS1_PIN, MS2_PIN, MS3_PIN, CORD_LENGTH_MM, CORD_DIAMETER_MM, AXIS_DIAMETER_MM, STEPS_PER_REV);
+MotorA4988* motor;
 
 BlindsHTTPAPI httpAPI(httpPort);
 BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
 
-State* state;
-
 int homeSwitchState = LOW;
 void IRAM_ATTR onHomePinChange() {
-  int newState = digitalRead(HOME_SWITCH_PIN);
+  int sw = DEFAULT_HOME_SWITCH_PIN;
+  if (state != nullptr) {
+    sw = state->getHomeSwitchPin();
+  }
+  int newState = digitalRead(sw);
   if (newState != homeSwitchState) {
     homeSwitchState = newState;
-    if (homeSwitchState == HIGH && motor.isInit()) {
-      motor.setCurrentPositionAsHome();
+    if (homeSwitchState == HIGH && motor != nullptr && motor->isInit()) {
+      motor->setCurrentPositionAsHome();
     }
   }
 }
 
 WBlinds* WBlinds::getInstance() {
-    if (!instance)
-        instance = new WBlinds;
-    return instance;
+  if (!instance)
+    instance = new WBlinds;
+  return instance;
 }
 
 void WBlinds::setup() {
+  ESP_LOGI(TAG, "Setup0");
+
   Serial.begin(115200);
+  delay(10000);
+
+  ESP_LOGI(TAG, "Setup1");
+
+  state = State::getInstance();
   delay(100);
-  ESP_LOGI(TAG, "Setup...");
+  ESP_LOGI(TAG, "Setup3");
 
-  pinMode(HOME_SWITCH_PIN, INPUT_PULLDOWN);
-  attachInterrupt(digitalPinToInterrupt(HOME_SWITCH_PIN), onHomePinChange, CHANGE);
-
-  motor.init();
-  motor.setResolution(stdBlinds::resolution_t::kSixteenth);
-  motor.stepper->setSpeedInHz(1000); // the parameter is us/step
-  motor.stepper->setAcceleration(INT32_MAX);
+  int hp = state->getHomeSwitchPin();
+  pinMode(hp, INPUT_PULLDOWN);
+  attachInterrupt(digitalPinToInterrupt(hp), onHomePinChange, CHANGE);
+  ESP_LOGI(TAG, "Setup5");
 
   // setup wifi
   // TODO: AP setup on first launch
@@ -95,9 +89,14 @@ void WBlinds::setup() {
     delay(500);
     ESP_LOGI(TAG, "Connecting to WiFi..");
   }
-  ESP_LOGI(TAG, "Connected to the WiFi network, IP: %s", WiFi.localIP());
+  auto ip = WiFi.localIP();
+  ESP_LOGI(TAG, "Connected to the WiFi network, IP: %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+  ESP_LOGI(TAG, "Setup6");
 
-  state = State::getInstance();
+  motor = new MotorA4988();
+  motor->init();
+  ESP_LOGI(TAG, "Setup4");
+
   udpNotifier = new UDPNotifier(*state);
   homekit = new Homekit(*state);
   homekit->init();
@@ -105,22 +104,35 @@ void WBlinds::setup() {
   _lastOTACheck = millis();
   OTAinit();
 
-  motor.setResolution(stdBlinds::resolution_t::kSixteenth);
+  // motor->setResolution(stdBlinds::resolution_t::kSixteenth);
 
-  httpAPI.init(&motor);
-  mqttAPI.init(&motor);
+  httpAPI.init();
+  mqttAPI.init();
 
   lastHeap = ESP.getFreeHeap();
 }
 
 void WBlinds::loop() {
+  if (doReboot) {
+    reset();
+  }
+
   mqttAPI.loop();
+
+  if ((millis() - TICK_INTERVAL) > _lastTick) {
+    _lastTick = millis();
+    EventFlags tickEv;
+    tickEv.tick_ = true;
+    state->Notify(nullptr, tickEv);
+  }
+  // yield();
   if ((millis() - STATE_SAVE_INTERVAL) > _lastStateSave) {
     _lastStateSave = millis();
     if (state != nullptr && state->isDirty()) {
       state->save();
     }
   }
+  // yield();
   if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck) {
     _lastOTACheck = millis();
     OTAloopHandler();
@@ -133,7 +145,20 @@ void WBlinds::loop() {
     lastHeap = heap;
     _lastHeapCheck = millis();
   }
-  if (doReboot) {
-    // reset();
-  }
+}
+
+void WBlinds::reset() {
+  ESP_LOGI(TAG, "reset...");
+  // TODO: close server, websockets, mqtt, disable motors
+  if (state != nullptr)
+    state->save();
+  homekit->~Homekit();
+  ESP.restart();
+}
+
+void WBlinds::restore() {
+  // TODO: close server, websockets, mqtt, disable motors
+  homekit->resetToFactory();
+  state->save();
+  ESP.restart();
 }

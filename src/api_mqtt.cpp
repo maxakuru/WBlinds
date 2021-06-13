@@ -33,6 +33,11 @@ BlindsMQTTAPI::BlindsMQTTAPI(
    this->password = password;
 }
 
+void BlindsMQTTAPI::handleEvent(const StateEvent& event){
+   // TODO:
+   ESP_LOGI(TAG, "event mask: %i", event.flags_.mask_);
+}
+
 void BlindsMQTTAPI::initTopics(const char* name) {
    char* ut = new char[strlen(name) + strlen(upTopicSuffix) + 1]();
    strcpy(ut, name);
@@ -71,9 +76,16 @@ void BlindsMQTTAPI::initTopics(const char* name) {
  *
  * @param motor
  */
-void BlindsMQTTAPI::init(BlindsMotor* motor) {
-   ESP_LOGI(TAG, "init");
-   this->motor = motor;
+void BlindsMQTTAPI::init() {
+   ESP_LOGI(TAG);
+   auto state = State::getInstance();
+   EventFlags interestingFlags;
+   interestingFlags.pos_ = true;
+   interestingFlags.targetPos_ = true;
+   interestingFlags.speed_ = true;
+   interestingFlags.accel_ = true;
+
+   state->Attach(this, interestingFlags);
 }
 
 /**
@@ -114,7 +126,7 @@ void BlindsMQTTAPI::reconnect() {
       ESP_LOGI(TAG, "Connecting...");
       if (client->connect(name, user, password)) {
          connectRetryCount = 0;
-         ESP_LOGI(" Connected.");
+         ESP_LOGI(TAG, " Connected.");
          client->subscribe(toSubscribe);
       }
       else {

@@ -10,14 +10,10 @@ public:
     static WBlinds* getInstance();
 
     void setup();
-
     void loop();
     void reset();
-
+    void restore();
     void initAP(bool resetAP = false);
-    //   void handleConnection();
-    //   void initConnection();
-    //   void initInterfaces();
 private:
     WBlinds() {}
 };

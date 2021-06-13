@@ -7,6 +7,24 @@
 // #include "ui_fixtures.h"
 #include "esp32-hal-log.h"
 
+// DEFAULTS
+// Pin config defaults
+#define DEFAULT_DIR_PIN 18
+#define DEFAULT_STEP_PIN 19
+#define DEFAULT_SLP_PIN 21
+#define DEFAULT_EN_PIN 23
+#define DEFAULT_RST_PIN 3
+#define DEFAULT_MS1_PIN 1
+#define DEFAULT_MS2_PIN 5
+#define DEFAULT_MS3_PIN 17
+#define DEFAULT_HOME_SWITCH_PIN 4 // microswitch pin for homing
+
+// Dimensions
+#define DEFAULT_STEPS_PER_REV 200
+#define DEFAULT_CORD_LENGTH_MM 1650
+#define DEFAULT_CORD_DIAMETER_MM 0.1
+#define DEFAULT_AXIS_DIAMETER_MM 15
+
 namespace stdBlinds {
 
     enum class resolution_t {
@@ -52,5 +70,8 @@ extern bool wifiLock;
 extern bool otaLock;
 extern bool doReboot;
 extern byte optionType;
+
+void setDoReboot(bool v);
+#define DO_REBOOT() setDoReboot(true);
 
 #endif // DEFINES_H_

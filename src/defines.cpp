@@ -3,7 +3,6 @@
 const char* VERSION = "0.0.1";
 const byte MAGIC_NUMBER[4] = { 0xFE, 0xED, 0xDA, 0xBB };
 
-
 namespace stdBlinds {
     const char* ERR_INVALID_JSON = "Invalid json";
     const char* ERR_NO_OP = "Expecting op";
@@ -41,3 +40,7 @@ bool doReboot = false;
 String messageHead = "";
 String messageSub = "";
 byte optionType;
+
+void setDoReboot(bool v) {
+    doReboot = v;
+}

@@ -7,20 +7,30 @@ char errStr[100] = "";
 
 AsyncWebServer server(80);
 
-BlindsHTTPAPI::BlindsHTTPAPI(const uint16_t port) {
+BlindsHTTPAPI::BlindsHTTPAPI(uint16_t port) {
    ESP_LOGI(TAG, "constructor");
    // this->server = server;
-   this->port = port;
+   this->port_ = port;
 }
 
-void BlindsHTTPAPI::init(BlindsMotor* motor) {
+void BlindsHTTPAPI::handleEvent(const StateEvent& event){
+   // TODO: send data over websocket to connected web clients
+   ESP_LOGI(TAG, "event mask: %i", event.flags_.mask_);
+}
+
+void BlindsHTTPAPI::init() {
    ESP_LOGI(TAG);
-   this->motor = motor;
+
+   EventFlags interestingFlags;
+   interestingFlags.pos_ = true;
+   State::getInstance()->Attach(this, interestingFlags);
+
    // server->on("/", HTTP_POST,
    //    [this]() {
    //       this->handlePOST();
    //    }
    // );
+
    server.on("/", HTTP_GET,
       [this](AsyncWebServerRequest* request) {
          this->serveIndex(request);
@@ -130,7 +140,7 @@ void BlindsHTTPAPI::getState(AsyncWebServerRequest* request, bool fromFile) {
 void BlindsHTTPAPI::updateState(AsyncWebServerRequest* request, JsonVariant& json) {
    ESP_LOGI(TAG);
    JsonObject obj = json.as<JsonObject>();
-   auto errCode = State::getInstance()->loadFromObject(obj);
+   auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
    if (errCode == stdBlinds::error_code_t::NoError) {
       return request->send(200, stdBlinds::MT_HTML, "Ok");
    }

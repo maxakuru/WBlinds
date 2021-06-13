@@ -32,7 +32,6 @@ void OTAinit() {
                 type = "sketch";
             else
                 type = "filesystem";
-
             ESP_LOGI("Start updating " + type);
             })
         .onEnd([]() {
@@ -52,7 +51,8 @@ void OTAinit() {
 
         ArduinoOTA.begin();
         if (WiFi.waitForConnectResult() == WL_CONNECTED) {
-            ESP_LOGI(TAG, "IP address: %s", WiFi.localIP());
+            auto ip = WiFi.localIP();
+            ESP_LOGI(TAG, "IP address: %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
         }
         else {
             ESP_LOGE(TAG, "Wifi Connection Failed.");

@@ -12,21 +12,15 @@ typedef struct {
 
 class MotorA4988 : virtual public BlindsMotor {
 public:
-  explicit MotorA4988(
-    uint8_t pinStep,
-    uint8_t pinDir,
-    uint8_t pinEnable,
-    uint8_t pinSleep,
-    uint8_t pinReset,
-    uint8_t pinMs1,
-    uint8_t pinMs2,
-    uint8_t pinMs3,
-    uint32_t cordLength_mm,
-    uint32_t cordDiameter_mm,
-    uint32_t axisDiameter_mm,
-    uint16_t stepsPerRev
-  );
-  ~MotorA4988() override {}
+  explicit MotorA4988();
+  ~MotorA4988() override {
+    if (isInit_) {
+      stepper_->detachFromPin();
+      stop(true);
+    }
+    State::getInstance()->Detach(this);
+  };
+  void handleEvent(const StateEvent& event) override;
   void setResolution(const stdBlinds::resolution_t resolution) override;
   void setSleep(const bool shouldSleep) override;
   void setEnabled(const bool isEnabled) override;
@@ -34,42 +28,31 @@ public:
   void init(FastAccelStepperEngine& engine);
   int8_t runUp() override;
   int8_t runDown() override;
+  void invertDirection() override;
   void stop(bool immediate) override;
   int8_t moveTo(int32_t pos) override;
-  int8_t moveTo(int32_t pos, uint32_t speed_hz) override;
-  int8_t moveTo(int32_t pos, uint32_t speed_hz, int32_t accel) override;
   int8_t moveToPercent(uint8_t pct) override;
-  int8_t moveToPercent(uint8_t pct, uint32_t speed_hz) override;
-  int8_t moveToPercent(uint8_t pct, uint32_t speed_hz, int32_t accel) override;
   bool isInit() override;
   bool isEnabled() override;
   bool isAsleep() override;
   void setCurrentPositionAsHome() override;
   bool isRunning() override;
   int32_t getCurrentPosition() override;
+  uint32_t getMaximumPosition() override;
   void setMaximumPosition(uint32_t pos) override;
-  FastAccelStepper* stepper = NULL;
 private:
-  uint8_t pinms1;
-  uint8_t pinms2;
-  uint8_t pinms3;
-  uint8_t pinSleep;
-  uint8_t pinReset;
-  uint8_t pinEnable;
-  uint8_t pinStep;
-  uint8_t pinDir;
-  uint32_t cordLength_mm;
-  uint32_t cordDiameter_mm;
-  uint32_t axisDiameter_mm;
-  uint16_t stepsPerRev;
-  uint32_t maxPosition;
-  uint32_t maxTurns;
-  FastAccelStepperEngine engine;
-  bool _isInit;
-  bool _isAsleep;
-  bool _isEnabled;
-  stdBlinds::resolution_t _resolution;
-  void _setMaximumPosition();
+  FastAccelStepper* stepper_ = NULL;
+  FastAccelStepperEngine engine_;
+  bool isInit_;
+  bool isAsleep_;
+  bool isEnabled_;
+  uint32_t cordLength_mm_;
+  double cordDiameter_mm_;
+  uint32_t axisDiameter_mm_;
+  uint16_t stepsPerRev_;
+  uint32_t maxTurns_;
+  uint32_t maxPosition_;
+  void setMaximumPosition_(stdBlinds::resolution_t res);
 };
 
 #endif  // MOTOR_A4988_H_

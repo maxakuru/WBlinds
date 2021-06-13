@@ -1,47 +1,63 @@
 #include "motor_a4988.h"
 
-MotorA4988::MotorA4988(
-  uint8_t pinStep, uint8_t pinDir, uint8_t pinEnable, uint8_t pinSleep, uint8_t pinReset, uint8_t pinMs1,
-  uint8_t pinMs2, uint8_t pinMs3, uint32_t cordLength_mm, uint32_t cordDiameter_mm, uint32_t axisDiameter_mm, uint16_t stepsPerRev
-) {
+MotorA4988::MotorA4988() {
   ESP_LOGI(TAG);
-  _isInit = false;
-  this->pinStep = pinStep;
-  this->pinDir = pinDir;
-  this->pinEnable = pinEnable;
-  this->pinSleep = pinSleep;
-  this->pinReset = pinReset;
-  this->pinms1 = pinMs1;
-  this->pinms2 = pinMs2;
-  this->pinms3 = pinMs3;
-  this->cordLength_mm = cordLength_mm;
-  this->cordDiameter_mm = cordDiameter_mm;
-  this->axisDiameter_mm = axisDiameter_mm;
-  this->stepsPerRev = stepsPerRev;
 
-  this->_resolution = stdBlinds::resolution_t::kFull;
-  this->maxTurns = calculateMaxTurns(axisDiameter_mm, cordDiameter_mm, cordLength_mm);
-  setResolution(_resolution);
-  _setMaximumPosition();
+  isInit_ = false;
+  auto state = State::getInstance();
 
-  pinMode(this->pinms1, OUTPUT);
-  pinMode(this->pinms2, OUTPUT);
-  pinMode(this->pinms3, OUTPUT);
-  pinMode(this->pinSleep, OUTPUT);
-  pinMode(this->pinReset, OUTPUT);
-  pinMode(this->pinEnable, OUTPUT);
+  this->axisDiameter_mm_ = state->getAxisDiameter();
+  this->cordDiameter_mm_ = state->getCordDiameter();
+  this->cordLength_mm_ = state->getCordLength();
+  this->stepsPerRev_ = state->getStepsPerRev();
+  ESP_LOGI(TAG, " axisDiameter_mm_, cordDiameter_mm_, cordLength_mm_: %i , %f , %i :", state->getAxisDiameter(), state->getCordDiameter(), state->getCordLength());
+
+  ESP_LOGI(TAG, " axisDiameter_mm_, cordDiameter_mm_, cordLength_mm_: %i , %f , %i :", axisDiameter_mm_, cordDiameter_mm_, cordLength_mm_);
+  this->maxTurns_ = calculateMaxTurns((double)axisDiameter_mm_, cordDiameter_mm_, (double)cordLength_mm_);
+  setResolution(state->getResolution());
+  ESP_LOGI(TAG, "max turns, position : %i , %i", maxTurns_, maxPosition_);
+
+  pinMode(state->getMs1Pin(), OUTPUT);
+  pinMode(state->getMs2Pin(), OUTPUT);
+  pinMode(state->getMs3Pin(), OUTPUT);
+  pinMode(state->getSleepPin(), OUTPUT);
+  pinMode(state->getResetPin(), OUTPUT);
+  pinMode(state->getEnablePin(), OUTPUT);
 
   // Not reset
-  digitalWrite(this->pinReset, HIGH);
+  digitalWrite(state->getResetPin(), HIGH);
 
   // Not asleep
-  _isAsleep = false;
-  digitalWrite(this->pinSleep, HIGH);
+  isAsleep_ = false;
+  digitalWrite(state->getSleepPin(), HIGH);
 
   // Using auto enable, initially disabled
-  _isEnabled = false;
-  digitalWrite(this->pinEnable, HIGH);
+  isEnabled_ = false;
+  digitalWrite(state->getEnablePin(), HIGH);
 }
+
+void MotorA4988::handleEvent(const StateEvent& event) {
+  auto state = State::getInstance();
+  auto tPos = state->getTargetPosition();
+  if (event.flags_.tick_) {
+    // convert steps to pct
+    auto cPos = state->getPosition();
+    auto pct = stepsToPercent(this->getCurrentPosition(), this->getMaximumPosition());
+    if (cPos != pct) {
+      ESP_LOGI(TAG, "set current pos: %i", pct);
+      state->setPosition(this, pct);
+    }
+    return;
+  }
+  if (event.flags_.targetPos_) {
+    ESP_LOGI(TAG, "move to target pos: %i", tPos);
+    this->moveToPercent(tPos);
+  }
+}
+
+// MotorA4988::~MotorA4988() {
+//   State::getInstance()->Detach(this);
+// }
 
 /**
  * @brief Initialize the motor with an existing engine.
@@ -49,21 +65,34 @@ MotorA4988::MotorA4988(
  * @param engine
  */
 void MotorA4988::init(FastAccelStepperEngine& engine) {
-  ESP_LOGI(TAG, "init(engine)");
+  auto state = State::getInstance();
 
-  this->engine = engine;
-  stepper = this->engine.stepperConnectToPin(pinStep);
+  this->engine_ = engine;
 
-  stepper->setDirectionPin(this->pinDir);
-  stepper->setEnablePin(this->pinEnable);
-  stepper->disableOutputs();
-  stepper->setAutoEnable(true);
+  stepper_ = this->engine_.stepperConnectToPin(state->getStepPin());
+
+  stepper_->setDirectionPin(state->getDirectionPin());
+  stepper_->setEnablePin(state->getEnablePin());
+  stepper_->disableOutputs();
+  stepper_->setAutoEnable(true);
 
   // restore state
-  auto state = State::getInstance();
-  stepper->setCurrentPosition(state->getPosition());
+  stepper_->setCurrentPosition(state->getPosition());
+  stepper_->setSpeedInHz(state->getSpeed());
+  stepper_->setAcceleration(state->getAccel());
 
-  _isInit = true;
+  EventFlags flags;
+  flags.pos_ = true;
+  flags.speed_ = true;
+  flags.accel_ = true;
+  flags.targetPos_ = true;
+  flags.moveDown_ = true;
+  flags.moveUp_ = true;
+  flags.moveStop_ = true;
+  flags.tick_ = true;
+  state->Attach(this, flags);
+
+  isInit_ = true;
 }
 
 /**
@@ -72,30 +101,30 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
 void MotorA4988::init() {
   ESP_LOGI(TAG);
 
-  this->engine = FastAccelStepperEngine();
-  engine.init();
-  init(engine);
+  this->engine_ = FastAccelStepperEngine();
+  engine_.init();
+  init(engine_);
 }
 
 /**
  * @brief Whether the motor/engine is initialized already.
  */
 bool MotorA4988::isInit() {
-  return _isInit;
+  return isInit_;
 }
 
 /**
  * @brief Whether the motor is asleep.
  */
 bool MotorA4988::isAsleep() {
-  return _isAsleep;
+  return isAsleep_;
 }
 
 /**
  * @brief Whether the motor is enabled.
  */
 bool MotorA4988::isEnabled() {
-  return _isEnabled;
+  return isEnabled_;
 }
 
 /**
@@ -104,25 +133,25 @@ bool MotorA4988::isEnabled() {
  * @param resolution
  */
 void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
-  ESP_LOGI(TAG);
+  auto state = State::getInstance();
 
-  digitalWrite(this->pinms1, LOW);
-  digitalWrite(this->pinms2, LOW);
-  digitalWrite(this->pinms3, LOW);
+  int ms1 = state->getMs1Pin();
+  int ms2 = state->getMs2Pin();
+  int ms3 = state->getMs3Pin();
+
+  digitalWrite(ms1, LOW);
+  digitalWrite(ms2, LOW);
+  digitalWrite(ms3, LOW);
   if (resolution > stdBlinds::resolution_t::kFull && resolution != stdBlinds::resolution_t::kQuarter) {
-    digitalWrite(this->pinms1, HIGH);
+    digitalWrite(ms1, HIGH);
   }
   if (resolution > stdBlinds::resolution_t::kHalf) {
-    digitalWrite(this->pinms2, HIGH);
+    digitalWrite(ms2, HIGH);
   }
   if (resolution == stdBlinds::resolution_t::kSixteenth) {
-    digitalWrite(this->pinms3, HIGH);
+    digitalWrite(ms3, HIGH);
   }
-  if (_resolution != resolution) {
-    // recalculate the max position
-    _resolution = resolution;
-    _setMaximumPosition();
-  }
+  setMaximumPosition_(resolution);
 }
 
 /**
@@ -131,19 +160,21 @@ void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
  * @param shouldSleep true to go to sleep, false to wake
  */
 void MotorA4988::setSleep(const bool shouldSleep) {
-  this->_isAsleep = shouldSleep;
+  this->isAsleep_ = shouldSleep;
+  auto state = State::getInstance();
+  int slp = state->getSleepPin();
 
   if (shouldSleep) {
-    if (this->stepper) {
-      this->stepper->stopMove();
+    if (this->stepper_) {
+      this->stepper_->stopMove();
     }
-    ESP_LOGI(TAG, "sleeping");
-    digitalWrite(this->pinSleep, LOW);
+    ESP_LOGI(TAG, "SLEEPING");
+    digitalWrite(slp, LOW);
   }
   else {
-   ESP_LOGI(TAG, "waking");
-    digitalWrite(this->pinSleep, HIGH);
-    // TODO: set current position from SPIFFS
+    ESP_LOGI(TAG, "WAKING");
+    digitalWrite(slp, HIGH);
+    stepper_->setCurrentPosition(state->getPosition());
     delay(1); // let it reach power
   }
 }
@@ -153,16 +184,17 @@ void MotorA4988::setSleep(const bool shouldSleep) {
  *
  * @param isEnabled
  */
-void MotorA4988::setEnabled(const bool isEnabled) {
-  this->_isEnabled = isEnabled;
-  digitalWrite(this->pinEnable, isEnabled ? LOW : HIGH);
+void MotorA4988::setEnabled(const bool v) {
+  int en = State::getInstance()->getEnablePin();
+  this->isEnabled_ = v;
+  digitalWrite(en, v ? LOW : HIGH);
 }
 
 /**
  * @brief Whether the motor is moving.
  */
 bool MotorA4988::isRunning() {
-  return stepper->isRunning();
+  return stepper_->isRunning();
 }
 
 /**
@@ -172,7 +204,7 @@ bool MotorA4988::isRunning() {
  */
 int8_t MotorA4988::runUp() {
   ESP_LOGI(TAG);
-  return stepper->runForward();
+  return stepper_->runForward();
 }
 
 /**
@@ -182,7 +214,12 @@ int8_t MotorA4988::runUp() {
  */
 int8_t MotorA4988::runDown() {
   ESP_LOGI(TAG);
-  return stepper->runBackward();
+  return stepper_->runBackward();
+}
+
+void MotorA4988::invertDirection() {
+  // TODO: save pin inversion to state
+  stepper_->setDirectionPin(stepper_->getDirectionPin(), !stepper_->directionPinHighCountsUp());
 }
 
 /**
@@ -191,11 +228,11 @@ int8_t MotorA4988::runDown() {
 void MotorA4988::stop(bool immediate = true) {
   ESP_LOGI(TAG);
   if (!immediate) {
-    return stepper->stopMove();
+    return stepper_->stopMove();
   }
 
   ESP_LOGI(TAG, "stop immediate");
-  stepper->forceStopAndNewPosition(stepper->getCurrentPosition());
+  stepper_->forceStopAndNewPosition(stepper_->getCurrentPosition());
 }
 
 /**
@@ -203,28 +240,19 @@ void MotorA4988::stop(bool immediate = true) {
  * Stops the motor if currently moving.
  */
 void MotorA4988::setCurrentPositionAsHome() {
-  stepper->forceStopAndNewPosition(0);
+  stepper_->forceStopAndNewPosition(0);
 }
 
 int8_t MotorA4988::moveToPercent(uint8_t pct) {
-  if (isInit()) {
+  if (!isInit()) {
     return -1;
   }
+
   pct = max(0, min(pct, 100));
-  int32_t pos = (pct * this->maxPosition) / 100;
+  int32_t pos = percentToSteps((double)pct, (double)this->maxPosition_);
 
-  ESP_LOGI(TAG, "new pos: %i", pos);
+  ESP_LOGI(TAG, "moveToPercent: %i", pos);
   return moveTo(pos);
-}
-
-int8_t MotorA4988::moveToPercent(uint8_t pct, uint32_t speed_hz) {
-  stepper->setSpeedInHz(speed_hz);
-  return this->moveToPercent(pct);
-}
-
-int8_t MotorA4988::moveToPercent(uint8_t pct, uint32_t speed_hz, int32_t accel) {
-  stepper->setAcceleration(accel);
-  return this->moveToPercent(pct, speed_hz);
 }
 
 int8_t MotorA4988::moveTo(int32_t pos) {
@@ -237,20 +265,9 @@ int8_t MotorA4988::moveTo(int32_t pos) {
     return -1;
   }
 
-  State::getInstance()->setPosition(pos);
-
-  return stepper->moveTo(pos);
-}
-
-int8_t MotorA4988::moveTo(int32_t pos, uint32_t speed_hz) {
-  stepper->setSpeedInHz(speed_hz);
-  State::getInstance()->setSpeed(speed_hz);
-  return this->moveTo(pos);
-}
-
-int8_t MotorA4988::moveTo(int32_t pos, uint32_t speed_hz, int32_t accel) {
-  stepper->setAcceleration(accel);
-  return this->moveTo(pos, speed_hz);
+  ESP_LOGI(TAG, "moveTo: %i", pos);
+  // move, event handler will update actual position on tick
+  return stepper_->moveTo(pos);
 }
 
 /**
@@ -259,22 +276,28 @@ int8_t MotorA4988::moveTo(int32_t pos, uint32_t speed_hz, int32_t accel) {
  * @return int32_t
  */
 int32_t MotorA4988::getCurrentPosition() {
-  return stepper->getCurrentPosition();
+  return stepper_->getCurrentPosition();
+}
+
+/**
+ * @brief Get maximum position.
+ */
+uint32_t MotorA4988::getMaximumPosition() {
+  return this->maxPosition_;
 }
 
 /**
  * @brief Set maximum position.
  */
 void MotorA4988::setMaximumPosition(uint32_t pos) {
-  this->maxPosition = pos;
+  this->maxPosition_ = pos;
 }
 
 /**
  * @brief Calculate maximum position based on height,
  *        axis radius, and resolution.
  */
-void MotorA4988::_setMaximumPosition() {
-  uint32_t nSteps = maxTurns * stepsPerRev * (uint8_t)_resolution;
-  ESP_LOGI(TAG, "nSteps: %i", nSteps);
+void MotorA4988::setMaximumPosition_(stdBlinds::resolution_t res) {
+  uint32_t nSteps = maxTurns_ * stepsPerRev_ * (uint8_t)res;
   setMaximumPosition(nSteps);
 }

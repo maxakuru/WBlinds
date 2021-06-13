@@ -8,8 +8,11 @@ class BlindsMQTTAPI : BlindsAPI {
 public:
    explicit BlindsMQTTAPI(PubSubClient* client,
       const char* host, const uint16_t port, const char* user, const char* password, const char* name);
-   ~BlindsMQTTAPI() override {}
-   void init(BlindsMotor* motor) override;
+   ~BlindsMQTTAPI() override {
+      State::getInstance()->Detach(this);
+   };
+   void handleEvent(const StateEvent& event) override;
+   void init() override;
    void loop();
 private:
    uint8_t connectRetryCount = 0;

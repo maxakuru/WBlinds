@@ -8,13 +8,17 @@
 
 class BlindsHTTPAPI : BlindsAPI {
 public:
-   explicit BlindsHTTPAPI(const uint16_t port);
-   ~BlindsHTTPAPI() override {}
-   void init(BlindsMotor* motor) override;
-   // void loop() override;
+   explicit BlindsHTTPAPI(uint16_t port);
+   ~BlindsHTTPAPI() override {
+      State::getInstance()->Detach(this);
+   };
+   void init() override;
+   void handleEvent(const StateEvent& event) override;
 private:
    // AsyncWebServer* server;
-   uint16_t port;
+   uint16_t port_;
+   // State& state_;
+
    void handlePOST();
    void serveIndex(AsyncWebServerRequest* request);
    void serveBackground(AsyncWebServerRequest* request);

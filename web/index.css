@@ -172,12 +172,11 @@ li.s {
 	position: fixed;
 	z-index: -10;
 	background-position: 30%;
-	/* background-position: center; */
 	background-repeat: no-repeat;
 	background-size: cover;
 	opacity: 1;
 	transition: opacity 2s;
-	background-image: url("bg.jpg");
+    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#58248a 0,#26588c, #28125d);
 }
 
 #app {
