@@ -1,10 +1,11 @@
 # WBlinds
 
-Wifi controller for smart blinds.
+ESP32 controller for smart blinds!
 
 ## Features
 * MQTT API
 * HTTP/REST API
+* Homekit integration
 * Handles halting on home detection
 * > Work in progress
 
@@ -23,11 +24,13 @@ Wifi controller for smart blinds.
 - [ ] Settings page in web UI (pins, hardware, name, etc.) - WIP
 - [ ] Web calibration wizard
 - [ ] UDP Sync
+- [ ] UDP Sync Groups
+- [ ] Routines
 - [ ] WS support for web clients
 - [ ] AP wifi setup
 - [ ] Servo brake & relay for minimizing power consumption
 - [ ] Add schematic, PCB
-- [ ] Add STLs for 3D printing axis, brake, enclosure
+- [ ] Add STLs for 3D printing axis, brake, enclosure - initial
 - [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
 - [ ] State approximation with Hall effect sensor (built-in on ESP32)
 
@@ -90,3 +93,7 @@ Where `pos`, `speed` are percentages and `accel` is Hz.
 
 ### Homekit
 Native Homekit integration allows the ESP32 to be detected as a device without a bridge/emulator. This mode requires percentage-based position values, so it's important to calibrate the settings first.
+
+# Other files
+The `/etc` directory contains some STL files that may be useful for building WBlinds. Those are designed for use with IKEA HOPPVALS, but would be close to the TRIPPVALS, too.
+> Note: Like everything else, those designs are a WIP :)
