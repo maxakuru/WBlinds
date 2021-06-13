@@ -10,14 +10,53 @@ Wifi controller for smart blinds.
 
 ## Setup
 1. Configure `src/Credentials.h.ex` and rename to `src/Credentials.h`
-2. Configure pins in `src/main.cpp`
+2. Configure pins in `src/defines.h`
 3. Setup `platformio.ini` to your liking
 4. Build & flash
 
+## TODO
+- [x] Parameterize pins
+- [x] Homekit integration
+- [x] Saving settings to SPIFFS
+- [ ] Solidify API definitions
+- [ ] Web UI - WIP
+- [ ] Settings page in web UI (pins, hardware, name, etc.) - WIP
+- [ ] Web calibration wizard
+- [ ] UDP Sync
+- [ ] WS support for web clients
+- [ ] AP wifi setup
+- [ ] Servo brake & relay for minimizing power consumption
+- [ ] Add schematic, PCB
+- [ ] Add STLs for 3D printing axis, brake, enclosure
+- [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
+- [ ] State approximation with Hall effect sensor (built-in on ESP32)
+
+
 ## APIs
+These APIs are in flux!
 
 ### HTTP
-```sh
+```js
+POST <host:port>/state
+{ 
+    "tPos": 50, //[0-100] (target position %, starts move)
+    "pos": 50, // [0-100] (current position %)
+    "accel": 99999, // [0-UINT32_MAX] (steps/s/s)
+    "speed": 1000, // [0-something reasonable] (Hz)
+}
+```
+```js
+GET <host:port>/state
+// 200
+{ 
+    "tPos": 50,
+    "pos": 50,
+    "accel": 99999,
+    "speed": 1000
+}
+```
+
+```js
 POST <host:port> 
 { 
     "op": "run_forward" | "run_backward" | "stop" | "sleep"
@@ -49,11 +88,5 @@ body="{\"pos\":50,\"speed\":10,\"accel\":10}"
 ```
 Where `pos`, `speed` are percentages and `accel` is Hz.
 
-## TODO
-- [ ] Parameterize pins
-- [ ] Saving settings to SPIFFS
-- [ ] Dashboard for configuration at runtime
-- [ ] AP wifi setup
-- [ ] Servo brake & relay for minimizing power consumption
-- [ ] Add schematic, PCB
-- [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
+### Homekit
+Native Homekit integration allows the ESP32 to be detected as a device without a bridge/emulator. This mode requires percentage-based position values, so it's important to calibrate the settings first.
