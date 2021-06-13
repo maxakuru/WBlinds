@@ -1,32 +1,70 @@
 #include "wblinds.h"
-#include "udp_notifier.h"
-#include "homekit.h"
 #include <Arduino.h>
 #include <WiFi.h>
-#include "motor_a4988.h"
-#include <WiFiClient.h>
-#include <PubSubClient.h>
 #include "api_http.h"
-#include "api_mqtt.h"
 #include <Credentials.h>
-#include "ota_update.h"
 
+#ifndef DISABLE_OTA
+#include "ota_update.h"
+#endif
+#ifndef DISABLE_MQTT
+#include <PubSubClient.h>
+#include "api_mqtt.h"
+#include <WiFiClient.h>
+#endif
+#ifndef DISABLE_UDP_SYNC
+#include "udp_notifier.h"
+#endif
+#ifndef DISABLE_HOMEKIT
+ESP_LOGI(TAG, "include homekit");
+#include "homekit.h"
+#endif
+
+// Only A4988 supported right now
+#ifndef STEPPER_A4988
+#define STEPPER_A4988
+#endif
+
+#ifdef STEPPER_A4988
+#include "motor_a4988.h"
+#endif
 WBlinds* WBlinds::instance = 0;
 
-State* state;
-
-// HTTP/MQTT config
-const uint8_t httpPort = 80;
+// ====== Optional =======
+// =======================
+// MQTT
+#ifndef DISABLE_MQTT
 WiFiClient client;
 PubSubClient mqttClient(client);
+BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
+#endif
 
+// UDP
+#ifndef DISABLE_UDP_SYNC
 UDPNotifier* udpNotifier;
+#endif
+
+// Native HomeKit
+#ifndef DISABLE_HOMEKIT
 Homekit* homekit;
+#endif
 
 // OTA Update config
+#ifndef DISABLE_OTA
 const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
 uint32_t _lastOTACheck = 0;
+#endif
 
+// ====== Configurable =======
+// ===========================
+// Only A4988 stepper driver supported right now
+#ifdef STEPPER_A4988
+MotorA4988* motor;
+#endif
+
+
+// ====== Required =======
+// =======================
 // State save interval, only occurs if state is dirty
 const uint16_t STATE_SAVE_INTERVAL = 10000; // ms
 uint32_t _lastStateSave = 0;
@@ -39,11 +77,14 @@ uint32_t _lastTick = 0;
 uint32_t _lastHeapCheck = 0;
 uint32_t lastHeap = 0;
 
-MotorA4988* motor;
+// State
+State* state;
 
+// HTTP
+const uint8_t httpPort = 80;
 BlindsHTTPAPI httpAPI(httpPort);
-BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
 
+#ifndef DISABLE_HOME_SWITCH
 int homeSwitchState = LOW;
 void IRAM_ATTR onHomePinChange() {
   int sw = DEFAULT_HOME_SWITCH_PIN;
@@ -58,6 +99,7 @@ void IRAM_ATTR onHomePinChange() {
     }
   }
 }
+#endif
 
 WBlinds* WBlinds::getInstance() {
   if (!instance)
@@ -66,21 +108,15 @@ WBlinds* WBlinds::getInstance() {
 }
 
 void WBlinds::setup() {
-  ESP_LOGI(TAG, "Setup0");
-
   Serial.begin(115200);
-  delay(10000);
-
-  ESP_LOGI(TAG, "Setup1");
 
   state = State::getInstance();
-  delay(100);
-  ESP_LOGI(TAG, "Setup3");
 
+#ifndef DISABLE_HOME_SWITCH
   int hp = state->getHomeSwitchPin();
   pinMode(hp, INPUT_PULLDOWN);
   attachInterrupt(digitalPinToInterrupt(hp), onHomePinChange, CHANGE);
-  ESP_LOGI(TAG, "Setup5");
+#endif
 
   // setup wifi
   // TODO: AP setup on first launch
@@ -91,24 +127,29 @@ void WBlinds::setup() {
   }
   auto ip = WiFi.localIP();
   ESP_LOGI(TAG, "Connected to the WiFi network, IP: %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-  ESP_LOGI(TAG, "Setup6");
 
   motor = new MotorA4988();
   motor->init();
-  ESP_LOGI(TAG, "Setup4");
 
+#ifndef DISABLE_UDP_SYNC
   udpNotifier = new UDPNotifier(*state);
+#endif 
+
+#ifndef DISABLE_HOMEKIT
   homekit = new Homekit(*state);
   homekit->init();
+#endif
 
+#ifndef DISABLE_OTA
   _lastOTACheck = millis();
   OTAinit();
+#endif
 
-  // motor->setResolution(stdBlinds::resolution_t::kSixteenth);
+#ifndef DISABLE_MQTT
+  mqttAPI.init();
+#endif
 
   httpAPI.init();
-  mqttAPI.init();
-
   lastHeap = ESP.getFreeHeap();
 }
 
@@ -117,7 +158,10 @@ void WBlinds::loop() {
     reset();
   }
 
+  // TODO: switch to asyncmqtt
+#ifndef DISABLE_MQTT
   mqttAPI.loop();
+#endif
 
   if ((millis() - TICK_INTERVAL) > _lastTick) {
     _lastTick = millis();
@@ -125,18 +169,21 @@ void WBlinds::loop() {
     tickEv.tick_ = true;
     state->Notify(nullptr, tickEv);
   }
-  // yield();
+
   if ((millis() - STATE_SAVE_INTERVAL) > _lastStateSave) {
     _lastStateSave = millis();
     if (state != nullptr && state->isDirty()) {
       state->save();
     }
   }
-  // yield();
+
+#ifndef DISABLE_OTA
   if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck) {
     _lastOTACheck = millis();
     OTAloopHandler();
   }
+#endif
+
   if (millis() - _lastHeapCheck > 5000) {
     uint32_t heap = ESP.getFreeHeap();
     if (heap < 9000 && lastHeap < 9000) {
@@ -152,13 +199,20 @@ void WBlinds::reset() {
   // TODO: close server, websockets, mqtt, disable motors
   if (state != nullptr)
     state->save();
+
+#ifndef DISABLE_HOMEKIT
   homekit->~Homekit();
+#endif
+
   ESP.restart();
 }
 
 void WBlinds::restore() {
   // TODO: close server, websockets, mqtt, disable motors
+#ifndef DISABLE_HOMEKIT
   homekit->resetToFactory();
+#endif
+
   state->save();
   ESP.restart();
 }

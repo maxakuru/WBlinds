@@ -1,6 +1,6 @@
+#define WBLINDS_DEFINE_GLOBAL_VARS
 #include "defines.h"
 
-const char* VERSION = "0.0.1";
 const byte MAGIC_NUMBER[4] = { 0xFE, 0xED, 0xDA, 0xBB };
 
 namespace stdBlinds {

@@ -7,6 +7,28 @@
 // #include "ui_fixtures.h"
 #include "esp32-hal-log.h"
 
+#ifndef WBLINDS_DEFINE_GLOBAL_VARS
+# define WBLINDS_GLOBAL extern
+# define _INIT(x)
+# define _INIT_N(x)
+#else
+# define WBLINDS_GLOBAL
+# define _INIT(x) = x
+
+#define UNPACK( ... ) __VA_ARGS__
+# define _INIT_N(x) UNPACK x
+#endif
+
+#define STRINGIFY(X) #X
+#define TOSTRING(X) STRINGIFY(X)
+
+#ifndef DVERSION
+  #define DVERSION "dev"
+#endif
+
+// Global Variable definitions
+WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(DVERSION));
+
 // DEFAULTS
 // Pin config defaults
 #define DEFAULT_DIR_PIN 18
@@ -26,7 +48,6 @@
 #define DEFAULT_AXIS_DIAMETER_MM 15
 
 namespace stdBlinds {
-
     enum class resolution_t {
         kFull = 1,
         kHalf = 2,
@@ -62,7 +83,6 @@ namespace stdBlinds {
 
 extern std::map<stdBlinds::datagram_t, const uint8_t> DatagramSize;
 extern const byte MAGIC_NUMBER[4];
-extern const char* VERSION;
 extern String messageHead;
 extern String messageSub;
 extern bool forceReconnect;
