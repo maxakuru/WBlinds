@@ -1,34 +1,34 @@
 #ifndef API_MQTT_H_
 #define API_MQTT_H_
 
+#ifndef DISABLE_MQTT
+
+
 #include "api.h"
-#include <PubSubClient.h>
 
 class BlindsMQTTAPI : BlindsAPI {
 public:
-   explicit BlindsMQTTAPI(PubSubClient* client,
-      const char* host, const uint16_t port, const char* user, const char* password, const char* name);
+   explicit BlindsMQTTAPI();
    ~BlindsMQTTAPI() override {
       State::getInstance()->Detach(this);
    };
    void handleEvent(const StateEvent& event) override;
    void init() override;
-   void loop();
 private:
    uint8_t connectRetryCount = 0;
-   PubSubClient* client;
-   const char* user;
-   const char* password;
-   const char* name;
    char* upTopic;
    char* downTopic;
    char* stopTopic;
    char* sleepTopic;
    char* moveTopic;
    char* toSubscribe;
-   void handleMessage(const char* topic, byte* payload, uint32_t length);
    void reconnect();
+   char* clientId;
+   // void handleMessage(const char* topic, byte* payload, uint32_t length);
+   // void reconnect();
    void initTopics(const char* name);
 };
+
+#endif // DISABLE_MQTT
 
 #endif  // API_MQTT_H_

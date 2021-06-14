@@ -1,23 +1,19 @@
 #ifndef STATE_H_
 #define STATE_H_
 
-#include <Arduino.h>
-#include <type_traits>
-#include "SPIFFS.h"
-#include <ArduinoJson.h>
 #include "defines.h"
-#include <list>
-#include <map>
 
 extern DynamicJsonDocument stateDoc;
 extern DynamicJsonDocument settingsDoc;
-extern char deviceName[256];
-extern char mDnsName[256];
-extern char mqttHost[256];
-extern char mqttTopic[256];
+extern char deviceName[64];
+extern char mDnsName[64];
+extern char mqttHost[128];
+extern char mqttTopic[128];
+extern char mqttUser[41];
+extern char mqttPass[41];
 
-class EventFlags
-{
+
+class EventFlags {
 public:
     EventFlags()
         : mask_(0) {
@@ -98,6 +94,8 @@ struct SettingsDataMQTT {
     char* host;
     uint16_t port;
     char* topic;
+    char* user;
+    char* password;
 };
 
 class StateEvent {
@@ -114,16 +112,15 @@ public:
     virtual void handleEvent(const StateEvent& event) = 0;
 };
 
-class ObserverItem
-{
+class ObserverItem {
 public:
     ObserverItem()
-        : observer_(0)
-    {}
+        : observer_(0) {
+    }
     ObserverItem(StateObserver* observer, EventFlags const& flags)
         : observer_(observer)
-        , flags_(flags)
-    {}
+        , flags_(flags) {
+    }
 
     StateObserver* observer_;
     EventFlags flags_;
@@ -163,6 +160,13 @@ public:
     char* getDeviceName();
     char* getmDnsName();
 
+    bool getMqttEnabled();
+    char* getMqttHost();
+    uint16_t getMqttPort();
+    char* getMqttTopic();
+    char* getMqttUser();
+    char* getMqttPass();
+
     uint8_t getStepPin();
     uint8_t getDirectionPin();
     uint8_t getEnablePin();
@@ -186,6 +190,14 @@ public:
     void setAccel(uint32_t v);
     void setDeviceName(char* v);
     void setmDnsName(char* v);
+
+    // mqtt
+    void setMqttEnabled(bool v);
+    void setMqttHost(char* val);
+    void setMqttPort(uint16_t v);
+    void setMqttTopic(char* v);
+    void setMqttUser(char* v);
+    void setMqttPass(char* v);
 
     void setStepPin(uint8_t v);
     void setDirectionPin(uint8_t v);
@@ -238,7 +250,7 @@ private:
         };
         settingsHardware_ = {
             pinStep: DEFAULT_STEP_PIN,
-            pinDir: DEFAULT_DIR_PIN,
+            pinDir : DEFAULT_DIR_PIN,
             pinEn : DEFAULT_EN_PIN,
             pinSleep : DEFAULT_SLP_PIN,
             pinReset : DEFAULT_RST_PIN,
@@ -250,14 +262,15 @@ private:
             cordDiameter : DEFAULT_CORD_DIAMETER_MM,
             axisDiameter : DEFAULT_AXIS_DIAMETER_MM,
             stepsPerRev : DEFAULT_STEPS_PER_REV,
-            resolution: stdBlinds::resolution_t::kSixteenth
+            resolution : stdBlinds::resolution_t::kSixteenth
         };
-        ESP_LOGI(TAG, "after init cordL, cordD, axisD: %i , %f , %i , %i", settingsHardware_.cordLength, settingsHardware_.cordDiameter, settingsHardware_.axisDiameter, DEFAULT_AXIS_DIAMETER_MM);
         settingsMQTT_ = {
             enabled: true,
             host : mqttHost,
             port : 1883,
-            topic : mqttTopic
+            topic : mqttTopic,
+            user : mqttUser,
+            password : mqttPass
         };
         load();
     };

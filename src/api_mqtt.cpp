@@ -1,5 +1,8 @@
+#ifndef DISABLE_MQTT
+
 #include "api_mqtt.h"
-#include <ArduinoJson.h>
+#include <AsyncMqttClient.h>
+
 
 const char* upTopicSuffix = "/up";
 const char* downTopicSuffix = "/down";
@@ -7,96 +10,53 @@ const char* stopTopicSuffix = "/stop";
 const char* sleepTopicSuffix = "/sleep";
 const char* moveTopicSuffix = "/move";
 
-BlindsMQTTAPI::BlindsMQTTAPI(
-   PubSubClient* client,
-   const char* host,
-   const uint16_t port,
-   const char* user,
-   const char* password,
-   const char* name
-) {
-   ESP_LOGI(TAG, "constructor");
+AsyncMqttClient* mqttClient;
 
-   this->client = client;
-   this->name = name;
-
-   initTopics(name);
-
-   client->setServer(host, 1883);
-   client->setCallback(
-      [this](const char* topic, byte* payload, unsigned int length) {
-         this->handleMessage(topic, payload, length);
-      }
-   );
-
-   this->user = user;
-   this->password = password;
+BlindsMQTTAPI::BlindsMQTTAPI() {
+   WLOG_I(TAG, "constructor");
 }
 
-void BlindsMQTTAPI::handleEvent(const StateEvent& event){
+void BlindsMQTTAPI::handleEvent(const StateEvent& event) {
    // TODO:
-   ESP_LOGI(TAG, "event mask: %i", event.flags_.mask_);
+   WLOG_I(TAG, "event mask: %i", event.flags_.mask_);
 }
 
 void BlindsMQTTAPI::initTopics(const char* name) {
-   char* ut = new char[strlen(name) + strlen(upTopicSuffix) + 1]();
+   size_t nameLen = strlen(name);
+   char* ut = new char[nameLen + strlen(upTopicSuffix) + 1]();
    strcpy(ut, name);
    strcat(ut, upTopicSuffix);
    this->upTopic = ut;
 
-   char* dt = new char[strlen(name) + strlen(downTopicSuffix) + 1]();
+   char* dt = new char[nameLen + strlen(downTopicSuffix) + 1]();
    strcpy(dt, name);
    strcat(dt, downTopicSuffix);
    this->downTopic = dt;
 
-   char* st = new char[strlen(name) + strlen(stopTopicSuffix) + 1]();
+   char* st = new char[nameLen + strlen(stopTopicSuffix) + 1]();
    strcpy(st, name);
    strcat(st, stopTopicSuffix);
    this->stopTopic = st;
 
-   char* slt = new char[strlen(name) + strlen(sleepTopicSuffix) + 1]();
+   char* slt = new char[nameLen + strlen(sleepTopicSuffix) + 1]();
    strcpy(slt, name);
    strcat(slt, sleepTopicSuffix);
    this->sleepTopic = slt;
 
-   char* mt = new char[strlen(name) + strlen(moveTopicSuffix) + 1]();
+   char* mt = new char[nameLen + strlen(moveTopicSuffix) + 1]();
    strcpy(mt, name);
    strcat(mt, moveTopicSuffix);
    this->moveTopic = mt;
 
    // Subscribe to all topics under the device name
-   char* ts = new char[strlen(name) + 3]();
+   char* ts = new char[nameLen + 3]();
    strcpy(ts, name);
    strcat(ts, "/#");
    this->toSubscribe = ts;
 }
 
-/**
- * @brief Initialize MQTT API.
- *
- * @param motor
- */
-void BlindsMQTTAPI::init() {
-   ESP_LOGI(TAG);
-   auto state = State::getInstance();
-   EventFlags interestingFlags;
-   interestingFlags.pos_ = true;
-   interestingFlags.targetPos_ = true;
-   interestingFlags.speed_ = true;
-   interestingFlags.accel_ = true;
-
-   state->Attach(this, interestingFlags);
-}
-
-/**
- * @brief Handle an MQTT message.
- *
- * @param topic
- * @param payload
- * @param length
- */
-void BlindsMQTTAPI::handleMessage(const char* topic, byte* payload, uint32_t length) {
-   ESP_LOGI(TAG, "Handling message: %s", topic);
+void handleMessage(const char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+   WLOG_I(TAG, "Handling message: %s", topic);
    int tLen = strlen(topic);
    int afterSlash = 0;
    for (int i = tLen; i >= 0; i--) {
@@ -111,29 +71,69 @@ void BlindsMQTTAPI::handleMessage(const char* topic, byte* payload, uint32_t len
    memcpy(part, topic + afterSlash, partLen);
    part[partLen] = 0;
 
-   doOperation(part, payload, length);
+   BlindsAPI::doOperation(part, (byte*)payload, len);
 }
 
-void BlindsMQTTAPI::loop() {
-   if (!client->connected()) {
-      reconnect();
-   }
-   client->loop();
+void onConnect(bool sessionPresent, const char* toSubscribe) {
+   WLOG_I(TAG, "MQTT Connected %i", sessionPresent);
+   mqttClient->subscribe(toSubscribe, 0);
 }
 
 void BlindsMQTTAPI::reconnect() {
-   while (!client->connected()) {
-      ESP_LOGI(TAG, "Connecting...");
-      if (client->connect(name, user, password)) {
-         connectRetryCount = 0;
-         ESP_LOGI(TAG, " Connected.");
-         client->subscribe(toSubscribe);
-      }
-      else {
-         connectRetryCount = std::min(connectRetryCount + 1, UINT8_MAX);
-         auto d = std::max(5000 * connectRetryCount, 1000);
-         ESP_LOGE(TAG, " Failed. state=%i trying again in %i seconds.", client->state(), d / 1000);
-         delay(d);
-      }
+   auto state = State::getInstance();
+
+   if (mqttClient == nullptr) {
+      mqttClient = new AsyncMqttClient();
+      mqttClient->onMessage(handleMessage);
+      mqttClient->onConnect(
+         [this](bool sessPres) {
+            onConnect(sessPres, toSubscribe);
+         }
+      );
    }
+   if (mqttClient->connected()) return;
+
+   IPAddress mqttIP;
+   if (mqttIP.fromString(state->getMqttHost())) //see if server is IP or domain
+   {
+      mqttClient->setServer(mqttIP, state->getMqttPort());
+   }
+   else {
+      mqttClient->setServer(state->getMqttHost(), state->getMqttPort());
+   }
+
+   mqttClient->setClientId(clientId);
+
+   auto user = state->getMqttUser();
+   auto pass = state->getMqttPass();
+   if (user[0] && pass[0]) mqttClient->setCredentials(user, pass);
+
+   // mqtt->setWill(statusTopic, 0, true, "offline");
+   mqttClient->connect();
 }
+
+/**
+ * @brief Initialize MQTT API.
+ *
+ */
+void BlindsMQTTAPI::init() {
+   if (macAddress[0]) {
+      char cid[41];
+      strcpy_P(cid, const_cast<char*>("WBlinds-"));
+      sprintf(cid + 8, "%*s", 6, macAddress.c_str() + 6);
+      this->clientId = cid;
+   }
+   initTopics(clientId);
+   reconnect();
+
+   auto state = State::getInstance();
+   EventFlags interestingFlags;
+   interestingFlags.pos_ = true;
+   interestingFlags.targetPos_ = true;
+   interestingFlags.speed_ = true;
+   interestingFlags.accel_ = true;
+
+   state->Attach(this, interestingFlags);
+}
+
+#endif // DISABLE_MQTT

@@ -1,89 +1,35 @@
 #include "api_http.h"
+#include "defines.h"
+#include "datagram.h"
+#include "api_http_websocket.h"
+#include <ESPAsyncWebServer.h>
 
 // Errors
 const char* errPrefix = "{\"error\":\"";
 const char* errSuffix = "\"}";
-char errStr[100] = "";
+char errStr[50] = "";
 
 AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
 
-BlindsHTTPAPI::BlindsHTTPAPI(uint16_t port) {
-   ESP_LOGI(TAG, "constructor");
-   // this->server = server;
-   this->port_ = port;
+BlindsHTTPAPI::BlindsHTTPAPI() {
+   WLOG_I(TAG);
 }
 
-void BlindsHTTPAPI::handleEvent(const StateEvent& event){
+BlindsHTTPAPI::~BlindsHTTPAPI() {
+   State::getInstance()->Detach(this);
+   ws.cleanupClients();
+};
+
+void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
    // TODO: send data over websocket to connected web clients
-   ESP_LOGI(TAG, "event mask: %i", event.flags_.mask_);
-}
+   WLOG_I(TAG, "event mask: %i", event.flags_.mask_);
 
-void BlindsHTTPAPI::init() {
-   ESP_LOGI(TAG);
+   // auto b = datagramToWSMessage()
+   String m = Datagram::packString(event);
+   WLOG_I(TAG, "DG message: %s", m);
 
-   EventFlags interestingFlags;
-   interestingFlags.pos_ = true;
-   State::getInstance()->Attach(this, interestingFlags);
-
-   // server->on("/", HTTP_POST,
-   //    [this]() {
-   //       this->handlePOST();
-   //    }
-   // );
-
-   server.on("/", HTTP_GET,
-      [this](AsyncWebServerRequest* request) {
-         this->serveIndex(request);
-      }
-   );
-
-   // server.on("/bg.jpg", HTTP_GET,
-   //    [this](AsyncWebServerRequest* request) {
-   //       this->serveBackground(request);
-   //    }
-   // );
-
-   server.on("/state.json", HTTP_GET,
-      [this](AsyncWebServerRequest* request) {
-         this->getState(request, true);
-      }
-   );
-   server.on("/state", HTTP_GET,
-      [this](AsyncWebServerRequest* request) {
-         this->getState(request, false);
-      }
-   );
-   AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/state", [this](AsyncWebServerRequest* request, JsonVariant& json) {
-      this->updateState(request, json);
-      }
-   );
-   server.addHandler(handler);
-
-   // server.on("/state", HTTP_POST,
-   //    [this](AsyncWebServerRequest* request) {
-   //       this->updateState(request);
-   //    }
-   // );
-
-   // server.on("/settings", HTTP_GET, [this]
-   // (AsyncWebServerRequest* request) {
-   //       this->serveSettings(request, false);
-   //    }
-   // );
-   // server.on("/settings", HTTP_POST,
-   //    [this](AsyncWebServerRequest* request) {
-   //       this->serveSettings(request, true);
-   //    }
-   // );
-
-   server.onNotFound(
-      [this](AsyncWebServerRequest* request) {
-         this->handleNotFound(request);
-      }
-   );
-
-   server.begin();
-   // server.begin(this->port);
+   ws.textAll(m);
 }
 
 char* errorJson(const char* msg) {
@@ -92,62 +38,6 @@ char* errorJson(const char* msg) {
    strcat(errStr, errSuffix);
    return errStr;
 };
-
-void getSettingsJS(byte subPage, char* dest) {
-   //0: menu 1: wifi 2: leds 3: ui 4: sync 5: time 6: sec
-}
-
-void BlindsHTTPAPI::serveIndex(AsyncWebServerRequest* request) {
-   if (handleFileRead(request, "/index.html")) return;
-
-   if (handleIfNoneMatchCacheHeader(request)) return;
-
-   AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, PAGE_index, PAGE_index_L);
-
-   response->addHeader(F("Content-Encoding"), "gzip");
-   setStaticContentCacheHeaders(response);
-
-   request->send(response);
-}
-
-void BlindsHTTPAPI::handleNotFound(AsyncWebServerRequest* request) {
-   request->send(404, stdBlinds::MT_HTML);
-}
-
-// void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
-//    if (handleFileRead(request, "/bg.jpg")) return;
-
-//    if (handleIfNoneMatchCacheHeader(request)) return;
-
-//    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_JPG, IMG_background, IMG_background_L);
-
-//    response->addHeader(F("Content-Encoding"), "gzip");
-//    setStaticContentCacheHeaders(response);
-
-//    request->send(response);
-// }
-
-void BlindsHTTPAPI::getState(AsyncWebServerRequest* request, bool fromFile) {
-   if (fromFile) {
-      if (!handleFileRead(request, "/state.json")) {
-         return request->send(404, stdBlinds::MT_HTML, "Not found");
-      }
-      return request->send(500);
-   };
-   request->send(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
-}
-
-void BlindsHTTPAPI::updateState(AsyncWebServerRequest* request, JsonVariant& json) {
-   ESP_LOGI(TAG);
-   JsonObject obj = json.as<JsonObject>();
-   auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
-   if (errCode == stdBlinds::error_code_t::NoError) {
-      return request->send(200, stdBlinds::MT_HTML, "Ok");
-   }
-   char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
-   return request->send(400, stdBlinds::MT_JSON, err);
-}
-
 
 String getContentType(AsyncWebServerRequest* request, String filename) {
    if (request->hasArg("download")) return "application/octet-stream";
@@ -167,19 +57,20 @@ String getContentType(AsyncWebServerRequest* request, String filename) {
    return "text/plain";
 }
 
-bool BlindsHTTPAPI::handleFileRead(AsyncWebServerRequest* request, String path) {
-   ESP_LOGI(TAG);
+bool handleFileRead(AsyncWebServerRequest* request, String path) {
+   WLOG_I(TAG);
    if (path.endsWith("/")) path += "index.html";
    String contentType = getContentType(request, path);
-   if (SPIFFS.exists(path)) {
-      ESP_LOGI(TAG, "exists");
-      request->send(SPIFFS, path, contentType);
+   if (LITTLEFS.exists(path)) {
+      WLOG_I(TAG, "exists");
+      request->send(LITTLEFS, path, contentType);
       return true;
    }
    return false;
 }
 
-bool BlindsHTTPAPI::handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request) {
+
+bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request) {
    AsyncWebHeader* header = request->getHeader("If-None-Match");
    if (header && header->value() == String(VERSION)) {
       request->send(304);
@@ -188,15 +79,66 @@ bool BlindsHTTPAPI::handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request)
    return false;
 }
 
-void BlindsHTTPAPI::setStaticContentCacheHeaders(AsyncWebServerResponse* response) {
+void setStaticContentCacheHeaders(AsyncWebServerResponse* response) {
    response->addHeader(F("Cache-Control"), "no-cache");
    response->addHeader(F("ETag"), String(VERSION));
 }
 
-void BlindsHTTPAPI::serveOps(AsyncWebServerRequest* request, bool post) {
-   ESP_LOGI(TAG, "HTTP POST");
+void serveIndex(AsyncWebServerRequest* request) {
+   if (handleFileRead(request, "/index.html")) return;
+
+   if (handleIfNoneMatchCacheHeader(request)) return;
+
+   AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, PAGE_index, PAGE_index_L);
+
+   response->addHeader(F("Content-Encoding"), "gzip");
+   setStaticContentCacheHeaders(response);
+
+   request->send(response);
+}
+
+void handleNotFound(AsyncWebServerRequest* request) {
+   request->send(404, stdBlinds::MT_HTML);
+}
+
+// void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
+//    if (handleFileRead(request, "/bg.jpg")) return;
+
+//    if (handleIfNoneMatchCacheHeader(request)) return;
+
+//    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_JPG, IMG_background, IMG_background_L);
+
+//    response->addHeader(F("Content-Encoding"), "gzip");
+//    setStaticContentCacheHeaders(response);
+
+//    request->send(response);
+// }
+
+void getState(AsyncWebServerRequest* request) {
+   bool fromFile = request->hasParam("f");
+   if (fromFile) {
+      if (!handleFileRead(request, "/state.json")) {
+         return request->send(404, stdBlinds::MT_HTML, "Not found");
+      }
+   };
+   request->send(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
+}
+
+void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
+   WLOG_I(TAG);
+   JsonObject obj = json.as<JsonObject>();
+   auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
+   if (errCode == stdBlinds::error_code_t::NoError) {
+      return request->send(200, stdBlinds::MT_HTML, "Ok");
+   }
+   char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
+   return request->send(400, stdBlinds::MT_JSON, err);
+}
+
+void serveOps(AsyncWebServerRequest* request, bool post) {
+   WLOG_I(TAG, "HTTP POST");
    if (post) {
-      auto errCode = doOperation(request->arg("plain").c_str());
+      auto errCode = BlindsAPI::doOperation(request->arg("plain").c_str());
       if (errCode == stdBlinds::error_code_t::NoError) {
          return request->send_P(200, stdBlinds::MT_HTML, "Ok");
       }
@@ -206,12 +148,54 @@ void BlindsHTTPAPI::serveOps(AsyncWebServerRequest* request, bool post) {
    request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
 }
 
-void BlindsHTTPAPI::updateSettings(AsyncWebServerRequest* request) {
-   ESP_LOGI(TAG);
+void updateSettings(AsyncWebServerRequest* request) {
+   WLOG_I(TAG);
    // TODO:
 }
 
-void BlindsHTTPAPI::getSettings(AsyncWebServerRequest* request) {
-   ESP_LOGI(TAG);
+void getSettings(AsyncWebServerRequest* request) {
+   WLOG_I(TAG);
    // TODO:
+}
+
+void BlindsHTTPAPI::init() {
+   WLOG_I(TAG);
+
+   EventFlags interestingFlags;
+   interestingFlags.pos_ = true;
+   interestingFlags.targetPos_ = true;
+   interestingFlags.accel_ = true;
+
+   State::getInstance()->Attach(this, interestingFlags);
+
+   ws.onEvent(onEvent);
+   server.addHandler(&ws);
+
+   server.on("/", HTTP_GET, serveIndex);
+
+   server.on("/state", HTTP_GET, getState);
+
+   AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/state", updateState);
+   server.addHandler(handler);
+
+   // server.on("/state", HTTP_POST,
+   //    [this](AsyncWebServerRequest* request) {
+   //       this->updateState(request);
+   //    }
+   // );
+
+   // server.on("/settings", HTTP_GET, [this]
+   // (AsyncWebServerRequest* request) {
+   //       this->serveSettings(request, false);
+   //    }
+   // );
+   // server.on("/settings", HTTP_POST,
+   //    [this](AsyncWebServerRequest* request) {
+   //       this->serveSettings(request, true);
+   //    }
+   // );
+
+   server.onNotFound(handleNotFound);
+
+   server.begin();
 }

@@ -1,11 +1,23 @@
 #ifndef DEFINES_H_
 #define DEFINES_H_
 
-#include <map>
-#include "Arduino.h"
+#include <Arduino.h>
 #include "ui_index.h"
+#include <Credentials.h>
+#include <LITTLEFS.h>
+
 // #include "ui_fixtures.h"
-#include "esp32-hal-log.h"
+
+#ifdef WBLINDS_DEBUG
+    #include "esp32-hal-log.h"
+    #define WLOG_I(x...) ESP_LOGI(x)
+    #define WLOG_D(x...) ESP_LOGD(x)
+    #define WLOG_E(x...) ESP_LOGE(x)
+#else
+    #define WLOG_I(x...)
+    #define WLOG_D(x...)
+    #define WLOG_E(x...)
+#endif
 
 #ifndef WBLINDS_DEFINE_GLOBAL_VARS
 # define WBLINDS_GLOBAL extern
@@ -22,12 +34,39 @@
 #define STRINGIFY(X) #X
 #define TOSTRING(X) STRINGIFY(X)
 
-#ifndef DVERSION
-  #define DVERSION "dev"
+#ifndef W_VERSION
+#define W_VERSION "dev"
 #endif
 
 // Global Variable definitions
-WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(DVERSION));
+WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(W_VERSION));
+
+// #define ARDUINOJSON_DECODE_UNICODE 0
+// #include "src/dependencies/json/AsyncJson-v6.h"
+// #include "src/dependencies/json/ArduinoJson-v6.h"
+#include <AsyncJson.h>
+#include <ArduinoJson.h>
+
+
+// ESP32-WROVER features SPI RAM (aka PSRAM) which can be allocated using ps_malloc()
+// we can create custom PSRAMDynamicJsonDocument to use such feature (replacing DynamicJsonDocument)
+// The following is a construct to enable code to compile without it.
+// There is a code thet will still not use PSRAM though:
+//    AsyncJsonResponse is a derived class that implements DynamicJsonDocument (AsyncJson-v6.h)
+// #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
+// struct PSRAM_Allocator {
+//     void* allocate(size_t size) {
+//         if (psramFound()) return ps_malloc(size); // use PSRAM if it exists
+//         else              return malloc(size);    // fallback
+//     }
+//     void deallocate(void* pointer) {
+//         free(pointer);
+//     }
+// };
+// using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
+// #else
+// #define PSRAMDynamicJsonDocument DynamicJsonDocument
+// #endif
 
 // DEFAULTS
 // Pin config defaults
@@ -64,16 +103,6 @@ namespace stdBlinds {
         MissingPos = 4
     };
 
-    enum class datagram_t {
-        Hello = 0,
-        Acknowledge = 1,
-        JoinGroup = 2,
-        LeaveGroup = 3,
-        UpdateState = 4,
-        Ping = 5,
-        Pong = 6
-    };
-
     extern std::map<error_code_t, const char*> ErrorMessage;
 
     extern const char* MT_JSON;
@@ -81,15 +110,15 @@ namespace stdBlinds {
     extern const char* MT_HTML;
 }
 
-extern std::map<stdBlinds::datagram_t, const uint8_t> DatagramSize;
 extern const byte MAGIC_NUMBER[4];
-extern String messageHead;
-extern String messageSub;
 extern bool forceReconnect;
-extern bool wifiLock;
-extern bool otaLock;
+// extern bool wifiLock;
+// extern bool otaLock;
 extern bool doReboot;
-extern byte optionType;
+// extern byte optionType;
+extern String macAddress;
+extern String ipAddress;
+
 
 void setDoReboot(bool v);
 #define DO_REBOOT() setDoReboot(true);

@@ -22,24 +22,13 @@ namespace stdBlinds {
     const char* MT_JPG = "image/jpeg";
 }
 
-std::map<stdBlinds::datagram_t, const uint8_t> DatagramSize = {
-    {stdBlinds::datagram_t::Hello, 128},
-    {stdBlinds::datagram_t::Acknowledge, 128},
-    {stdBlinds::datagram_t::JoinGroup, 128},
-    {stdBlinds::datagram_t::LeaveGroup, 128},
-    {stdBlinds::datagram_t::Ping, 128},
-    {stdBlinds::datagram_t::Pong, 128},
-    {stdBlinds::datagram_t::UpdateState, 128}
-};
-
 bool forceReconnect = false;
-bool wifiLock = false;
-bool otaLock = false;
+// bool wifiLock = false;
+// bool otaLock = false;
 bool doReboot = false;
-// char* deviceName[1024] = "wblinds";
-String messageHead = "";
-String messageSub = "";
-byte optionType;
+// byte optionType;
+String macAddress = "";
+String ipAddress = "";
 
 void setDoReboot(bool v) {
     doReboot = v;

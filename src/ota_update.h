@@ -1,25 +1,18 @@
 #ifndef OTA_UPDATE_H_
 #define OTA_UPDATE_H_
 
-#ifndef OTA_ENABLE
-#define OTA_ENABLE true
-#endif  // OTA_ENABLE
+#ifndef DISABLE_OTA
 
-#if OTA_ENABLE
-
-#include <WiFi.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include "defines.h"
 
 /**
  * @brief Start existing WiFi for OTA updater.
  */
-void OTAwifi() {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin();
-}
+// void OTAwifi() {
+//     WiFi.mode(WIFI_STA);
+//     WiFi.begin();
+// }
 
 /**
  * @brief Initialize OTA updater.
@@ -32,30 +25,30 @@ void OTAinit() {
                 type = "sketch";
             else
                 type = "filesystem";
-            ESP_LOGI("Start updating " + type);
+            WLOG_I("Start updating " + type);
             })
         .onEnd([]() {
-            ESP_LOGI(TAG, "\nEnd");
+            WLOG_I(TAG, "\nEnd");
         })
         .onProgress([](unsigned int progress, unsigned int total) {
-            ESP_LOGI(TAG, "Progress: %u%%\r", (progress / (total / 100)));
+            WLOG_I(TAG, "Progress: %u%%\r", (progress / (total / 100)));
         })
         .onError([](ota_error_t error) {
-            ESP_LOGE(TAG, "Error[%u]: ", error);
-            if (error == OTA_AUTH_ERROR) ESP_LOGE(TAG, "Auth Failed");
-            else if (error == OTA_BEGIN_ERROR) ESP_LOGE(TAG, "Begin Failed");
-            else if (error == OTA_CONNECT_ERROR) ESP_LOGE(TAG, "Connect Failed");
-            else if (error == OTA_RECEIVE_ERROR) ESP_LOGE(TAG, "Receive Failed");
-            else if (error == OTA_END_ERROR) ESP_LOGE(TAG, "End Failed");
+            WLOG_E(TAG, "Error[%u]: ", error);
+            if (error == OTA_AUTH_ERROR) WLOG_E(TAG, "Auth Failed");
+            else if (error == OTA_BEGIN_ERROR) WLOG_E(TAG, "Begin Failed");
+            else if (error == OTA_CONNECT_ERROR) WLOG_E(TAG, "Connect Failed");
+            else if (error == OTA_RECEIVE_ERROR) WLOG_E(TAG, "Receive Failed");
+            else if (error == OTA_END_ERROR) WLOG_E(TAG, "End Failed");
         });
 
         ArduinoOTA.begin();
         if (WiFi.waitForConnectResult() == WL_CONNECTED) {
             auto ip = WiFi.localIP();
-            ESP_LOGI(TAG, "IP address: %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+            WLOG_I(TAG, "IP address: %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
         }
         else {
-            ESP_LOGE(TAG, "Wifi Connection Failed.");
+            WLOG_E(TAG, "Wifi Connection Failed.");
         }
 }
 
@@ -66,10 +59,6 @@ void OTAloopHandler() {
     ArduinoOTA.handle();
 }
 
-#else   // OTA_ENABLE
-void OTAwifi() {}
-void OTAinit() {}
-void OTAloopHandler() {}
-#endif  // OTA_ENABLE
+#endif // DISABLE_OTA
 
 #endif // OTA_UPDATE_H_

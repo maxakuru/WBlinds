@@ -61,13 +61,14 @@
         "list": "cpp",
         "iostream": "cpp",
         "regex": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "map": "cpp"
     },
     "search.exclude": {
         "**/node_modules": true,
         "**/bower_components": true,
         "**/*.code-search": true,
-        "**/.pio": true,
+        "**/.pio": false,
         "**/.vscode": true
     },
     "CppHelper.HeaderGuardPattern": "{FILE}_H_",

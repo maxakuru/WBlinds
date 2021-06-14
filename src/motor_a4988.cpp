@@ -1,7 +1,9 @@
+#ifdef STEPPER_A4988
+
 #include "motor_a4988.h"
 
 MotorA4988::MotorA4988() {
-  ESP_LOGI(TAG);
+  WLOG_I(TAG);
 
   isInit_ = false;
   auto state = State::getInstance();
@@ -10,12 +12,8 @@ MotorA4988::MotorA4988() {
   this->cordDiameter_mm_ = state->getCordDiameter();
   this->cordLength_mm_ = state->getCordLength();
   this->stepsPerRev_ = state->getStepsPerRev();
-  ESP_LOGI(TAG, " axisDiameter_mm_, cordDiameter_mm_, cordLength_mm_: %i , %f , %i :", state->getAxisDiameter(), state->getCordDiameter(), state->getCordLength());
-
-  ESP_LOGI(TAG, " axisDiameter_mm_, cordDiameter_mm_, cordLength_mm_: %i , %f , %i :", axisDiameter_mm_, cordDiameter_mm_, cordLength_mm_);
   this->maxTurns_ = calculateMaxTurns((double)axisDiameter_mm_, cordDiameter_mm_, (double)cordLength_mm_);
   setResolution(state->getResolution());
-  ESP_LOGI(TAG, "max turns, position : %i , %i", maxTurns_, maxPosition_);
 
   pinMode(state->getMs1Pin(), OUTPUT);
   pinMode(state->getMs2Pin(), OUTPUT);
@@ -44,13 +42,13 @@ void MotorA4988::handleEvent(const StateEvent& event) {
     auto cPos = state->getPosition();
     auto pct = stepsToPercent(this->getCurrentPosition(), this->getMaximumPosition());
     if (cPos != pct) {
-      ESP_LOGI(TAG, "set current pos: %i", pct);
+      WLOG_I(TAG, "set current pos: %i", pct);
       state->setPosition(this, pct);
     }
     return;
   }
   if (event.flags_.targetPos_) {
-    ESP_LOGI(TAG, "move to target pos: %i", tPos);
+    WLOG_I(TAG, "move to target pos: %i", tPos);
     this->moveToPercent(tPos);
   }
 }
@@ -99,7 +97,7 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
  * @brief Initialize the motor.
  */
 void MotorA4988::init() {
-  ESP_LOGI(TAG);
+  WLOG_I(TAG);
 
   this->engine_ = FastAccelStepperEngine();
   engine_.init();
@@ -168,11 +166,11 @@ void MotorA4988::setSleep(const bool shouldSleep) {
     if (this->stepper_) {
       this->stepper_->stopMove();
     }
-    ESP_LOGI(TAG, "SLEEPING");
+    WLOG_I(TAG, "SLEEPING");
     digitalWrite(slp, LOW);
   }
   else {
-    ESP_LOGI(TAG, "WAKING");
+    WLOG_I(TAG, "WAKING");
     digitalWrite(slp, HIGH);
     stepper_->setCurrentPosition(state->getPosition());
     delay(1); // let it reach power
@@ -203,7 +201,7 @@ bool MotorA4988::isRunning() {
  * @return int8_t
  */
 int8_t MotorA4988::runUp() {
-  ESP_LOGI(TAG);
+  WLOG_I(TAG);
   return stepper_->runForward();
 }
 
@@ -213,7 +211,7 @@ int8_t MotorA4988::runUp() {
  * @return int8_t
  */
 int8_t MotorA4988::runDown() {
-  ESP_LOGI(TAG);
+  WLOG_I(TAG);
   return stepper_->runBackward();
 }
 
@@ -226,12 +224,12 @@ void MotorA4988::invertDirection() {
  * @brief Stop the motor
  */
 void MotorA4988::stop(bool immediate = true) {
-  ESP_LOGI(TAG);
+  WLOG_I(TAG);
   if (!immediate) {
     return stepper_->stopMove();
   }
 
-  ESP_LOGI(TAG, "stop immediate");
+  WLOG_I(TAG, "immediate");
   stepper_->forceStopAndNewPosition(stepper_->getCurrentPosition());
 }
 
@@ -248,10 +246,10 @@ int8_t MotorA4988::moveToPercent(uint8_t pct) {
     return -1;
   }
 
-  pct = max(0, min(pct, 100));
+  pct = max(0, min((int)pct, 100));
   int32_t pos = percentToSteps((double)pct, (double)this->maxPosition_);
 
-  ESP_LOGI(TAG, "moveToPercent: %i", pos);
+  WLOG_I(TAG, "moveToPercent: %i", pos);
   return moveTo(pos);
 }
 
@@ -265,7 +263,7 @@ int8_t MotorA4988::moveTo(int32_t pos) {
     return -1;
   }
 
-  ESP_LOGI(TAG, "moveTo: %i", pos);
+  WLOG_I(TAG, "moveTo: %i", pos);
   // move, event handler will update actual position on tick
   return stepper_->moveTo(pos);
 }
@@ -301,3 +299,5 @@ void MotorA4988::setMaximumPosition_(stdBlinds::resolution_t res) {
   uint32_t nSteps = maxTurns_ * stepsPerRev_ * (uint8_t)res;
   setMaximumPosition(nSteps);
 }
+
+#endif // STEPPER_A4988

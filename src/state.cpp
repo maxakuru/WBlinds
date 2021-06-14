@@ -1,16 +1,28 @@
 #include "state.h"
-#include <FS.h>
-#include <ArduinoJson.h>
 
 State* State::instance = 0;
-DynamicJsonDocument stateDoc(1024);
-DynamicJsonDocument settingsDoc(1024);
+DynamicJsonDocument stateDoc(512);
+DynamicJsonDocument settingsDoc(512);
 
 // TODO: define real sizes
-char deviceName[256] = "WBlinds";
-char mDnsName[256] = "WBlinds";
-char mqttHost[256] = "1.2.3.4";
-char mqttTopic[256] = "WBlinds";
+char deviceName[64] = "WBlinds";
+char mDnsName[64] = "WBlinds";
+char mqttTopic[128] = "WBlinds";
+#ifdef MQTT_HOST
+char mqttHost[128] = MQTT_HOST;
+#else
+char mqttHost[128] = "1.2.3.4";
+#endif
+#ifdef MQTT_USER
+char mqttUser[41] = MQTT_USER;
+#else
+char mqttUser[41] = "user";
+#endif
+#ifdef MQTT_PW
+char mqttPass[41] = MQTT_PW;
+#else
+char mqttPass[41] = "pass";
+#endif
 
 State* State::getInstance() {
     if (!instance)
@@ -31,8 +43,8 @@ void State::Detach(StateObserver* observer) {
     struct ObserverEquals {
         StateObserver* observer_;
         ObserverEquals(StateObserver* observer)
-            : observer_(observer)         {        
-}
+            : observer_(observer) {
+        }
         bool operator()(ObserverItem const& e) const {
             return (e.observer_ == observer_);
         }
@@ -43,7 +55,7 @@ void State::Detach(StateObserver* observer) {
 }
 void State::Notify(StateObserver* that, EventFlags const& flags) {
     StateEvent evt(flags);
-    for (Observers::iterator i = observers_.begin(); i != observers_.end(); ++i)     {
+    for (Observers::iterator i = observers_.begin(); i != observers_.end(); ++i) {
         if (0 != (i->flags_.mask_ & flags.mask_)) {
             i->observer_->handleEvent(evt);
         }
@@ -84,16 +96,16 @@ String State::serializeSettings() {
 }
 
 void State::load() {
-    ESP_LOGI(TAG, "LOAD STATE/SETTINGS");
+    WLOG_I(TAG, "LOAD STATE/SETTINGS");
 
     init_();
 
-    File stateFile = SPIFFS.open("/state.json", "r");
+    File stateFile = LITTLEFS.open("/state.json", "r");
     if (!stateFile) {
         return save();
     }
 
-    File settingsFile = SPIFFS.open("/settings.json", "r");
+    File settingsFile = LITTLEFS.open("/settings.json", "r");
     if (!settingsFile) {
         return saveSettings();
     }
@@ -123,7 +135,7 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
 
     if (obj.containsKey("deviceName")) {
         const char* v = obj["deviceName"];
-        ESP_LOGI(TAG, "loaded name: %s", v);
+        WLOG_I(TAG, "loaded name: %s", v);
         int nameLen = strlen(v) + 1;
         if (nameLen > 256) {
             err = stdBlinds::error_code_t::InvalidJson;
@@ -150,7 +162,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
     EventFlags flags;
     if (obj.containsKey("accel")) {
         uint32_t v = obj["accel"];
-        ESP_LOGI(TAG, "loaded accel: %i", v);
+        WLOG_I(TAG, "loaded accel: %i", v);
         if (data_.accel != v) {
             flags.accel_ = true;
             data_.accel = v;
@@ -158,7 +170,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
     }
     if (obj.containsKey("speed")) {
         int32_t v = obj["speed"];
-        ESP_LOGI(TAG, "loaded speed: %i", v);
+        WLOG_I(TAG, "loaded speed: %i", v);
         if (data_.speed != v) {
             flags.speed_ = true;
             data_.speed = v;
@@ -166,7 +178,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
     }
     if (obj.containsKey("pos")) {
         int32_t v = obj["pos"];
-        ESP_LOGI(TAG, "loaded pos: %i", v);
+        WLOG_I(TAG, "loaded pos: %i", v);
         if (data_.pos != v) {
             flags.pos_ = true;
             data_.pos = v;
@@ -174,7 +186,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
     }
     if (obj.containsKey("tPos")) {
         int32_t v = obj["tPos"];
-        ESP_LOGI(TAG, "loaded tPos: %i", v);
+        WLOG_I(TAG, "loaded tPos: %i", v);
         if (data_.targetPos != v) {
             flags.targetPos_ = true;
             data_.targetPos = v;
@@ -187,7 +199,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
     toNotify.speed_ = true;
     toNotify.accel_ = true;
 
-    ESP_LOGI(TAG, "Should notify? (flags.mask_ & toNotify.mask_): %i", (flags.mask_ & toNotify.mask_));
+    WLOG_I(TAG, "Should notify? (flags.mask_ & toNotify.mask_): %i", (flags.mask_ & toNotify.mask_));
 
     if (makesDirty && 0 != (flags.mask_ & toNotify.mask_)) {
         updateDirty_(true);
@@ -198,7 +210,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
 }
 
 stdBlinds::error_code_t State::loadFromObject(StateObserver* that, JsonObject& jsonObj) {
-    ESP_LOGI(TAG);
+    WLOG_I(TAG);
     return setFieldsFromJSON_(that, jsonObj, true);
 }
 
@@ -213,29 +225,29 @@ stdBlinds::error_code_t State::loadFromJSONString(StateObserver* that, String js
 }
 
 void State::save() {
-    ESP_LOGI(TAG, "SAVE STATE");
+    WLOG_I(TAG, "SAVE STATE");
     // TODO: sanitize
     stateDoc["accel"] = data_.accel;
     stateDoc["pos"] = data_.pos;
     stateDoc["speed"] = data_.speed;
     // TODO:? save target pos
 
-    File stateFile = SPIFFS.open("/state.json", "w");
+    File stateFile = LITTLEFS.open("/state.json", "w");
     serializeJson(stateDoc, stateFile);
     isDirty_ = false;
 }
 
 void State::saveSettings() {
     settingsDoc["deviceName"] = settingsGeneral_.deviceName;
-    File settingsFile = SPIFFS.open("/settings.json", "w");
+    File settingsFile = LITTLEFS.open("/settings.json", "w");
     serializeJson(settingsDoc, settingsFile);
 }
 
 void State::init_() {
-    ESP_LOGI(TAG);
+    WLOG_I(TAG);
     if (isInit_) return;
-    if (!SPIFFS.begin(true)) {
-        ESP_LOGE(TAG, "Failed to mount file system");
+    if (!LITTLEFS.begin(true)) {
+        WLOG_E(TAG, "Failed to mount file system");
         return;
     }
     isInit_ = true;
@@ -270,6 +282,26 @@ char* State::getDeviceName() {
 char* State::getmDnsName() {
     return settingsGeneral_.mDnsName;
 }
+
+bool State::getMqttEnabled() {
+    return settingsMQTT_.enabled;
+}
+char* State::getMqttHost() {
+    return settingsMQTT_.host;
+}
+uint16_t State::getMqttPort() {
+    return settingsMQTT_.port;
+}
+char* State::getMqttTopic() {
+    return settingsMQTT_.topic;
+}
+char* State::getMqttUser() {
+    return settingsMQTT_.user;
+}
+char* State::getMqttPass() {
+    return settingsMQTT_.password;
+}
+
 uint8_t State::getStepPin() {
     return settingsHardware_.pinStep;
 }
@@ -315,7 +347,6 @@ stdBlinds::resolution_t State::getResolution() {
 
 // Setters
 void State::setPosition(StateObserver* that, int32_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(data_.pos != v);
     data_.pos = v;
 
@@ -324,97 +355,104 @@ void State::setPosition(StateObserver* that, int32_t v) {
     Notify(that, flags);
 }
 void State::setTargetPosition(int32_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(data_.targetPos != v);
     data_.targetPos = v;
 }
 void State::setSpeed(uint32_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(data_.speed != v);
     data_.speed = v;
 }
 void State::setAccel(uint32_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(data_.accel != v);
     data_.accel = v;
 }
 void State::setDeviceName(char* v) {
-    ESP_LOGI(TAG, "set: %s", v);
     updateDirty_(strcmp(settingsGeneral_.deviceName, v) != 0);
     settingsGeneral_.deviceName = v;
 }
 void State::setmDnsName(char* v) {
-    ESP_LOGI(TAG, "set: %s", v);
     updateDirty_(strcmp(settingsGeneral_.mDnsName, v) != 0);
     settingsGeneral_.mDnsName = v;
 }
+
+void State::setMqttEnabled(bool v) {
+    updateDirty_(settingsMQTT_.enabled != v);
+    settingsMQTT_.enabled = v;
+}
+void State::setMqttHost(char* v) {
+    updateDirty_(strcmp(settingsMQTT_.host, v) != 0);
+    settingsMQTT_.host = v;
+}
+void State::setMqttPort(uint16_t v) {
+    updateDirty_(settingsMQTT_.port != v);
+    settingsMQTT_.port = v;
+}
+void State::setMqttTopic(char* v) {
+    updateDirty_(strcmp(settingsMQTT_.topic, v) != 0);
+    settingsMQTT_.topic = v;
+}
+void State::setMqttUser(char* v) {
+    updateDirty_(strcmp(settingsMQTT_.user, v) != 0);
+    settingsMQTT_.user = v;
+}
+void State::setMqttPass(char* v) {
+    updateDirty_(strcmp(settingsMQTT_.password, v) != 0);
+    settingsMQTT_.password = v;
+}
+
 void State::setStepPin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinStep != v);
     settingsHardware_.pinStep = v;
 }
 void State::setDirectionPin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinDir != v);
     settingsHardware_.pinDir = v;
 }
 void State::setEnablePin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinEn != v);
     settingsHardware_.pinEn = v;
 }
 void State::setSleepPin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinSleep != v);
     settingsHardware_.pinSleep = v;
 }
 void State::setResetPin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinReset != v);
     settingsHardware_.pinReset = v;
 }
 void State::setMs1Pin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinMs1 != v);
     settingsHardware_.pinMs1 = v;
 }
 void State::setMs2Pin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinMs2 != v);
     settingsHardware_.pinMs2 = v;
 }
 void State::setMs3Pin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinMs3 != v);
     settingsHardware_.pinMs3 = v;
 }
 void State::setHomeSwitchPin(uint8_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.pinHomeSw != v);
     settingsHardware_.pinHomeSw = v;
 }
 void State::setCordLength(uint32_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.cordLength != v);
     settingsHardware_.cordLength = v;
 }
 void State::setCordDiameter(double v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.cordDiameter != v);
     settingsHardware_.cordDiameter = v;
 }
 void State::setAxisDiameter(uint32_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.axisDiameter != v);
     settingsHardware_.axisDiameter = v;
 }
 void State::setStepsPerRev(uint16_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.stepsPerRev != v);
     settingsHardware_.stepsPerRev = v;
 }
 void State::setResolution(stdBlinds::resolution_t v) {
-    ESP_LOGI(TAG, "set: %i", v);
     updateDirty_(settingsHardware_.resolution != v);
     settingsHardware_.resolution = v;
 }

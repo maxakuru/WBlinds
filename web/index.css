@@ -176,7 +176,7 @@ li.s {
 	background-size: cover;
 	opacity: 1;
 	transition: opacity 2s;
-    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#58248a 0,#26588c, #28125d);
+    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#1d0143 0,#293b7c, #300a52);
 }
 
 #app {

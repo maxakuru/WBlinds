@@ -1,7 +1,6 @@
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
-#include <Arduino.h>
 #include "defines.h"
 #include "state.h"
 

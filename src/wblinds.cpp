@@ -1,42 +1,19 @@
 #include "wblinds.h"
-#include <Arduino.h>
+#include "state.h"
 #include <WiFi.h>
 #include "api_http.h"
-#include <Credentials.h>
 
 #ifndef DISABLE_OTA
 #include "ota_update.h"
 #endif
-#ifndef DISABLE_MQTT
-#include <PubSubClient.h>
-#include "api_mqtt.h"
-#include <WiFiClient.h>
-#endif
-#ifndef DISABLE_UDP_SYNC
-#include "udp_notifier.h"
-#endif
-#ifndef DISABLE_HOMEKIT
-ESP_LOGI(TAG, "include homekit");
-#include "homekit.h"
-#endif
 
-// Only A4988 supported right now
-#ifndef STEPPER_A4988
-#define STEPPER_A4988
-#endif
-
-#ifdef STEPPER_A4988
-#include "motor_a4988.h"
-#endif
 WBlinds* WBlinds::instance = 0;
 
 // ====== Optional =======
 // =======================
 // MQTT
 #ifndef DISABLE_MQTT
-WiFiClient client;
-PubSubClient mqttClient(client);
-BlindsMQTTAPI mqttAPI(&mqttClient, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PW, MQTT_NAME);
+BlindsMQTTAPI mqttAPI;
 #endif
 
 // UDP
@@ -79,10 +56,10 @@ uint32_t lastHeap = 0;
 
 // State
 State* state;
+EventFlags tickEv;
 
 // HTTP
-const uint8_t httpPort = 80;
-BlindsHTTPAPI httpAPI(httpPort);
+BlindsHTTPAPI httpAPI;
 
 #ifndef DISABLE_HOME_SWITCH
 int homeSwitchState = LOW;
@@ -111,6 +88,7 @@ void WBlinds::setup() {
   Serial.begin(115200);
 
   state = State::getInstance();
+  tickEv.tick_ = true;
 
 #ifndef DISABLE_HOME_SWITCH
   int hp = state->getHomeSwitchPin();
@@ -123,13 +101,16 @@ void WBlinds::setup() {
   WiFi.begin(WIFI_SSID, WIFI_PW);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    ESP_LOGI(TAG, "Connecting to WiFi..");
+    WLOG_I(TAG, "Connecting to WiFi..");
   }
-  auto ip = WiFi.localIP();
-  ESP_LOGI(TAG, "Connected to the WiFi network, IP: %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+  ipAddress = WiFi.localIP().toString();
+  macAddress = WiFi.macAddress();
+  WLOG_I(TAG, "Connected to the WiFi network, IP: %s", ipAddress);
 
+#ifdef STEPPER_A4988
   motor = new MotorA4988();
   motor->init();
+#endif
 
 #ifndef DISABLE_UDP_SYNC
   udpNotifier = new UDPNotifier(*state);
@@ -158,15 +139,8 @@ void WBlinds::loop() {
     reset();
   }
 
-  // TODO: switch to asyncmqtt
-#ifndef DISABLE_MQTT
-  mqttAPI.loop();
-#endif
-
   if ((millis() - TICK_INTERVAL) > _lastTick) {
     _lastTick = millis();
-    EventFlags tickEv;
-    tickEv.tick_ = true;
     state->Notify(nullptr, tickEv);
   }
 
@@ -184,7 +158,7 @@ void WBlinds::loop() {
   }
 #endif
 
-  if (millis() - _lastHeapCheck > 5000) {
+  if ((millis() - 5000) > _lastHeapCheck) {
     uint32_t heap = ESP.getFreeHeap();
     if (heap < 9000 && lastHeap < 9000) {
       forceReconnect = true;
@@ -195,12 +169,12 @@ void WBlinds::loop() {
 }
 
 void WBlinds::reset() {
-  ESP_LOGI(TAG, "reset...");
+  WLOG_I(TAG, "reset...");
   // TODO: close server, websockets, mqtt, disable motors
   if (state != nullptr)
     state->save();
 
-#ifndef DISABLE_HOMEKIT
+#ifdef ENABLE_HOMEKIT
   homekit->~Homekit();
 #endif
 
@@ -209,7 +183,7 @@ void WBlinds::reset() {
 
 void WBlinds::restore() {
   // TODO: close server, websockets, mqtt, disable motors
-#ifndef DISABLE_HOMEKIT
+#ifdef ENABLE_HOMEKIT
   homekit->resetToFactory();
 #endif
 

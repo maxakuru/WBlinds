@@ -1,3 +1,5 @@
+#ifndef DISABLE_HOMEKIT
+
 #include "homekit.h"
 
 hap_acc_t* accessory;
@@ -16,7 +18,7 @@ const int kPosStateStopped = 2; // ”Stopped” (STOP, target == pos)
  * @return int
  */
 static int identify(hap_acc_t* ha) {
-	ESP_LOGI(TAG, "Accessory identified");
+	WLOG_I(TAG, "Accessory identified");
 	return HAP_SUCCESS;
 }
 
@@ -31,44 +33,45 @@ static int identify(hap_acc_t* ha) {
  */
 static int read_cb(hap_char_t* hc, hap_status_t* status_code, void* serv_priv, void* read_priv) {
 	if (hap_req_get_ctrl_id(read_priv)) {
-		ESP_LOGI(TAG, "Received read from %s", hap_req_get_ctrl_id(read_priv));
+		WLOG_D(TAG, "Received read from %s", hap_req_get_ctrl_id(read_priv));
 	}
 	auto state = State::getInstance();
 	auto typeName = hap_char_get_type_uuid(hc);
-	ESP_LOGI(TAG, "READ - UUID: %s", typeName);
+	WLOG_I(TAG, "READ - UUID: %s", typeName);
 	// HAP_CHAR_UUID_CURRENT_POSITION 		6D
 	// HAP_CHAR_UUID_TARGET_POSITION 		7C
 	// HAP_CHAR_UUID_POSITION_STATE 		72
 	// HAP_CHAR_UUID_OBSTRUCTION_DETECTED 	24
 	// HAP_CHAR_UUID_NAME					23
 	if (!strcmp(typeName, HAP_CHAR_UUID_CURRENT_POSITION)) {
-		ESP_LOGI(TAG, "READ current position");
+		WLOG_I(TAG, "READ current position");
 
 		const hap_val_t* cur_val = hap_char_get_val(hc);
 		// NOTE: WBlinds uses 0 as fully open, 100 as fully closed
 		// Homekit uses the opposite, so...
 		auto pos = 100 - state->getPosition();
 		if (cur_val->i != pos) {
+			WLOG_D(TAG, "cPos: %i", pos);
 			hap_val_t new_val;
 			new_val.i = pos;
-			ESP_LOGI(TAG, "new current pos %i", pos);
 			hap_char_update_val(hc, &new_val);
 		}
 	}
 	else if (!strcmp(typeName, HAP_CHAR_UUID_TARGET_POSITION)) {
-		ESP_LOGI(TAG, "READ target position");
+		WLOG_I(TAG, "READ target position");
 
 		const hap_val_t* cur_val = hap_char_get_val(hc);
 		auto pos = 100 - state->getTargetPosition();
 		if (cur_val->i != pos) {
+			WLOG_D(TAG, "tPos: %i", pos);
+
 			hap_val_t new_val;
 			new_val.i = pos;
-			ESP_LOGI(TAG, "new target pos %i", pos);
 			hap_char_update_val(hc, &new_val);
 		}
 	}
 	else if (!strcmp(typeName, HAP_CHAR_UUID_POSITION_STATE)) {
-		ESP_LOGI(TAG, "READ position state");
+		WLOG_I(TAG, "READ position state");
 
 		// TODO: whether it's moving, and up or down
 		const hap_val_t* cur_val = hap_char_get_val(hc);
@@ -76,19 +79,20 @@ static int read_cb(hap_char_t* hc, hap_status_t* status_code, void* serv_priv, v
 		auto tp = state->getTargetPosition();
 		int newPosState = p == tp ? kPosStateStopped : p > tp ? kPosStateMin : kPosStateMax;
 		if (cur_val->i != newPosState) {
+			WLOG_D(TAG, "pos state: %i", newPosState);
+
 			hap_val_t new_val;
 			new_val.i = newPosState;
-			ESP_LOGI(TAG, "new posState %i", newPosState);
 			hap_char_update_val(hc, &new_val);
 		}
 	}
 	else if (!strcmp(typeName, HAP_CHAR_UUID_OBSTRUCTION_DETECTED)) {
-		ESP_LOGI(TAG, "READ obstruction detected");
+		WLOG_I(TAG, "READ obstruction");
 		*status_code = HAP_STATUS_RES_ABSENT;
 		return HAP_FAIL;
 	}
 	else if (!strcmp(typeName, HAP_CHAR_UUID_NAME)) {
-		ESP_LOGI(TAG, "READ name");
+		WLOG_I(TAG, "READ name");
 
 	}
 	else {
@@ -105,10 +109,9 @@ static int read_cb(hap_char_t* hc, hap_status_t* status_code, void* serv_priv, v
  */
 static int write_cb(hap_write_data_t write_data[], int count, void* serv_priv, void* write_priv) {
 	if (hap_req_get_ctrl_id(write_priv)) {
-		ESP_LOGI(TAG, "Received write from %s", hap_req_get_ctrl_id(write_priv));
+		WLOG_D(TAG, "Received write from %s", hap_req_get_ctrl_id(write_priv));
 	}
 
-	ESP_LOGI(TAG, "Blinds write called with %d chars", count);
 	auto state = State::getInstance();
 	EventFlags toNotify;
 
@@ -117,14 +120,14 @@ static int write_cb(hap_write_data_t write_data[], int count, void* serv_priv, v
 	for (i = 0; i < count; i++) {
 		write = &write_data[i];
 		auto typeName = hap_char_get_type_uuid(write->hc);
-		ESP_LOGI(TAG, "WRITE - UUID: %s", typeName);
+		WLOG_D(TAG, "WRITE - UUID: %s", typeName);
 		// HAP_CHAR_UUID_CURRENT_POSITION 		6D
 		// HAP_CHAR_UUID_TARGET_POSITION 		7C
 		// HAP_CHAR_UUID_POSITION_STATE 		72
 		// HAP_CHAR_UUID_OBSTRUCTION_DETECTED 	24
 		// HAP_CHAR_UUID_NAME					23
 		if (!strcmp(typeName, HAP_CHAR_UUID_TARGET_POSITION)) {
-			ESP_LOGI(TAG, "Handling write to targetPos: %i", write->val.i);
+			WLOG_I(TAG, "WRITE - targetPos: %i", write->val.i);
 
 			toNotify.targetPos_ = true;
 			state->setTargetPosition(100 - write->val.i);
@@ -160,7 +163,7 @@ err:
 }
 
 void Homekit::init() {
-	ESP_LOGI(TAG);
+	WLOG_I(TAG);
 
 	/**
 	 * Configure HomeKit core to make the Accessory name (and thus the WAC SSID) unique,
@@ -179,14 +182,18 @@ void Homekit::init() {
 	 * the mandatory services internally
 	 */
 	auto state = State::getInstance();
+
+	WLOG_I(TAG, "state->getDeviceName(): %s", state->getDeviceName());
+	WLOG_I(TAG, "VERSION: %s", VERSION);
+
 	hap_acc_cfg_t cfg = {
 		.name = state->getDeviceName(),
 		.model = state->getDeviceName(),
 		.manufacturer = state->getDeviceName(),
 		.serial_num = const_cast<char*>("001122334455"),
-		.fw_rev = const_cast<char*>(VERSION),
+		.fw_rev = VERSION,
 		.hw_rev = NULL,
-		.pv = const_cast<char*>(VERSION),
+		.pv = VERSION,
 		.cid = HAP_CID_WINDOW_COVERING,
 		.identify_routine = identify,
 	};
@@ -216,7 +223,7 @@ void Homekit::init() {
 	hap_add_accessory(accessory);
 
 	/* Query the controller count (just for information) */
-	ESP_LOGI(TAG, "Accessory is paired with %d controllers",
+	WLOG_D(TAG, "Accessory is paired with %d controllers",
 		hap_get_paired_controller_count());
 
 	/* Unique Setup code of the format xxx-xx-xxx. Default: 111-22-333 */
@@ -226,10 +233,13 @@ void Homekit::init() {
 
 	/* After all the initializations are done, start the HAP core */
 	hap_start();
+
+	// ...as needed
+	// resetToFactory();
 }
 
 void Homekit::handleEvent(const StateEvent& event) {
-	ESP_LOGI(TAG);
+	WLOG_I(TAG);
 
 	// TODO: add more flags, custom handlers for custom characteristics
 	EventFlags interestingEvents;
@@ -243,20 +253,22 @@ void Homekit::handleEvent(const StateEvent& event) {
 	int p = state_.getPosition();
 	int tp = state_.getTargetPosition();
 	if (event.flags_.pos_) {
-		ESP_LOGI(TAG, "got new pos message: %i", p);
 		hap_val_t newPos;
 		newPos.i = 100 - p;
+		WLOG_I(TAG, "handle event cpos: %i", newPos.i);
+
 		hap_char_update_val(charPos_, &newPos);
 	}
 	if (event.flags_.targetPos_) {
-		ESP_LOGI(TAG, "got new targetPos message: %i", tp);
 		hap_val_t newTargPos;
 		newTargPos.i = 100 - tp;
+		WLOG_I(TAG, "handle event tpos: %i", newTargPos.i);
+
 		hap_char_update_val(charTargPos_, &newTargPos);
 	}
 
 	int newPosState = p == tp ? kPosStateStopped : p > tp ? kPosStateMin : kPosStateMax;
-	ESP_LOGI(TAG, "new posState: %i", newPosState);
+	WLOG_I(TAG, "newPosState: %i", newPosState);
 	hap_val_t nS;
 	nS.i = newPosState;
 	hap_char_update_val(charPosState_, &nS);
@@ -264,7 +276,7 @@ void Homekit::handleEvent(const StateEvent& event) {
 
 void Homekit::resetToFactory() {
 	hap_reset_to_factory();
-	DO_REBOOT();
+	// DO_REBOOT();
 }
 
 void Homekit::resetPairings() {
@@ -276,3 +288,5 @@ void Homekit::resetNetwork() {
 	hap_reset_network();
 	DO_REBOOT();
 }
+
+#endif // DISABLE_HOMEKIT

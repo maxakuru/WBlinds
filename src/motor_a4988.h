@@ -1,7 +1,9 @@
 #ifndef MOTOR_A4988_H_
 #define MOTOR_A4988_H_
 
-#include "FastAccelStepper.h"
+#ifdef STEPPER_A4988
+
+#include <FastAccelStepper.h>
 #include "motor.h"
 
 typedef struct {
@@ -54,5 +56,8 @@ private:
   uint32_t maxPosition_;
   void setMaximumPosition_(stdBlinds::resolution_t res);
 };
+
+
+#endif // STEPPER_A4988
 
 #endif  // MOTOR_A4988_H_

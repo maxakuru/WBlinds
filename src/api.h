@@ -1,8 +1,6 @@
 #ifndef API_H_
 #define API_H_
 
-#include "motor.h"
-#include <ArduinoJson.h>
 #include "defines.h"
 #include "state.h"
 
@@ -11,8 +9,7 @@ class BlindsAPI: virtual protected StateObserver {
 public:
     virtual ~BlindsAPI() {};
     virtual void init() = 0;
-protected:
-    stdBlinds::error_code_t doOperation(const char* op, byte* jsonData, uint32_t length) {
+    static stdBlinds::error_code_t doOperation(const char* op, byte* jsonData, uint32_t length) {
         if (length < 2) {
             return doOperation(op, nullptr);
         }
@@ -25,7 +22,7 @@ protected:
         }
         return doOperation(op, &jsonDoc);
     }
-    stdBlinds::error_code_t doOperation(const char* jsonStr) {
+    static stdBlinds::error_code_t doOperation(const char* jsonStr) {
         DynamicJsonDocument jsonDoc(1024);
         DeserializationError error = deserializeJson(jsonDoc, jsonStr);
         if (error) {
@@ -37,7 +34,7 @@ protected:
         const char* op = jsonDoc["op"];
         return doOperation(op, &jsonDoc);
     }
-    stdBlinds::error_code_t doOperation(const char* op, DynamicJsonDocument* jsonDoc) {
+    static stdBlinds::error_code_t doOperation(const char* op, DynamicJsonDocument* jsonDoc) {
         EventFlags flags;
         if (strcmp(op, "up") == 0) {
             flags.moveUp_ = true;
