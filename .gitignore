@@ -17,4 +17,5 @@ src/Credentials.h
 
 # temporary
 data/*
+databu/*
 flows.txt

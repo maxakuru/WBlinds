@@ -1,5 +1,3 @@
-#ifdef STEPPER_A4988
-
 #include "motor_a4988.h"
 
 MotorA4988::MotorA4988() {
@@ -36,11 +34,10 @@ MotorA4988::MotorA4988() {
 
 void MotorA4988::handleEvent(const StateEvent& event) {
   auto state = State::getInstance();
-  auto tPos = state->getTargetPosition();
   if (event.flags_.tick_) {
     // convert steps to pct
     auto cPos = state->getPosition();
-    auto pct = stepsToPercent(this->getCurrentPosition(), this->getMaximumPosition());
+    auto pct = this->getCurrentPercent();
     if (cPos != pct) {
       WLOG_I(TAG, "set current pos: %i", pct);
       state->setPosition(this, pct);
@@ -48,6 +45,8 @@ void MotorA4988::handleEvent(const StateEvent& event) {
     return;
   }
   if (event.flags_.targetPos_) {
+    auto tPos = state->getTargetPosition();
+
     WLOG_I(TAG, "move to target pos: %i", tPos);
     this->moveToPercent(tPos);
   }
@@ -75,7 +74,8 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
   stepper_->setAutoEnable(true);
 
   // restore state
-  stepper_->setCurrentPosition(state->getPosition());
+  int steps = percentToSteps(state->getPosition(), stepsPerPct_, maxPosition_);
+  stepper_->setCurrentPosition(steps);
   stepper_->setSpeedInHz(state->getSpeed());
   stepper_->setAcceleration(state->getAccel());
 
@@ -172,8 +172,8 @@ void MotorA4988::setSleep(const bool shouldSleep) {
   else {
     WLOG_I(TAG, "WAKING");
     digitalWrite(slp, HIGH);
-    stepper_->setCurrentPosition(state->getPosition());
-    delay(1); // let it reach power
+    int steps = percentToSteps(state->getPosition(), stepsPerPct_, maxPosition_);
+    stepper_->setCurrentPosition(steps);
   }
 }
 
@@ -239,6 +239,8 @@ void MotorA4988::stop(bool immediate = true) {
  */
 void MotorA4988::setCurrentPositionAsHome() {
   stepper_->forceStopAndNewPosition(0);
+  auto state = State::getInstance();
+  state->setPosition(this, 0);
 }
 
 int8_t MotorA4988::moveToPercent(uint8_t pct) {
@@ -246,10 +248,9 @@ int8_t MotorA4988::moveToPercent(uint8_t pct) {
     return -1;
   }
 
-  pct = max(0, min((int)pct, 100));
-  int32_t pos = percentToSteps((double)pct, (double)this->maxPosition_);
+  int32_t pos = percentToSteps(pct, stepsPerPct_, maxPosition_);
 
-  WLOG_I(TAG, "moveToPercent: %i", pos);
+  WLOG_I(TAG, "steps: %i", pos);
   return moveTo(pos);
 }
 
@@ -269,12 +270,13 @@ int8_t MotorA4988::moveTo(int32_t pos) {
 }
 
 /**
- * @brief Get the current position.
+ * @brief Get the current position in percent.
  *
- * @return int32_t
+ * @return uint8_t
  */
-int32_t MotorA4988::getCurrentPosition() {
-  return stepper_->getCurrentPosition();
+uint8_t MotorA4988::getCurrentPercent() {
+  int pct = stepsToPercent(stepper_->getCurrentPosition(), stepsPerPct_);
+  return pct;
 }
 
 /**
@@ -285,10 +287,11 @@ uint32_t MotorA4988::getMaximumPosition() {
 }
 
 /**
- * @brief Set maximum position.
+ * @brief Set maximum position in steps.
  */
 void MotorA4988::setMaximumPosition(uint32_t pos) {
   this->maxPosition_ = pos;
+  this->stepsPerPct_ = pos / 100;
 }
 
 /**
@@ -299,5 +302,3 @@ void MotorA4988::setMaximumPosition_(stdBlinds::resolution_t res) {
   uint32_t nSteps = maxTurns_ * stepsPerRev_ * (uint8_t)res;
   setMaximumPosition(nSteps);
 }
-
-#endif // STEPPER_A4988

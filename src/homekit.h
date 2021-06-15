@@ -1,8 +1,6 @@
 #ifndef HOMEKIT_H_
 #define HOMEKIT_H_
 
-#ifndef DISABLE_HOMEKIT
-
 #include "defines.h"
 #include "state.h"
 #include <ESP32HomeKit.h>
@@ -37,7 +35,5 @@ private:
     State& state_;
 
 };
-
-#endif // DISABLE_HOMEKIT
 
 #endif // HOMEKIT_H_

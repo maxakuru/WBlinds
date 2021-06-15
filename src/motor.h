@@ -15,35 +15,33 @@ public:
     virtual bool isRunning() = 0;
     virtual bool isEnabled() = 0;
     virtual bool isAsleep() = 0;
+    virtual bool isInit() = 0;
     virtual void invertDirection() = 0;
     virtual void stop(bool immediate) = 0;
     virtual int8_t runUp() = 0;
     virtual int8_t runDown() = 0;
-    virtual int8_t moveTo(int32_t pos) = 0;
-    virtual int8_t moveToPercent(uint8_t pos) = 0;
+    virtual void setCurrentPositionAsHome() = 0;
 
+    // as steps
+    virtual int8_t moveTo(int32_t pos) = 0;
     virtual uint32_t getMaximumPosition() = 0;
     virtual void setMaximumPosition(uint32_t pos) = 0;
 
-    virtual int32_t getCurrentPosition() = 0;
-    virtual void setCurrentPositionAsHome() = 0;
+    // as percent
+    virtual int8_t moveToPercent(uint8_t pos) = 0;
+    virtual uint8_t getCurrentPercent() = 0;
 
-    virtual bool isInit() = 0;
-
-    static uint8_t stepsToPercent(double steps, double maxPosition) {
-        steps = max((double)0, steps);
-        if (steps == 0 || maxPosition == 0) {
-            return steps;
-        }
-        return round((steps / maxPosition) * 100.0);
+    static uint8_t stepsToPercent(uint32_t steps, uint32_t stepsPerPct) {
+        steps = max((uint32_t)0, steps);
+        return min(steps / stepsPerPct, (uint32_t)100);
     }
-    static int32_t percentToSteps(double pct, double maxPosition) {
-        pct = max((double)0, min(pct, 100.0));
-        return round((pct * maxPosition) / 100.0);
+    static int32_t percentToSteps(uint8_t pct, int stepsPerPct, uint32_t maxPosition) {
+        pct = max(0, min((int)pct, 100));
+        return min((pct * stepsPerPct), (int)maxPosition);
     }
 
     /**
-     * @brief Calculate maximum number of turns to fully wrap cord around axis.
+     * @brief Calculate number of turns to fully wrap cord around axle.
      *
      *          Dc - Da + sqrt((Da - Dc)^2 + (4 * Dc * Lc) / pi)
      * Nturns = ------------------------------------------------
@@ -55,11 +53,9 @@ public:
      * @return uint32_t
      */
     static uint32_t calculateMaxTurns(double dAxis, double dCord, double lCord) {
-        ESP_LOGI(TAG, "dAxis, dCord, lCord: %f %f %f", dAxis, dCord, lCord);
-        uint32_t v = (dCord - dAxis + sqrt(pow(dAxis - 1, 2) + ((4.0 * dCord * lCord) / PI))) / (2.0 * dCord);
-        ESP_LOGI(TAG, "max turns: %i", v);
+        uint32_t v = (dCord - dAxis + sqrt((dAxis - 1) * (dAxis - 1) + ((4.0 * dCord * lCord) / PI))) / (2.0 * dCord);
         return v;
-    }    
+    }
 };
 
 #endif  // MOTOR_H_

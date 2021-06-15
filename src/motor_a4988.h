@@ -1,8 +1,6 @@
 #ifndef MOTOR_A4988_H_
 #define MOTOR_A4988_H_
 
-#ifdef STEPPER_A4988
-
 #include <FastAccelStepper.h>
 #include "motor.h"
 
@@ -39,7 +37,9 @@ public:
   bool isAsleep() override;
   void setCurrentPositionAsHome() override;
   bool isRunning() override;
-  int32_t getCurrentPosition() override;
+
+  uint8_t getCurrentPercent() override;
+
   uint32_t getMaximumPosition() override;
   void setMaximumPosition(uint32_t pos) override;
 private:
@@ -52,12 +52,10 @@ private:
   double cordDiameter_mm_;
   uint32_t axisDiameter_mm_;
   uint16_t stepsPerRev_;
+  uint16_t stepsPerPct_;
   uint32_t maxTurns_;
   uint32_t maxPosition_;
   void setMaximumPosition_(stdBlinds::resolution_t res);
 };
-
-
-#endif // STEPPER_A4988
 
 #endif  // MOTOR_A4988_H_

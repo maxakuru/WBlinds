@@ -1,5 +1,3 @@
-#ifndef DISABLE_HOMEKIT
-
 #include "homekit.h"
 
 hap_acc_t* accessory;
@@ -288,5 +286,3 @@ void Homekit::resetNetwork() {
 	hap_reset_network();
 	DO_REBOOT();
 }
-
-#endif // DISABLE_HOMEKIT
