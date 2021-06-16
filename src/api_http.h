@@ -22,7 +22,7 @@ private:
 
    // bool handleFileRead(AsyncWebServerRequest* request, String path);
 
-   // void getState(AsyncWebServerRequest* request, bool fromFile);
+   // void getState(AsyncWebServerRequest* request);
    // void updateState(AsyncWebServerRequest* request, JsonVariant& json);
 
    // void serveOps(AsyncWebServerRequest* request, bool post);

@@ -59,6 +59,13 @@ public:
     };
 };
 
+enum class setting_t {
+        kAll = 0,
+        kGeneral = 1,
+        kHardware = 2,
+        kMqtt = 3,
+    };
+
 struct StateData {
     int32_t pos;
     int32_t targetPos;
@@ -70,6 +77,7 @@ struct SettingsDataGeneral {
     char* deviceName;
     char* mDnsName;
     bool emitSyncData;
+    int etag;
 };
 
 struct SettingsDataHardware {
@@ -87,6 +95,7 @@ struct SettingsDataHardware {
     uint32_t axisDiameter;
     uint16_t stepsPerRev;
     stdBlinds::resolution_t resolution;
+    int etag;
 };
 
 struct SettingsDataMQTT {
@@ -96,6 +105,7 @@ struct SettingsDataMQTT {
     char* topic;
     char* user;
     char* password;
+    int etag;
 };
 
 class StateEvent {
@@ -139,11 +149,10 @@ public:
     static State* instance;
     static State* getInstance();
     bool isDirty();
-    void load();
     void save();
     void saveSettings();
     String serialize();
-    String serializeSettings();
+    String serializeSettings(setting_t settingType);
     stdBlinds::error_code_t loadFromJSONString(StateObserver* that, String jsonStr);
     stdBlinds::error_code_t loadFromObject(StateObserver* that, JsonObject& jsonObj);
 
@@ -153,6 +162,11 @@ public:
     void Notify(StateObserver* that, EventFlags const& flags) override;
 
     // Getters
+    String getHardwareEtag();
+    String getGeneralEtag();
+    String getMqttEtag();
+    String getAllSettingsEtag();
+
     int32_t getPosition();
     int32_t getTargetPosition();
     uint32_t getSpeed();
@@ -219,13 +233,19 @@ private:
     SettingsDataGeneral settingsGeneral_;
     SettingsDataHardware settingsHardware_;
     SettingsDataMQTT settingsMQTT_;
+    bool isInit_;
+    bool isDirty_; // state
+    bool isSettingsDirty_; // settings
 
+    void load_();
     void init_();
     void updateDirty_(bool);
-    void setClean_();
-    bool isInit_;
-    bool isDirty_;
-    bool settingsDirty_;
+    // void updateSettingsDirty_(bool);
+    void updateMqttDirty_(bool);
+    void updateHardwareDirty_(bool);
+    void updateGeneralDirty_(bool);
+    // void updateSettingsEtag_();
+
     stdBlinds::error_code_t setFieldsFromJSON_(StateObserver* that, JsonObject& obj, bool makesDirty);
     stdBlinds::error_code_t setSettingsFromJSON_(StateObserver* that, JsonObject& obj, bool shouldSave);
 
@@ -235,7 +255,7 @@ private:
 
     State() {
         isDirty_ = false;
-        settingsDirty_ = false;
+        isSettingsDirty_ = false;
         isInit_ = false;
         data_ = {
             pos: 0,
@@ -272,7 +292,7 @@ private:
             user : mqttUser,
             password : mqttPass
         };
-        load();
+        load_();
     };
 };
 

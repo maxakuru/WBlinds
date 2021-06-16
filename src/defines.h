@@ -9,14 +9,14 @@
 // #include "ui_fixtures.h"
 
 #ifdef WBLINDS_DEBUG
-    #include "esp32-hal-log.h"
-    #define WLOG_I(x...) ESP_LOGI(x)
-    #define WLOG_D(x...) ESP_LOGD(x)
-    #define WLOG_E(x...) ESP_LOGE(x)
+#include "esp32-hal-log.h"
+#define WLOG_I(x...) ESP_LOGI(x)
+#define WLOG_D(x...) ESP_LOGD(x)
+#define WLOG_E(x...) ESP_LOGE(x)
 #else
-    #define WLOG_I(x...)
-    #define WLOG_D(x...)
-    #define WLOG_E(x...)
+#define WLOG_I(x...)
+#define WLOG_D(x...)
+#define WLOG_E(x...)
 #endif
 
 #ifndef WBLINDS_DEFINE_GLOBAL_VARS

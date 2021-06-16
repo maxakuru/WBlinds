@@ -32,14 +32,14 @@ void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
    ws.textAll(m);
 }
 
-char* errorJson(const char* msg) {
+static char* errorJson(const char* msg) {
    strcpy(errStr, errPrefix);
    strcat(errStr, msg);
    strcat(errStr, errSuffix);
    return errStr;
 };
 
-String getContentType(AsyncWebServerRequest* request, String filename) {
+static String getContentType(AsyncWebServerRequest* request, String filename) {
    if (request->hasArg("download")) return "application/octet-stream";
    else if (filename.endsWith(".htm")) return "text/html";
    else if (filename.endsWith(".html")) return "text/html";
@@ -57,8 +57,9 @@ String getContentType(AsyncWebServerRequest* request, String filename) {
    return "text/plain";
 }
 
-bool handleFileRead(AsyncWebServerRequest* request, String path) {
-   WLOG_I(TAG);
+static bool handleFileRead(AsyncWebServerRequest* request, String path) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+
    if (path.endsWith("/")) path += "index.html";
    String contentType = getContentType(request, path);
    if (LITTLEFS.exists(path)) {
@@ -70,34 +71,38 @@ bool handleFileRead(AsyncWebServerRequest* request, String path) {
 }
 
 
-bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request) {
+static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+
    AsyncWebHeader* header = request->getHeader("If-None-Match");
-   if (header && header->value() == String(VERSION)) {
+   if (header && header->value() == etag) {
       request->send(304);
       return true;
    }
    return false;
 }
 
-void setStaticContentCacheHeaders(AsyncWebServerResponse* response) {
+static void setCacheControlHeaders(AsyncWebServerResponse* response, String etag) {
    response->addHeader(F("Cache-Control"), "no-cache");
-   response->addHeader(F("ETag"), String(VERSION));
+   response->addHeader(F("ETag"), etag);
 }
 
-void serveIndex(AsyncWebServerRequest* request) {
+static void serveIndex(AsyncWebServerRequest* request) {
    if (handleFileRead(request, "/index.html")) return;
 
-   if (handleIfNoneMatchCacheHeader(request)) return;
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, PAGE_index, PAGE_index_L);
 
    response->addHeader(F("Content-Encoding"), "gzip");
-   setStaticContentCacheHeaders(response);
+   setCacheControlHeaders(response, String(VERSION));
 
    request->send(response);
 }
 
-void handleNotFound(AsyncWebServerRequest* request) {
+static void handleNotFound(AsyncWebServerRequest* request) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+
    request->send(404, stdBlinds::MT_HTML);
 }
 
@@ -114,7 +119,9 @@ void handleNotFound(AsyncWebServerRequest* request) {
 //    request->send(response);
 // }
 
-void getState(AsyncWebServerRequest* request) {
+static void getState(AsyncWebServerRequest* request) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+
    bool fromFile = request->hasParam("f");
    if (fromFile) {
       if (!handleFileRead(request, "/state.json")) {
@@ -124,8 +131,9 @@ void getState(AsyncWebServerRequest* request) {
    request->send(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
 }
 
-void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
-   WLOG_I(TAG);
+static void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+
    JsonObject obj = json.as<JsonObject>();
    auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
    if (errCode == stdBlinds::error_code_t::NoError) {
@@ -135,8 +143,8 @@ void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
    return request->send(400, stdBlinds::MT_JSON, err);
 }
 
-void serveOps(AsyncWebServerRequest* request, bool post) {
-   WLOG_I(TAG, "HTTP POST");
+static void serveOps(AsyncWebServerRequest* request, bool post) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
    if (post) {
       auto errCode = BlindsAPI::doOperation(request->arg("plain").c_str());
       if (errCode == stdBlinds::error_code_t::NoError) {
@@ -148,14 +156,59 @@ void serveOps(AsyncWebServerRequest* request, bool post) {
    request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
 }
 
-void updateSettings(AsyncWebServerRequest* request) {
-   WLOG_I(TAG);
-   // TODO:
+static void updateSettings(AsyncWebServerRequest* request, JsonVariant& json) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+   JsonObject obj = json.as<JsonObject>();
+   auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
+   if (errCode == stdBlinds::error_code_t::NoError) {
+      return request->send(204, stdBlinds::MT_HTML);
+   }
+   char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
+   return request->send(400, stdBlinds::MT_JSON, err);
 }
 
-void getSettings(AsyncWebServerRequest* request) {
-   WLOG_I(TAG);
-   // TODO:
+static void getSettings(AsyncWebServerRequest* request) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+   auto state = State::getInstance();
+
+   bool fromFile = request->hasParam("f");
+   if (fromFile) {
+      if (!handleFileRead(request, "/settings.json")) {
+         return request->send(404, stdBlinds::MT_HTML, "Not found");
+      }
+   };
+
+   String data;
+   String etag;
+   AsyncWebServerResponse* response;
+   if (request->hasArg("type")) {
+      auto p = request->getParam("type")->value();
+      if (!strcmp(p.c_str(), "mqtt")) {
+         etag = state->getMqttEtag();
+         if (handleIfNoneMatchCacheHeader(request, etag)) return;
+         data = state->serializeSettings(setting_t::kMqtt);
+      }
+      else if (!strcmp(p.c_str(), "hw")) {
+         etag = state->getHardwareEtag();
+         if (handleIfNoneMatchCacheHeader(request, etag)) return;
+         data = state->serializeSettings(setting_t::kHardware);
+      }
+      else if (!strcmp(p.c_str(), "gen")) {
+         etag = state->getGeneralEtag();
+         if (handleIfNoneMatchCacheHeader(request, etag)) return;
+         data = state->serializeSettings(setting_t::kGeneral);
+      }
+      else {
+         request->send(400, stdBlinds::MT_JSON, errorJson("Invalid type"));
+      }
+   }
+   else {
+      etag = state->getAllSettingsEtag();
+      if (handleIfNoneMatchCacheHeader(request, etag)) return;
+      data = state->serializeSettings(setting_t::kGeneral);
+   }
+   request->beginResponse(200, stdBlinds::MT_JSON, data);
+   setCacheControlHeaders(response, etag);
 }
 
 void BlindsHTTPAPI::init() {
@@ -184,16 +237,9 @@ void BlindsHTTPAPI::init() {
    //    }
    // );
 
-   // server.on("/settings", HTTP_GET, [this]
-   // (AsyncWebServerRequest* request) {
-   //       this->serveSettings(request, false);
-   //    }
-   // );
-   // server.on("/settings", HTTP_POST,
-   //    [this](AsyncWebServerRequest* request) {
-   //       this->serveSettings(request, true);
-   //    }
-   // );
+   server.on("/settings", HTTP_GET, getSettings);
+   AsyncCallbackJsonWebHandler* settingsHandler = new AsyncCallbackJsonWebHandler("/settings", updateSettings);
+   server.addHandler(settingsHandler);
 
    server.onNotFound(handleNotFound);
 

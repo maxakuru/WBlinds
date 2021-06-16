@@ -72,30 +72,60 @@ String State::serialize() {
     return output;
 }
 
-String State::serializeSettings() {
-    settingsDoc["deviceName"] = settingsGeneral_.deviceName;
-    settingsDoc["mdnsName"] = settingsGeneral_.mDnsName;
-
-    settingsDoc["pStep"] = settingsHardware_.pinStep;
-    settingsDoc["pDir"] = settingsHardware_.pinDir;
-    settingsDoc["pEn"] = settingsHardware_.pinEn;
-    settingsDoc["pSleep"] = settingsHardware_.pinSleep;
-    settingsDoc["pReset"] = settingsHardware_.pinReset;
-    settingsDoc["pMs1"] = settingsHardware_.pinMs1;
-    settingsDoc["pMs2"] = settingsHardware_.pinMs2;
-    settingsDoc["pMs3"] = settingsHardware_.pinMs3;
-    settingsDoc["pHome"] = settingsHardware_.pinHomeSw;
-    settingsDoc["cLen"] = settingsHardware_.cordLength;
-    settingsDoc["cDia"] = settingsHardware_.cordDiameter;
-    settingsDoc["axDia"] = settingsHardware_.axisDiameter;
-    settingsDoc["stepsPerRev"] = settingsHardware_.stepsPerRev;
-
+String State::serializeSettings(setting_t settingType) {
+    DynamicJsonDocument doc(512);
     String output;
-    serializeJson(settingsDoc, output);
+
+    if (settingType == setting_t::kAll || settingType == setting_t::kGeneral) {
+        doc["deviceName"] = settingsGeneral_.deviceName;
+        doc["mdnsName"] = settingsGeneral_.mDnsName;
+        doc["emitSync"] = settingsGeneral_.emitSyncData;
+        if (settingType == setting_t::kGeneral) {
+            serializeJson(doc, output);
+            return output;
+        }
+    }
+
+    auto hwObj = doc.createNestedObject("hw");
+    if (settingType == setting_t::kAll || settingType == setting_t::kHardware) {
+        hwObj["pStep"] = settingsHardware_.pinStep;
+        hwObj["pDir"] = settingsHardware_.pinDir;
+        hwObj["pEn"] = settingsHardware_.pinEn;
+        hwObj["pSleep"] = settingsHardware_.pinSleep;
+        hwObj["pReset"] = settingsHardware_.pinReset;
+        hwObj["pMs1"] = settingsHardware_.pinMs1;
+        hwObj["pMs2"] = settingsHardware_.pinMs2;
+        hwObj["pMs3"] = settingsHardware_.pinMs3;
+        hwObj["pHome"] = settingsHardware_.pinHomeSw;
+        hwObj["cLen"] = settingsHardware_.cordLength;
+        hwObj["cDia"] = settingsHardware_.cordDiameter;
+        hwObj["axDia"] = settingsHardware_.axisDiameter;
+        hwObj["stepsPerRev"] = settingsHardware_.stepsPerRev;
+        hwObj["res"] = (int)settingsHardware_.resolution;
+        if (settingType == setting_t::kHardware) {
+            serializeJson(hwObj, output);
+            return output;
+        }
+    }
+
+    auto mqttObj = doc.createNestedObject("mqtt");
+    if (settingType == setting_t::kAll || settingType == setting_t::kMqtt) {
+        mqttObj["enabled"] = settingsMQTT_.enabled;
+        mqttObj["host"] = settingsMQTT_.host;
+        mqttObj["port"] = settingsMQTT_.port;
+        mqttObj["topic"] = settingsMQTT_.topic;
+        mqttObj["user"] = settingsMQTT_.user;
+        if (settingType == setting_t::kMqtt) {
+            serializeJson(mqttObj, output);
+            return output;
+        }
+    }
+
+    serializeJson(doc, output);
     return output;
 }
 
-void State::load() {
+void State::load_() {
     WLOG_I(TAG, "LOAD STATE/SETTINGS");
 
     init_();
@@ -241,6 +271,7 @@ void State::saveSettings() {
     settingsDoc["deviceName"] = settingsGeneral_.deviceName;
     File settingsFile = LITTLEFS.open("/settings.json", "w");
     serializeJson(settingsDoc, settingsFile);
+    isSettingsDirty_ = false;
 }
 
 void State::init_() {
@@ -254,16 +285,46 @@ void State::init_() {
 }
 
 void State::updateDirty_(bool isDirty) {
-    if (!isDirty_) {
+    if (isDirty) {
         isDirty_ = true;
     }
 }
 
-void State::setClean_() {
-    isDirty_ = false;
+void State::updateGeneralDirty_(bool isDirty) {
+    if (isDirty) {
+        isSettingsDirty_ = true;
+        settingsGeneral_.etag += 1;
+    }
+}
+
+void State::updateMqttDirty_(bool isDirty) {
+    if (isDirty) {
+        isSettingsDirty_ = true;
+        settingsMQTT_.etag += 1;
+    }
+}
+
+void State::updateHardwareDirty_(bool isDirty) {
+    if (isDirty) {
+        isSettingsDirty_ = true;
+        settingsHardware_.etag += 1;
+    }
 }
 
 // Getters
+String State::getHardwareEtag() {
+    return String(settingsHardware_.etag);
+}
+String State::getGeneralEtag() {
+    return String(settingsGeneral_.etag);
+}
+String State::getMqttEtag() {
+    return String(settingsMQTT_.etag);
+}
+String State::getAllSettingsEtag() {
+    return getHardwareEtag() + String("-") + getGeneralEtag() + String("-") + getMqttEtag();
+}
+
 int32_t State::getPosition() {
     return data_.pos;
 }
@@ -366,93 +427,94 @@ void State::setAccel(uint32_t v) {
     updateDirty_(data_.accel != v);
     data_.accel = v;
 }
+
 void State::setDeviceName(char* v) {
-    updateDirty_(strcmp(settingsGeneral_.deviceName, v) != 0);
+    updateGeneralDirty_(strcmp(settingsGeneral_.deviceName, v) != 0);
     settingsGeneral_.deviceName = v;
 }
 void State::setmDnsName(char* v) {
-    updateDirty_(strcmp(settingsGeneral_.mDnsName, v) != 0);
+    updateGeneralDirty_(strcmp(settingsGeneral_.mDnsName, v) != 0);
     settingsGeneral_.mDnsName = v;
 }
 
 void State::setMqttEnabled(bool v) {
-    updateDirty_(settingsMQTT_.enabled != v);
+    updateMqttDirty_(settingsMQTT_.enabled != v);
     settingsMQTT_.enabled = v;
 }
 void State::setMqttHost(char* v) {
-    updateDirty_(strcmp(settingsMQTT_.host, v) != 0);
+    updateMqttDirty_(strcmp(settingsMQTT_.host, v) != 0);
     settingsMQTT_.host = v;
 }
 void State::setMqttPort(uint16_t v) {
-    updateDirty_(settingsMQTT_.port != v);
+    updateMqttDirty_(settingsMQTT_.port != v);
     settingsMQTT_.port = v;
 }
 void State::setMqttTopic(char* v) {
-    updateDirty_(strcmp(settingsMQTT_.topic, v) != 0);
+    updateMqttDirty_(strcmp(settingsMQTT_.topic, v) != 0);
     settingsMQTT_.topic = v;
 }
 void State::setMqttUser(char* v) {
-    updateDirty_(strcmp(settingsMQTT_.user, v) != 0);
+    updateMqttDirty_(strcmp(settingsMQTT_.user, v) != 0);
     settingsMQTT_.user = v;
 }
 void State::setMqttPass(char* v) {
-    updateDirty_(strcmp(settingsMQTT_.password, v) != 0);
+    updateMqttDirty_(strcmp(settingsMQTT_.password, v) != 0);
     settingsMQTT_.password = v;
 }
 
 void State::setStepPin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinStep != v);
+    updateHardwareDirty_(settingsHardware_.pinStep != v);
     settingsHardware_.pinStep = v;
 }
 void State::setDirectionPin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinDir != v);
+    updateHardwareDirty_(settingsHardware_.pinDir != v);
     settingsHardware_.pinDir = v;
 }
 void State::setEnablePin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinEn != v);
+    updateHardwareDirty_(settingsHardware_.pinEn != v);
     settingsHardware_.pinEn = v;
 }
 void State::setSleepPin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinSleep != v);
+    updateHardwareDirty_(settingsHardware_.pinSleep != v);
     settingsHardware_.pinSleep = v;
 }
 void State::setResetPin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinReset != v);
+    updateHardwareDirty_(settingsHardware_.pinReset != v);
     settingsHardware_.pinReset = v;
 }
 void State::setMs1Pin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinMs1 != v);
+    updateHardwareDirty_(settingsHardware_.pinMs1 != v);
     settingsHardware_.pinMs1 = v;
 }
 void State::setMs2Pin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinMs2 != v);
+    updateHardwareDirty_(settingsHardware_.pinMs2 != v);
     settingsHardware_.pinMs2 = v;
 }
 void State::setMs3Pin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinMs3 != v);
+    updateHardwareDirty_(settingsHardware_.pinMs3 != v);
     settingsHardware_.pinMs3 = v;
 }
 void State::setHomeSwitchPin(uint8_t v) {
-    updateDirty_(settingsHardware_.pinHomeSw != v);
+    updateHardwareDirty_(settingsHardware_.pinHomeSw != v);
     settingsHardware_.pinHomeSw = v;
 }
 void State::setCordLength(uint32_t v) {
-    updateDirty_(settingsHardware_.cordLength != v);
+    updateHardwareDirty_(settingsHardware_.cordLength != v);
     settingsHardware_.cordLength = v;
 }
 void State::setCordDiameter(double v) {
-    updateDirty_(settingsHardware_.cordDiameter != v);
+    updateHardwareDirty_(settingsHardware_.cordDiameter != v);
     settingsHardware_.cordDiameter = v;
 }
 void State::setAxisDiameter(uint32_t v) {
-    updateDirty_(settingsHardware_.axisDiameter != v);
+    updateHardwareDirty_(settingsHardware_.axisDiameter != v);
     settingsHardware_.axisDiameter = v;
 }
 void State::setStepsPerRev(uint16_t v) {
-    updateDirty_(settingsHardware_.stepsPerRev != v);
+    updateHardwareDirty_(settingsHardware_.stepsPerRev != v);
     settingsHardware_.stepsPerRev = v;
 }
 void State::setResolution(stdBlinds::resolution_t v) {
-    updateDirty_(settingsHardware_.resolution != v);
+    updateHardwareDirty_(settingsHardware_.resolution != v);
     settingsHardware_.resolution = v;
 }
