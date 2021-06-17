@@ -5,7 +5,7 @@ import { debug, getElement, querySelector } from "./util";
 import { mock } from "../tools/mock";
 import { fetchJson } from "./api";
 import { State } from "./state";
-import { makeWebsocket, WSIncomingEvent } from "./ws";
+import { makeWebsocket, WSEventType, WSIncomingEvent } from "./ws";
 import { ToastContainer } from "./components/ToastContainer";
 
 export default function (ns: WBlindsNamespace): void {
@@ -87,6 +87,12 @@ export default function (ns: WBlindsNamespace): void {
   const wsc = makeWebsocket({
     onMessage(msg: WSIncomingEvent) {
       console.log("WS msg: ", msg);
+      if (msg.type === WSEventType.UpdateSettings) {
+        State.update("settings", {
+          ...State.get<State["_state"]["settings"]>("settings"),
+          ...msg.data,
+        });
+      }
     },
     onError(e: any, num: number) {
       if (!num) {

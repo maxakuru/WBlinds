@@ -23,20 +23,24 @@ export interface WSUpdateStateEvent {
 export interface WSIncomingStateEvent {
   type: WSEventType.UpdateState;
   mac: string;
-  tPos?: number;
-  pos?: number;
-  accel?: number;
-  speed?: number;
-  [key: string]: WSEventType.UpdateState | string | boolean | number;
+  data: {
+    tPos?: number;
+    pos?: number;
+    accel?: number;
+    speed?: number;
+    [key: string]: number;
+  };
 }
 export interface WSIncomingSettingsEvent {
   type: WSEventType.UpdateSettings;
   mac: string;
-  deviceName?: string;
-  mDnsName?: string;
-  emitSyncData?: boolean;
-  pinStep?: number;
-  [key: string]: WSEventType.UpdateSettings | string | boolean | number;
+  data: {
+    deviceName?: string;
+    mDnsName?: string;
+    emitSyncData?: boolean;
+    pinStep?: number;
+    [key: string]: string | boolean | number;
+  };
 }
 export type WSIncomingEvent = WSIncomingStateEvent | WSIncomingSettingsEvent;
 
@@ -112,35 +116,49 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
     const mac = spl.shift();
     const mask = parseInt(spl.shift());
     // for each event flag, add to event
-    const stateEv: WSIncomingStateEvent = {
-      type: WSEventType.UpdateState,
-      mac,
-    };
-    const settingsEv: WSIncomingSettingsEvent = {
-      type: WSEventType.UpdateSettings,
-      mac,
-    };
+    const stateEvData: WSIncomingStateEvent["data"] = {};
+    const settingsEvData: WSIncomingSettingsEvent["data"] = {};
 
     let j = 1;
-    for (let i = 0, len = OrderedEventFlags.length; i < len; i++) {
+    for (
+      let i = 0, len = OrderedEventFlags.length;
+      i < len && spl.length > 0;
+      i++
+    ) {
       if (j & mask) {
         const k = OrderedEventFlags[i];
         const v = spl.shift();
         if (i < 4) {
           // All state updates are numbers
-          stateEv[k] = parseInt(v);
+          stateEvData[k] = parseInt(v);
         } else {
           // Some settings are strings, most are numbers.
           // Some are also bools, but will be parsed as
           // ints and used as 0/1, just can't do strict
           // equivalence checks.
-          settingsEv[k] = i in EventFlagStringIndices ? v : parseInt(v);
+          settingsEvData[k] = i in EventFlagStringIndices ? v : parseInt(v);
         }
       }
       j = j << 1;
     }
 
-    return [stateEv, settingsEv].filter((e) => Object.keys(e).length > 2);
+    const evs: WSIncomingEvent[] = [];
+    if (Object.keys(stateEvData).length > 0) {
+      evs.push({
+        type: WSEventType.UpdateState,
+        mac,
+        data: stateEvData,
+      });
+    }
+    if (Object.keys(settingsEvData).length > 0) {
+      evs.push({
+        type: WSEventType.UpdateSettings,
+        mac,
+        data: settingsEvData,
+      });
+    }
+
+    return evs;
   }
 
   return { ws, push };
