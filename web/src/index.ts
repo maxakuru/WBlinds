@@ -18,7 +18,6 @@ export default function (ns: WBlindsNamespace): void {
   // Toasts
   const tc = ToastContainer({});
   body.appendChild(tc.node);
-  tc.pushToast("test toast");
   window.onerror = (e) => {
     tc.pushToast(e.toString(), true);
   };
@@ -89,11 +88,16 @@ export default function (ns: WBlindsNamespace): void {
     onMessage(msg: WSIncomingEvent) {
       console.log("WS msg: ", msg);
     },
-    onError(e: any) {
-      console.log("WS error: ", e);
+    onError(e: any, num: number) {
+      if (!num) {
+        tc.pushToast("Websocket disconnected!", true, false, 5000);
+      }
     },
-    onConnect(e: Event) {
+    onConnect(e: Event, num: number) {
       console.log("WS connect: ", e);
+      if (num) {
+        tc.pushToast("Websocket connected!");
+      }
     },
     onDisconnect(e: CloseEvent) {
       console.log("WS disconnect: ", e);

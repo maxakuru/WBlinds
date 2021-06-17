@@ -443,28 +443,35 @@ var WSEventType;
     WSEventType[WSEventType["UpdateState"] = 1] = "UpdateState";
 })(WSEventType || (WSEventType = {}));
 function makeWebsocket(opts = {}) {
-    const ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+    let ws;
     let _enabled = false;
-    ws.onopen = (e) => {
-        debug("[ws] onOpen(): ", e);
-        _enabled = true;
-        opts.onConnect && opts.onConnect(e);
-    };
-    ws.onclose = (e) => {
-        debug("[ws] onClose(): ", e);
-        _enabled = false;
-        opts.onDisconnect && opts.onDisconnect(e);
-    };
-    ws.onmessage = (e) => {
-        debug("[ws] onMessage(): ", e, e.data);
-        unpackMessage(e.data);
-        opts.onMessage && opts.onMessage(e);
-    };
-    ws.onerror = (e) => {
-        debug("[ws] onError(): ", e);
-        _enabled = false;
-        opts.onError && opts.onError(e);
-    };
+    let _reconnectAttempt = 0;
+    connect();
+    function connect() {
+        ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+        ws.onopen = (e) => {
+            debug("[ws] onOpen(): ", e);
+            _enabled = true;
+            _reconnectAttempt = 0;
+            opts.onConnect && opts.onConnect(e, _reconnectAttempt);
+        };
+        ws.onclose = (e) => {
+            debug("[ws] onClose(): ", e);
+            _enabled = false;
+            opts.onDisconnect && opts.onDisconnect(e, _reconnectAttempt);
+            setTimeout(connect, Math.min(5000 * ++_reconnectAttempt, 60000));
+        };
+        ws.onmessage = (e) => {
+            debug("[ws] onMessage(): ", e, e.data);
+            unpackMessage(e.data);
+            opts.onMessage && opts.onMessage(e, _reconnectAttempt);
+        };
+        ws.onerror = (e) => {
+            debug("[ws] onError(): ", e);
+            _enabled = false;
+            opts.onError && opts.onError(e, _reconnectAttempt);
+        };
+    }
     const push = (ev, data) => {
         debug("[ws] push(): ", ev, data);
         if (_enabled) {
@@ -552,7 +559,6 @@ function run (ns) {
     window.wblinds.State = State;
     const tc = ToastContainer({});
     body.appendChild(tc.node);
-    tc.pushToast("test toast");
     window.onerror = (e) => {
         tc.pushToast(e.toString(), true);
     };
@@ -609,11 +615,16 @@ function run (ns) {
         onMessage(msg) {
             console.log("WS msg: ", msg);
         },
-        onError(e) {
-            console.log("WS error: ", e);
+        onError(e, num) {
+            if (!num) {
+                tc.pushToast("Websocket disconnected!", true, false, 5000);
+            }
         },
-        onConnect(e) {
+        onConnect(e, num) {
             console.log("WS connect: ", e);
+            if (num) {
+                tc.pushToast("Websocket connected!");
+            }
         },
         onDisconnect(e) {
             console.log("WS disconnect: ", e);

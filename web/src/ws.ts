@@ -24,39 +24,53 @@ export interface WSIncomingEvent {
 }
 
 export interface WSOptions {
-  onDisconnect?(e: CloseEvent): void;
-  onConnect?(e: Event): void;
-  onMessage?(msg: WSIncomingEvent): void;
-  onError?(e: any): void;
+  onDisconnect?(e: CloseEvent, reconnectAttempt: number): void;
+  onConnect?(e: Event, reconnectAttempt: number): void;
+  onMessage?(msg: WSIncomingEvent, reconnectAttempt: number): void;
+  onError?(e: any, reconnectAttempt: number): void;
 }
 
 export function makeWebsocket(opts: WSOptions = {}): WSController {
-  const ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+  let ws: WebSocket;
   let _enabled = false;
-  ws.onopen = (e: Event) => {
-    debug("[ws] onOpen(): ", e);
-    _enabled = true;
-    // TODO: reconnected event
-    opts.onConnect && opts.onConnect(e);
-  };
-  ws.onclose = (e: CloseEvent) => {
-    debug("[ws] onClose(): ", e);
-    _enabled = false;
-    // TODO: disconnect event
-    // TODO: reconnect
-    opts.onDisconnect && opts.onDisconnect(e);
-  };
-  ws.onmessage = (e: MessageEvent<any>) => {
-    debug("[ws] onMessage(): ", e, e.data);
-    // TODO: parse packed message
-    const unpacked = unpackMessage(e.data);
-    opts.onMessage && opts.onMessage(e as any);
-  };
-  ws.onerror = (e: any) => {
-    debug("[ws] onError(): ", e);
-    _enabled = false;
-    opts.onError && opts.onError(e);
-  };
+  let _reconnectAttempt = 0;
+
+  connect();
+
+  function connect() {
+    ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+
+    ws.onopen = (e: Event) => {
+      debug("[ws] onOpen(): ", e);
+      _enabled = true;
+      _reconnectAttempt = 0;
+      // TODO: reconnected event
+      opts.onConnect && opts.onConnect(e, _reconnectAttempt);
+    };
+
+    ws.onclose = (e: CloseEvent) => {
+      debug("[ws] onClose(): ", e);
+      _enabled = false;
+
+      // TODO: disconnect event
+      // TODO: reconnect
+      opts.onDisconnect && opts.onDisconnect(e, _reconnectAttempt);
+      setTimeout(connect, Math.min(5000 * ++_reconnectAttempt, 60000));
+    };
+
+    ws.onmessage = (e: MessageEvent<any>) => {
+      debug("[ws] onMessage(): ", e, e.data);
+      // TODO: parse packed message
+      const unpacked = unpackMessage(e.data);
+      opts.onMessage && opts.onMessage(e as any, _reconnectAttempt);
+    };
+
+    ws.onerror = (e: any) => {
+      debug("[ws] onError(): ", e);
+      _enabled = false;
+      opts.onError && opts.onError(e, _reconnectAttempt);
+    };
+  }
 
   const push = (
     ev: WSEventType,

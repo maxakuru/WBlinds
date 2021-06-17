@@ -36,7 +36,7 @@ export const querySelector = <T = HTMLElement>(
   elem: HTMLElement | Document = document
 ): T => elem.querySelector.call(elem, selectors);
 
-export const stopPropagation = (e: any) => e.stopPropagation();
+export const stopPropagation = (e: Event): void => e.stopPropagation();
 /**
  * Type alias for containers
  */
