@@ -1,4 +1,4 @@
-import { OrderedEventFlags } from "./eventFlags";
+import { EventFlagStringIndices, OrderedEventFlags } from "./eventFlags";
 import { debug } from "./util";
 
 export interface WSController {
@@ -27,11 +27,16 @@ export interface WSIncomingStateEvent {
   pos?: number;
   accel?: number;
   speed?: number;
+  [key: string]: WSEventType.UpdateState | string | boolean | number;
 }
 export interface WSIncomingSettingsEvent {
   type: WSEventType.UpdateSettings;
   mac: string;
-  deviceName?: number;
+  deviceName?: string;
+  mDnsName?: string;
+  emitSyncData?: boolean;
+  pinStep?: number;
+  [key: string]: WSEventType.UpdateSettings | string | boolean | number;
 }
 export type WSIncomingEvent = WSIncomingStateEvent | WSIncomingSettingsEvent;
 
@@ -119,13 +124,17 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
     let j = 1;
     for (let i = 0, len = OrderedEventFlags.length; i < len; i++) {
       if (j & mask) {
+        const k = OrderedEventFlags[i];
         const v = spl.shift();
         if (i < 4) {
-          const k = OrderedEventFlags[i];
-          stateEv[k as "pos"] = parseInt(v);
+          // All state updates are numbers
+          stateEv[k] = parseInt(v);
         } else {
-          const k = OrderedEventFlags[i];
-          settingsEv[k as "deviceName"] = parseInt(v);
+          // Some settings are strings, most are numbers.
+          // Some are also bools, but will be parsed as
+          // ints and used as 0/1, just can't do strict
+          // equivalence checks.
+          settingsEv[k] = i in EventFlagStringIndices ? v : parseInt(v);
         }
       }
       j = j << 1;
