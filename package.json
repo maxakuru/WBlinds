@@ -64,11 +64,6 @@
     "ts-node": "^10.0.0",
     "uncss": "^0.17.3"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn build:ui && lint-staged"
-    }
-  },
   "lint-staged": {
     "*.{js,ts,tsx}": [
       "eslint --fix"

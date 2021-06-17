@@ -20,7 +20,9 @@ plugins.push(
     "process.env.NODE_ENV": JSON.stringify(env.MODE),
     "process.env.USE_MOCKS": JSON.stringify(env.USE_MOCKS),
   }),
-  typescript(),
+  typescript({
+    sourceMap: dev,
+  }),
   nodeResolve({
     mainFields: ["browser", "module", "main"],
   }),
@@ -60,6 +62,7 @@ export default {
   output: {
     file: "public/index.js",
     format: "es",
+    sourcemap: dev,
     globals: {
       document: "document",
       window: "window",

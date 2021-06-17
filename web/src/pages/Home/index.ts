@@ -95,14 +95,14 @@ const _Home: Component<HomeAPI> = function () {
       }
     }
 
-    State.observe(PRESET_TILE + "s", ({ value, prev }) => {
+    State.observe((PRESET_TILE + "s") as "presets", ({ value, prev }) => {
       console.log("presets updated: ", value, prev);
       loaded();
 
       updateTiles(PRESET_TILE, value);
     });
 
-    State.observe(DEVICE_TILE + "s", ({ value, prev }) => {
+    State.observe((DEVICE_TILE + "s") as "devices", ({ value, prev }) => {
       console.log("devices updated: ", value, prev);
       loaded();
 
