@@ -1,7 +1,7 @@
 import { _Component, Component } from "../Component";
 import template from "./Slider.html";
 import "./Slider.css";
-import { stopPropagation } from "../../util";
+import { querySelector, stopPropagation } from "../../util";
 
 export interface SliderAPI {
   destroy(): void;
@@ -20,9 +20,9 @@ const _Slider: Component<SliderAPI, SliderProps> = function ({
 }: SliderProps) {
   this.init = function (elem: HTMLElement) {
     elem.id = id;
-    elem.querySelector("h4").innerText = label;
+    querySelector("h4", elem).innerText = label;
 
-    const slider = elem.querySelector("input");
+    const slider = querySelector<HTMLInputElement>("input", elem);
     slider.onmousedown = stopPropagation;
     slider.ontouchstart = stopPropagation;
 

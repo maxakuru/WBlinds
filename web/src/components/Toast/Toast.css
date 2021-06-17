@@ -1,0 +1,16 @@
+.toast {
+	background-color: #00000070;
+    box-shadow: 1px 1px 8px #54545473;
+    border-radius: 10px;
+	margin: 10px;
+	height: 80px;
+	display: flex;
+	max-width: 700px;
+	position: relative;
+	transition: 0.5s bottom ease-in-out;
+	pointer-events: all;
+}
+
+.tom {
+	margin: auto;
+}

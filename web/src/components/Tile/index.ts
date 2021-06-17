@@ -1,6 +1,7 @@
 import { _Component, Component } from "../Component";
 import template from "./Tile.html";
 import "./Tile.css";
+import { querySelector } from "../../util";
 
 type ClickHandler = (data: TileProps) => unknown;
 export interface TileAPI {
@@ -24,7 +25,7 @@ const _Tile: Component<TileAPI, TileProps> = function ({
     elem.onclick = (e) => {
       _clickHandlers.forEach((h) => h({ id, name }));
     };
-    elem.querySelector("p").innerText = name;
+    querySelector("p", elem).innerText = name;
     return {
       onClick: (h) => {
         _clickHandlers.push(h);

@@ -1,0 +1,10 @@
+
+.tc {
+	display: flex;
+	position: absolute;
+    top: 0;
+    flex-flow: column-reverse;
+	pointer-events: none;
+	height: calc(100% - 63px);
+	padding-bottom: 63px;
+}

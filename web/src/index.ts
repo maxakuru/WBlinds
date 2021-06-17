@@ -1,33 +1,27 @@
 import { Nav, Card } from "./components";
 import { Home } from "./pages";
 import { WBlindsNamespace } from "./types";
-import { debug, getElement } from "./util";
+import { debug, getElement, querySelector } from "./util";
 import { mock } from "../tools/mock";
 import { fetchJson } from "./api";
 import { State } from "./state";
 import { makeWebsocket, WSIncomingEvent } from "./ws";
+import { ToastContainer } from "./components/ToastContainer";
 
 export default function (ns: WBlindsNamespace): void {
   debug("onLoad(): ", ns);
   mock.init();
-  const body = document.querySelector("body");
+  const body = querySelector("body");
   const app = getElement("app");
   (window as any).wblinds.State = State;
 
-  const wsc = makeWebsocket({
-    onMessage(msg: WSIncomingEvent) {
-      console.log("WS msg: ", msg);
-    },
-    onError(e: any) {
-      console.log("WS error: ", e);
-    },
-    onConnect(e: Event) {
-      console.log("WS connect: ", e);
-    },
-    onDisconnect(e: CloseEvent) {
-      console.log("WS disconnect: ", e);
-    },
-  });
+  // Toasts
+  const tc = ToastContainer({});
+  body.appendChild(tc.node);
+  tc.pushToast("test toast");
+  window.onerror = (e) => {
+    tc.pushToast(e.toString(), true);
+  };
 
   fetchJson("/state").then((res) => {
     console.log("state res: ", res);
@@ -91,8 +85,22 @@ export default function (ns: WBlindsNamespace): void {
   }
 
   // Websocket
+  const wsc = makeWebsocket({
+    onMessage(msg: WSIncomingEvent) {
+      console.log("WS msg: ", msg);
+    },
+    onError(e: any) {
+      console.log("WS error: ", e);
+    },
+    onConnect(e: Event) {
+      console.log("WS connect: ", e);
+    },
+    onDisconnect(e: CloseEvent) {
+      console.log("WS disconnect: ", e);
+    },
+  });
 
-  // add nav
+  // Nav
   const nav = Nav();
   console.log("node: ", nav.node);
   getElement("nav").appendChild(nav.node);

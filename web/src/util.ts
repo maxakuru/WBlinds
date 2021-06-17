@@ -31,6 +31,11 @@ export function debug(...msgs: any[]): void {
 export const getElement: (id: string) => HTMLElement =
   document.getElementById.bind(document);
 
+export const querySelector = <T = HTMLElement>(
+  selectors: keyof HTMLElementTagNameMap,
+  elem: HTMLElement | Document = document
+): T => elem.querySelector.call(elem, selectors);
+
 export const stopPropagation = (e: any) => e.stopPropagation();
 /**
  * Type alias for containers

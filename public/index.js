@@ -1,19 +1,636 @@
-function h(c){return(...b)=>{var a={};b=c.call(a,...b);b=(new DOMParser).parseFromString(b,"text/html");console.log("ctx: ",a);b=b.getElementsByTagName("body").item(0).firstChild;a=a.init.call(a,b);a.node=b;return a}}
-function k(c,b){void 0===b&&(b={});b=b.insertAt;if(c&&"undefined"!==typeof document){var a=document.head||document.getElementsByTagName("head")[0],d=document.createElement("style");d.type="text/css";"top"===b?a.firstChild?a.insertBefore(d,a.firstChild):a.appendChild(d):a.appendChild(d);d.styleSheet?d.styleSheet.cssText=c:d.appendChild(document.createTextNode(c))}}k("#nav{background:rgba(0,0,0,.5019607843137255);height:63px;display:flex}.navc{justify-content:space-evenly;align-self:center}.navc .sel{color:#db8b1d}");
-let l=h(function(){let c=0,b=[];this.init=function(a){console.log("elem: ",a);const d=a.querySelectorAll("li");console.log("buttons: ",d);d.forEach((a,e)=>{a.addEventListener("click",()=>{c=e;d.forEach((a,b)=>{b===c?a.classList.add("sel"):a.classList.remove("sel")});b.map(a=>a.call(void 0,e))})});return{onClick:a=>{b.push(a)},currentIndex:()=>c,destroy:()=>{b=[]}}};return'<ul class="fw navc"><li class="sel">Home</li><li>Routines</li><li>Settings</li></ul>'});k("#card{height:100%;position:fixed;width:100%;top:100%;background:rgba(83,83,83,.47058823529411764)}#card.an{transition:top .2s ease-in-out}");
-k(".sc{padding:20px}.slider{background:linear-gradient(90deg,#db8b1d 0,#db8b1d 50%,#606060 0,#606060);border-radius:8px;height:7px;width:75%;border-radius:15px;height:6px;-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;outline:none}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;background:#fff;box-shadow:#000;border-radius:50%;cursor:pointer}");
-let m=document.getElementById.bind(document),q=c=>c.stopPropagation(),r=h(function({label:c,value:b,id:a}){this.init=function(d){d.id=a;d.querySelector("h4").innerText=c;const f=d.querySelector("input");f.onmousedown=q;f.ontouchstart=q;f.oninput=function(){const a=(parseInt(f.value)-parseInt(f.min))/(parseInt(f.max)-parseInt(f.min))*100;f.style.background="linear-gradient(to right, #DB8B1D 0%, #DB8B1D "+a+"%, #606060 "+a+"%, #606060 100%)"};console.log("slider: ",f,b);f.value=b;return{destroy:()=>
-{}}};return'<div class="sc"><div class="fR fSB"><h4>Title</h4><h4>Value</h4></div><input class="slider" type="range" min="0" max="100"></div>'}),t=h(function(){let c=!1,b=0,a=0,d=!1,f={};this.init=function(e){function g(a=!1){a!==d&&(a?e.classList.add("an"):e.classList.remove("an"),d=a)}function n(a){console.log("on transition end: ",a);e.remove()}function p(a){console.log("move event: ",a);let {x:b,y:c}=a;null==b&&(b=a.touches[0].clientX,c=a.touches[0].clientY);return{x:b,y:c}}g(!0);const A=r({id:"position",
-label:"Position",value:"50"});e.appendChild(A.node);e.onmousedown=e.ontouchstart=b=>{f=b=p(b);a=b.y;c=!0;g(!1)};e.onmouseup=e.onmouseout=e.ontouchend=()=>{if(c){c=!1;g(!0);var d=0;b>e.clientHeight/2&&(d=e.clientHeight,e.ontransitionend=n);e.style.top=`${d}px`;b=a=0}};e.onmousemove=e.ontouchmove=d=>{d=p(d);c&&(0>d.y-a?f=d:(b+=d.y-f.y,f=d,e.style.top=`${b}px`))};return{destroy:n,show:()=>{e.style.top="0px"}}};return'<div id="card" class="an"></div>'});k(".dt{justify-content:space-between}.tile{background:rgba(0,0,0,.30196078431372547);border-radius:12px;display:flex}.tile.sq{width:110px;height:110px;margin:5px 0;position:relative}.tile.sq>span{width:109px;max-height:90px;top:10px;position:absolute;right:0;border-right:1px groove #fff}.pt>.sq{height:50px;width:auto;min-width:150px}.pt>.sq>span{display:none}.tile.sq p{font-size:11px;margin:auto 21px 10px 9px;font-weight:500}");
-let u=h(function({name:c,id:b}){let a=[];this.init=function(d){d.id=b;d.onclick=()=>{a.forEach(a=>a({id:b,name:c}))};d.querySelector("p").innerText=c;return{onClick:b=>{a.push(b)},destroy:()=>{a=[]}}};return'<div class="tile sq"><span></span><p>Bedroom Left</p></div>'});
-class v{constructor(){this._observers={};this._state={}}update(c,b){var a,d;null!==(a=(d=this._observers)[c])&&void 0!==a?a:d[c]=[];let f=this._state[c];this._state[c]=b;this._observers[c].forEach(a=>{a({value:{...b},prev:f})})}observe(c,b){var a,d;null!==(a=(d=this._observers)[c])&&void 0!==a?a:d[c]=[];this._observers[c].push(b);this._state[c]&&b({value:{...this._state[c]},prev:void 0})}}
-let w=new v,x=h(function(){let c=!0,b=[],a=[];this.init=function(){function d(){c&&(m("hl").style.display="none",m("hlc").classList.remove("hide"),c=!1)}function f(a){a=m(`${a}-tiles`);return{container:a,tiles:a.querySelectorAll("div")}}function e(a){const {container:b,tiles:c}=f(a);a=Math.floor(b.clientWidth/110);let d=c.length;for(;0!==d%a;){const a=document.createElement("div");a.classList.add("tile","sq","em");b.appendChild(a);d++}}function g(a,c){const {container:d,tiles:p}=f(a);p.forEach(a=>
-{a.id in c&&(c[a.id]=void 0)});for(const [e,f]of Object.entries(c)){if(!f)continue;const c=u({id:`tile-${e}`,name:f.name||e,...f});c.onClick(b=>n(a,b));b.push(c);d.appendChild(c.node)}e(a)}function n(b,c){"device"===b&&a.forEach(a=>a(c))}w.observe("presets",({value:a,prev:b})=>{console.log("presets updated: ",a,b);d();g("preset",a)});w.observe("devices",({value:a,prev:b})=>{console.log("devices updated: ",a,b);d();g("device",a)});return{onDeviceClick:b=>{a.push(b)},destroy:()=>{a=[];b.forEach(a=>
-a.destroy());b=[]}}};return'<div class="f flex" id="h"><div class="loader" id="hl"></div><div id="hlc" class="hide" style="text-align: left;"><h1 id="ht">WBlinds</h1><h4 class="hst">Presets</h4><div id="preset-tiles" class="pt fw flex wrap"></div><h4 class="hst">Devices</h4><div id="device-tiles" class="dt fw flex wrap"></div></div></div>'}),y={init:()=>{},restore:()=>{}};console.log("use mocks: ","true","string");
-{let c=window.fetch,b={"Going to bed":{state:{"mac-address":{position:50,speed:50,accel:50},"mac-address-2":{position:50,speed:50,accel:50}},routines:[]}},a={"mac-address":{name:"Bedroom Left",position:50,speed:50,accel:50},"mac-address-2":{name:"Bedroom Right",position:50,speed:50,accel:50},"mac-address-3":{name:"Bay Window Left",position:50,speed:50,accel:50},"mac-address-4":{name:"Bay Window Middle",position:50,speed:50,accel:50},"mac-address-5":{name:"Bay Window Right",position:50,speed:50,accel:50}};
-y={init:()=>{window.fetch=async c=>({json:()=>"/devices"===c?a:b,ok:!0})},restore:()=>{window.fetch=c}}}let z=y;var B,C=B||(B={});C.GET="GET";C.POST="POST";function D(c,b){console.log("this: ",this);return fetch(c,{method:b}).then(a=>{if(!a.ok)throw a;return a.json()})}var E,F=E||(E={});F[F.UpdateSettings=0]="UpdateSettings";F[F.UpdateState=1]="UpdateState";
-function G(c={}){let b=new WebSocket(`ws://${window.location.hostname}/ws`),a=!1;b.onopen=b=>{a=!0;c.onConnect&&c.onConnect(b)};b.onclose=b=>{a=!1;c.onDisconnect&&c.onDisconnect(b)};b.onmessage=a=>{c.onMessage&&c.onMessage(a)};b.onerror=b=>{a=!1;c.onError&&c.onError(b)};return{ws:b,push:()=>{a&&b.send("")}}}
-function H(){function c(a){var c;console.log("on click! ",a);if(f!==a){f=a;null===(c=null===e||void 0===e?void 0:e.destroy)||void 0===c?void 0:c.call(e);console.log("currentTab.node: ",null===e||void 0===e?void 0:e.node);null===e||void 0===e?void 0:e.node.remove();switch(a){case 0:a=x();a.onDeviceClick(b);e=a;console.log("node: ",e.node);break;case 1:e=null;break;case 2:e=null}e&&d.appendChild(e.node)}}function b(b){console.log("device clicked: ",b);b=t({});a.appendChild(b.node);setTimeout(b.show)}
-z.init();let a=document.querySelector("body"),d=m("app");window.wblinds.State=w;G({onMessage(a){console.log("WS msg: ",a)},onError(a){console.log("WS error: ",a)},onConnect(a){console.log("WS connect: ",a)},onDisconnect(a){console.log("WS disconnect: ",a)}});D("/state").then(a=>{console.log("state res: ",a);w.update("state",a)});D("/presets").then(a=>{console.log("presets res: ",a);w.update("presets",a)});D("/devices").then(a=>{console.log("devices res: ",a);w.update("devices",a)});let f=-1,e;c(0);
-let g=l();console.log("node: ",g.node);m("nav").appendChild(g.node);console.log("nav: ",g.currentIndex());g.onClick(c)}k(':root{--blue:#06c;--green:#32d74b;--input:#db8b1d}html{touch-action:manipulation}body{margin:0;background-color:#111;font-family:-apple-system,BlinkMacSystemFont,helvetica,sans-serif;font-size:17px;font-weight:400;color:#fff;text-align:center;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;scrollbar-width:6px;scrollbar-color:var(--c-sb) transparent}body,html{height:100%;width:100%;position:fixed;-ms-scroll-chaining:none;overscroll-behavior:none}h1,h4{font-weight:400}h1{font-size:32px}h4{-webkit-margin-after:.3em;margin-block-end:.3em;font-size:14px;padding-left:5px}.hide{display:none}.loader,.loader:after,.loader:before{border-radius:50%;width:2.5em;height:2.5em;-webkit-animation-fill-mode:both;animation-fill-mode:both;-webkit-animation:load7 1.8s ease-in-out infinite;animation:load7 1.8s ease-in-out infinite}.loader{margin:auto;color:#fff;font-size:10px;text-indent:-9999em;transform:translate3d(0,-100px,0);-webkit-animation-delay:-.16s;animation-delay:-.16s;align-self:center}.loader:after,.loader:before{content:"";position:absolute;top:0}.loader:before{left:-3.5em;-webkit-animation-delay:-.32s;animation-delay:-.32s}.loader:after{left:3.5em}@-webkit-keyframes load7{0%,80%,to{box-shadow:0 2.5em 0 -1.3em}40%{box-shadow:0 2.5em 0 0}}@keyframes load7{0%,80%,to{box-shadow:0 2.5em 0 -1.3em}40%{box-shadow:0 2.5em 0 0}}.em{opacity:0}ul{display:flex;list-style-type:none;-webkit-margin-before:0;margin-block-start:0;-webkit-margin-after:0;margin-block-end:0;-webkit-padding-start:0;padding-inline-start:0}li{display:list-item;text-align:-webkit-match-parent;color:hsla(0,0%,100%,.4)}li.s{color:#db8b1d}.f{width:100%;height:100%}.fC,.flex{display:flex}.fC{flex-direction:column}.fR{display:flex;flex-direction:row}.fSB{justify-content:space-between}.wrap{flex-wrap:wrap}.fh{height:100%}.fw{width:100%}#bg{height:100vh;width:100vw;position:fixed;z-index:-10;background-position:30%;background-repeat:no-repeat;background-size:cover;opacity:1;transition:opacity 2s;background-image:url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#1d0143,#293b7c,#300a52)}#app{display:flex;flex-direction:column;padding:23px 23px 0;height:calc(100% - 86px);overflow-y:scroll}.overlay{position:fixed;height:100%;width:100%;top:0;left:0;background-color:#333;font-size:24px;display:flex;align-items:center;justify-content:center;z-index:11;opacity:.95;transition:.7s;pointer-events:none}');
-window.wblinds={test:!0};window.onload=()=>H()
+function _Component(c) {
+    return (...args) => {
+        const ctx = {};
+        const toRender = c.call(ctx, ...args);
+        const elem = new DOMParser().parseFromString(toRender, "text/html");
+        console.log("ctx: ", ctx);
+        const node = elem.getElementsByTagName("body").item(0).firstChild;
+        const api = ctx.init.call(ctx, node);
+        api.node = node;
+        return api;
+    };
+}
+
+var template$6 = "<ul class=\"fw navc\"><li class=\"sel\">Home</li><li>Routines</li><li>Settings</li></ul>";
+
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css_248z$6 = "#nav {\n\tbackground: #00000080;\n\theight: 63px;\n\tdisplay: flex;\n}\n\n.navc {\n\tjustify-content: space-evenly;\n\talign-self: center;\n}\n\n.navc .sel {\n\tcolor: #DB8B1D;\n}";
+styleInject(css_248z$6);
+
+const _Nav = function () {
+    let _i = 0;
+    let _clickHandlers = [];
+    this.init = function (elem) {
+        console.log("elem: ", elem);
+        const buttons = elem.querySelectorAll("li");
+        console.log("buttons: ", buttons);
+        buttons.forEach((b, index) => {
+            b.addEventListener("click", () => {
+                _i = index;
+                buttons.forEach((b2, i2) => {
+                    if (i2 === _i) {
+                        b2.classList.add("sel");
+                    }
+                    else {
+                        b2.classList.remove("sel");
+                    }
+                });
+                _clickHandlers.map((c) => c.call(undefined, index));
+            });
+        });
+        return {
+            onClick: (h) => {
+                _clickHandlers.push(h);
+            },
+            currentIndex: () => _i,
+            destroy: () => {
+                _clickHandlers = [];
+            },
+        };
+    };
+    return template$6;
+};
+const Nav = _Component(_Nav);
+
+var template$5 = "<div id=\"card\" class=\"an\"></div>";
+
+var css_248z$5 = "#card {\n\theight: 100%;\n    position: fixed;\n    width: 100%;\n    top: 100%;\n\tbackground: #53535378;\n}\n\n#card.an {\n    transition: 0.2s top ease-in-out;\n}";
+styleInject(css_248z$5);
+
+var template$4 = "<div class=\"sc\"><div class=\"fR fSB\"><h4>Title</h4><h4>Value</h4></div><input class=\"slider\" type=\"range\" min=\"0\" max=\"100\"></div>";
+
+var css_248z$4 = ".sc {\n\tpadding: 20px;\n}\n\n.slider {\n\tbackground: linear-gradient(to right, #DB8B1D 0%, #DB8B1D 50%, #606060 50%, #606060 100%);\n\tborder-radius: 8px;\n\theight: 7px;\n\twidth: 75%;\n\toutline: none;\n\t-webkit-appearance: none;\n}\n\n.slider {\n\tborder-radius: 15px;\n\theight: 6px;\n\t-webkit-appearance: none;\n\t-moz-appearance: none;\n\tappearance: none;\n\twidth: 100%;\n\toutline: none;\n}\n\n.slider::-webkit-slider-thumb {\n\t-webkit-appearance: none;\n\tappearance: none;\n\twidth: 16px;\n\theight: 16px;\n\tbackground: white;\n\tbox-shadow: black;\n\tborder-radius: 50%;\n\tcursor: pointer;\n}";
+styleInject(css_248z$4);
+
+function debug(...msgs) {
+    console.debug(...msgs);
+}
+const getElement = document.getElementById.bind(document);
+const querySelector = (selectors, elem = document) => elem.querySelector.call(elem, selectors);
+const stopPropagation = (e) => e.stopPropagation();
+
+const _Slider = function ({ label, value, id, }) {
+    this.init = function (elem) {
+        elem.id = id;
+        querySelector("h4", elem).innerText = label;
+        const slider = querySelector("input", elem);
+        slider.onmousedown = stopPropagation;
+        slider.ontouchstart = stopPropagation;
+        slider.oninput = function () {
+            const value = ((parseInt(slider.value) - parseInt(slider.min)) /
+                (parseInt(slider.max) - parseInt(slider.min))) *
+                100;
+            slider.style.background =
+                "linear-gradient(to right, #DB8B1D 0%, #DB8B1D " +
+                    value +
+                    "%, #606060 " +
+                    value +
+                    "%, #606060 100%)";
+        };
+        console.log("slider: ", slider, value);
+        slider.value = value;
+        return {
+            destroy: () => {
+            },
+        };
+    };
+    return template$4;
+};
+const Slider = _Component(_Slider);
+
+const _Card = function ({ temp }) {
+    let draggingCard = false;
+    let yOffset = 0;
+    let yStart = 0;
+    let animated = false;
+    let lastCoords = {};
+    this.init = function (elem) {
+        toggleAnimations(true);
+        const slider = Slider({ id: "position", label: "Position", value: "50" });
+        elem.appendChild(slider.node);
+        const onPress = (coords) => {
+            lastCoords = coords;
+            yStart = coords.y;
+            draggingCard = true;
+            toggleAnimations(false);
+        };
+        const onRelease = () => {
+            if (!draggingCard)
+                return;
+            draggingCard = false;
+            toggleAnimations(true);
+            let o = 0;
+            if (yOffset > elem.clientHeight / 2) {
+                o = elem.clientHeight;
+                elem.ontransitionend = destroy;
+            }
+            elem.style.top = `${o}px`;
+            yOffset = yStart = 0;
+        };
+        const onMove = (coords) => {
+            if (!draggingCard)
+                return;
+            if (coords.y - yStart < 0) {
+                lastCoords = coords;
+                return;
+            }
+            const movedY = coords.y - lastCoords.y;
+            yOffset += movedY;
+            lastCoords = coords;
+            elem.style.top = `${yOffset}px`;
+        };
+        function toggleAnimations(newState = false) {
+            if (newState === animated)
+                return;
+            newState ? elem.classList.add("an") : elem.classList.remove("an");
+            animated = newState;
+        }
+        function destroy(ev) {
+            console.log("on transition end: ", ev);
+            elem.remove();
+        }
+        elem.onmousedown = elem.ontouchstart = (e) => onPress(firstTouchXY(e));
+        elem.onmouseup = elem.onmouseout = elem.ontouchend = onRelease;
+        elem.onmousemove = elem.ontouchmove = (e) => onMove(firstTouchXY(e));
+        function firstTouchXY(e) {
+            console.log("move event: ", e);
+            let { x, y } = e;
+            if (x == null) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            }
+            return {
+                x,
+                y,
+            };
+        }
+        return {
+            destroy,
+            show: () => {
+                elem.style.top = "0px";
+            },
+        };
+    };
+    return template$5;
+};
+const Card = _Component(_Card);
+
+var template$3 = "<div class=\"tile sq\"><span></span><p>Bedroom Left</p></div>";
+
+var css_248z$3 = "\n.dt {\n\t/* margin: 0 10px 0 -10px; */\n\tjustify-content: space-between;\n}\n\n.tile {\n\tbackground: #0000004D;\n\tborder-radius: 12px;\n\tdisplay: flex;\n\t/* justify-content: space-around; */\n}\n\n.tile.sq {\n\twidth: 110px;\n\theight: 110px;\n\tmargin: 20px;\n\tmargin: 5px 0px 5px 0px;\n\tposition: relative;\n}\n\n.tile.sq >span {\n\twidth: 109px;\n\tmax-height: 90px;\n\ttop: 10px;\n\tposition: absolute;\n\tright: 0px;\n\tborder-right: 1px dashed white;\n\tborder-right-style: groove;\n}\n\n.pt>.sq {\n\theight: 50px;\n\twidth: auto;\n\tmin-width: 150px;\n}\n\n.pt>.sq>span {\n\tdisplay: none;\n}\n\n.tile.sq p {\n\tfont-size: 11px;\n\tmargin: auto 21px 10px 9px;\n\tfont-weight: 500;\n}";
+styleInject(css_248z$3);
+
+const _Tile = function ({ name, id, }) {
+    let _clickHandlers = [];
+    this.init = function (elem) {
+        elem.id = id;
+        elem.onclick = (e) => {
+            _clickHandlers.forEach((h) => h({ id, name }));
+        };
+        querySelector("p", elem).innerText = name;
+        return {
+            onClick: (h) => {
+                _clickHandlers.push(h);
+            },
+            destroy: () => {
+                _clickHandlers = [];
+            },
+        };
+    };
+    return template$3;
+};
+const Tile = _Component(_Tile);
+
+var template$2 = "<div class=\"f flex\" id=\"h\"><div class=\"loader\" id=\"hl\"></div><div id=\"hlc\" class=\"hide\" style=\"text-align: left;\"><h1 id=\"ht\">WBlinds</h1><h4 class=\"hst\">Presets</h4><div id=\"preset-tiles\" class=\"pt fw flex wrap\"></div><h4 class=\"hst\">Devices</h4><div id=\"device-tiles\" class=\"dt fw flex wrap\"></div></div></div>";
+
+class _State {
+    constructor() {
+        this._observers = {};
+        this._state = {};
+    }
+    update(key, value) {
+        var _a;
+        var _b;
+        (_a = (_b = this._observers)[key]) !== null && _a !== void 0 ? _a : (_b[key] = []);
+        const prev = this._state[key];
+        this._state[key] = value;
+        this._observers[key].forEach((h) => {
+            h({
+                value: { ...value },
+                prev,
+            });
+        });
+    }
+    observe(key, handler) {
+        var _a;
+        var _b;
+        (_a = (_b = this._observers)[key]) !== null && _a !== void 0 ? _a : (_b[key] = []);
+        this._observers[key].push(handler);
+        if (this._state[key]) {
+            handler({
+                value: { ...this._state[key] },
+                prev: undefined,
+            });
+        }
+    }
+}
+const State = new _State();
+
+const DEVICE_TILE = "device";
+const PRESET_TILE = "preset";
+const _Home = function () {
+    let _loading = true;
+    let _tiles = [];
+    let _deviceClickHandlers = [];
+    this.init = function (elem) {
+        function loaded() {
+            if (!_loading)
+                return;
+            const spinner = getElement("hl");
+            spinner.style.display = "none";
+            const content = getElement("hlc");
+            content.classList.remove("hide");
+            _loading = false;
+        }
+        function getAllTiles(type) {
+            const container = getElement(`${type}-tiles`);
+            return { container, tiles: container.querySelectorAll("div") };
+        }
+        function padTiles(type) {
+            const { container, tiles } = getAllTiles(type);
+            const w = container.clientWidth;
+            const perRow = Math.floor(w / 110);
+            let len = tiles.length;
+            while (len % perRow !== 0) {
+                const e = document.createElement("div");
+                e.classList.add("tile", "sq", "em");
+                container.appendChild(e);
+                len++;
+            }
+        }
+        function updateTiles(type, o) {
+            const { container, tiles } = getAllTiles(type);
+            tiles.forEach((tile) => {
+                if (!(tile.id in o)) ;
+                else {
+                    o[tile.id] = undefined;
+                }
+            });
+            for (const [k, v] of Object.entries(o)) {
+                if (!v)
+                    continue;
+                const t = Tile({
+                    id: `tile-${k}`,
+                    name: v.name || k,
+                    ...v,
+                });
+                t.onClick((data) => handleTileClick(type, data));
+                _tiles.push(t);
+                container.appendChild(t.node);
+            }
+            padTiles(type);
+        }
+        function handleTileClick(type, data) {
+            if (type === "device") {
+                _deviceClickHandlers.forEach((h) => h(data));
+            }
+        }
+        State.observe(PRESET_TILE + "s", ({ value, prev }) => {
+            console.log("presets updated: ", value, prev);
+            loaded();
+            updateTiles(PRESET_TILE, value);
+        });
+        State.observe(DEVICE_TILE + "s", ({ value, prev }) => {
+            console.log("devices updated: ", value, prev);
+            loaded();
+            updateTiles(DEVICE_TILE, value);
+        });
+        return {
+            onDeviceClick: (h) => {
+                _deviceClickHandlers.push(h);
+            },
+            destroy: () => {
+                _deviceClickHandlers = [];
+                _tiles.forEach((t) => t.destroy());
+                _tiles = [];
+            },
+        };
+    };
+    return template$2;
+};
+const Home = _Component(_Home);
+
+let _mock = {
+    init: () => { },
+    restore: () => { },
+};
+console.log("use mocks: ", "true", typeof "true");
+{
+    const ogFetch = window.fetch;
+    const presetResp = {
+        "Going to bed": {
+            state: {
+                "mac-address": {
+                    position: 50,
+                    speed: 50,
+                    accel: 50,
+                },
+                "mac-address-2": {
+                    position: 50,
+                    speed: 50,
+                    accel: 50,
+                },
+            },
+            routines: [],
+        },
+    };
+    const devicesResp = {
+        "mac-address": {
+            name: "Bedroom Left",
+            position: 50,
+            speed: 50,
+            accel: 50,
+        },
+        "mac-address-2": {
+            name: "Bedroom Right",
+            position: 50,
+            speed: 50,
+            accel: 50,
+        },
+        "mac-address-3": {
+            name: "Bay Window Left",
+            position: 50,
+            speed: 50,
+            accel: 50,
+        },
+        "mac-address-4": {
+            name: "Bay Window Middle",
+            position: 50,
+            speed: 50,
+            accel: 50,
+        },
+        "mac-address-5": {
+            name: "Bay Window Right",
+            position: 50,
+            speed: 50,
+            accel: 50,
+        },
+    };
+    _mock = {
+        init: () => {
+            window.fetch = async (url, opts) => {
+                return {
+                    json: () => {
+                        return url === "/devices" ? devicesResp : presetResp;
+                    },
+                    ok: true,
+                };
+            };
+        },
+        restore: () => {
+            window.fetch = ogFetch;
+        },
+    };
+}
+const mock = _mock;
+
+var HTTPMethod;
+(function (HTTPMethod) {
+    HTTPMethod["GET"] = "GET";
+    HTTPMethod["POST"] = "POST";
+})(HTTPMethod || (HTTPMethod = {}));
+function fetchJson(url, method) {
+    console.log("this: ", this);
+    return fetch(url, {
+        method,
+    }).then((res) => {
+        if (!res.ok) {
+            throw res;
+        }
+        return res.json();
+    });
+}
+
+var WSEventType;
+(function (WSEventType) {
+    WSEventType[WSEventType["UpdateSettings"] = 0] = "UpdateSettings";
+    WSEventType[WSEventType["UpdateState"] = 1] = "UpdateState";
+})(WSEventType || (WSEventType = {}));
+function makeWebsocket(opts = {}) {
+    const ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+    let _enabled = false;
+    ws.onopen = (e) => {
+        debug("[ws] onOpen(): ", e);
+        _enabled = true;
+        opts.onConnect && opts.onConnect(e);
+    };
+    ws.onclose = (e) => {
+        debug("[ws] onClose(): ", e);
+        _enabled = false;
+        opts.onDisconnect && opts.onDisconnect(e);
+    };
+    ws.onmessage = (e) => {
+        debug("[ws] onMessage(): ", e, e.data);
+        unpackMessage(e.data);
+        opts.onMessage && opts.onMessage(e);
+    };
+    ws.onerror = (e) => {
+        debug("[ws] onError(): ", e);
+        _enabled = false;
+        opts.onError && opts.onError(e);
+    };
+    const push = (ev, data) => {
+        debug("[ws] push(): ", ev, data);
+        if (_enabled) {
+            ws.send(packMessage());
+        }
+    };
+    function packMessage(ev, data) {
+        return "";
+    }
+    function unpackMessage(data) {
+    }
+    return { ws, push };
+}
+
+var template$1 = "<div id=\"toc\" class=\"fw tc\"></div>";
+
+var css_248z$2 = "\n.tc {\n\tdisplay: flex;\n\tposition: absolute;\n    top: 0;\n    flex-flow: column-reverse;\n\tpointer-events: none;\n\theight: calc(100% - 63px);\n\tpadding-bottom: 63px;\n}";
+styleInject(css_248z$2);
+
+var template = "<div class=\"toast\"><p class=\"tom\"></p></div>";
+
+var css_248z$1 = ".toast {\n\tbackground-color: #00000070;\n    box-shadow: 1px 1px 8px #54545473;\n    border-radius: 10px;\n\tmargin: 10px;\n\theight: 80px;\n\tdisplay: flex;\n\tmax-width: 700px;\n\tposition: relative;\n\ttransition: 0.5s bottom ease-in-out;\n\tpointer-events: all;\n}\n\n.tom {\n\tmargin: auto;\n}";
+styleInject(css_248z$1);
+
+const _Toast = function ({ message, id, isError = false, }) {
+    let _clickHandlers = [];
+    this.init = function (elem) {
+        elem.onclick = (e) => {
+            _clickHandlers.forEach((h) => h({ id }));
+        };
+        querySelector("p", elem).innerText = message;
+        return {
+            onClick: (h) => {
+                _clickHandlers.push(h);
+            },
+            destroy: () => {
+                _clickHandlers = [];
+            },
+        };
+    };
+    return template;
+};
+const Toast = _Component(_Toast);
+
+const _ToastContainer = function ({ name, id }) {
+    let _index = 0;
+    let _toasts = [];
+    this.init = function (elem) {
+        console.log("toast container: ", elem);
+        function pushToast(message, isError, isPersistent, timeout = 2500) {
+            const t = Toast({ message, isError, id: _index++ });
+            t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
+            t.onClick(remove);
+            _toasts.push(t);
+            elem.appendChild(t.node);
+            function remove() {
+                t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
+                setTimeout(() => {
+                    t.node.remove();
+                }, 500);
+            }
+            setTimeout(() => {
+                t.node.style.bottom = `0px`;
+                !isPersistent && setTimeout(remove, timeout);
+            });
+        }
+        return {
+            destroy: () => {
+                _toasts.map((t) => t.destroy());
+                _toasts = [];
+                _index = 0;
+            },
+            pushToast,
+        };
+    };
+    return template$1;
+};
+const ToastContainer = _Component(_ToastContainer);
+
+function run (ns) {
+    debug("onLoad(): ", ns);
+    mock.init();
+    const body = querySelector("body");
+    const app = getElement("app");
+    window.wblinds.State = State;
+    const tc = ToastContainer({});
+    body.appendChild(tc.node);
+    tc.pushToast("test toast");
+    window.onerror = (e) => {
+        tc.pushToast(e.toString(), true);
+    };
+    fetchJson("/state").then((res) => {
+        console.log("state res: ", res);
+        State.update("state", res);
+    });
+    fetchJson("/presets").then((res) => {
+        console.log("presets res: ", res);
+        State.update("presets", res);
+    });
+    fetchJson("/devices").then((res) => {
+        console.log("devices res: ", res);
+        State.update("devices", res);
+    });
+    let currentIndex = -1;
+    let currentTab;
+    function handleTabChange(nextIndex) {
+        var _a;
+        console.log("on click! ", nextIndex);
+        if (currentIndex === nextIndex)
+            return;
+        currentIndex = nextIndex;
+        (_a = currentTab === null || currentTab === void 0 ? void 0 : currentTab.destroy) === null || _a === void 0 ? void 0 : _a.call(currentTab);
+        console.log("currentTab.node: ", currentTab === null || currentTab === void 0 ? void 0 : currentTab.node);
+        currentTab === null || currentTab === void 0 ? void 0 : currentTab.node.remove();
+        switch (nextIndex) {
+            case 0: {
+                const t = Home();
+                t.onDeviceClick(handleDeviceClick);
+                currentTab = t;
+                console.log("node: ", currentTab.node);
+                break;
+            }
+            case 1: {
+                currentTab = null;
+                break;
+            }
+            case 2: {
+                currentTab = null;
+                break;
+            }
+        }
+        currentTab && app.appendChild(currentTab.node);
+    }
+    handleTabChange(0);
+    function handleDeviceClick(device) {
+        console.log("device clicked: ", device);
+        const card = Card({});
+        body.appendChild(card.node);
+        setTimeout(card.show);
+    }
+    makeWebsocket({
+        onMessage(msg) {
+            console.log("WS msg: ", msg);
+        },
+        onError(e) {
+            console.log("WS error: ", e);
+        },
+        onConnect(e) {
+            console.log("WS connect: ", e);
+        },
+        onDisconnect(e) {
+            console.log("WS disconnect: ", e);
+        },
+    });
+    const nav = Nav();
+    console.log("node: ", nav.node);
+    getElement("nav").appendChild(nav.node);
+    console.log("nav: ", nav.currentIndex());
+    nav.onClick(handleTabChange);
+}
+
+var css_248z = ":root {\n\t--blue: #06c;\n\t--green: #32D74B;\n\t--input: #DB8B1D;\n}\n\nhtml {\n\ttouch-action: manipulation;\n}\n\nbody {\n\tmargin: 0;\n\tbackground-color: #111;\n\tfont-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;;\n\tfont-size: 17px;\n\tfont-weight: 400;\n\tcolor: #fff;\n\ttext-align: center;\n\t-webkit-touch-callout: none;\n\t-webkit-user-select: none;\n\t-moz-user-select: none;\n\t-ms-user-select: none;\n\tuser-select: none;\n\t-webkit-tap-highlight-color: transparent;\n\tscrollbar-width: 6px;\n\tscrollbar-color: var(--c-sb) transparent;\n}\n\nhtml, body {\n\theight: 100%;\n\twidth: 100%;\n\tposition: fixed;\n\t-ms-scroll-chaining: none;\n\t    overscroll-behavior: none;\n}\n\nh1, h4 {\n\tfont-weight: 400;\n}\n\nh1 {\n\tfont-size: 32px;\n}\n\nh4 {\n\t-webkit-margin-after: 0.3em;\n\t        margin-block-end: 0.3em;\n\tfont-size: 14px;\n\tpadding-left: 5px;\n}\n\n.hide {\n\tdisplay: none;\n}\n\n.loader, .loader:before, .loader:after {\n\tborder-radius: 50%;\n\twidth: 2.5em;\n\theight: 2.5em;\n\t-webkit-animation-fill-mode: both;\n\tanimation-fill-mode: both;\n\t-webkit-animation: load7 1.8s infinite ease-in-out;\n\tanimation: load7 1.8s infinite ease-in-out;\n}\n\n.loader {\n\tmargin: auto;\n\tcolor: #ffffff;\n\tfont-size: 10px;\n\ttext-indent: -9999em;\n\ttransform: translate3d(0, -100px, 0);\n\t-webkit-animation-delay: -0.16s;\n\tanimation-delay: -0.16s;\n\talign-self: center;\n}\n\n.loader:before, .loader:after {\n\tcontent: '';\n\tposition: absolute;\n\ttop: 0;\n}\n\n.loader:before {\n\tleft: -3.5em;\n\t-webkit-animation-delay: -0.32s;\n\tanimation-delay: -0.32s;\n}\n\n.loader:after {\n\tleft: 3.5em;\n}\n\n@-webkit-keyframes load7 {\n\t0%, 80%, 100% {\n\t\tbox-shadow: 0 2.5em 0 -1.3em;\n\t}\n\t40% {\n\t\tbox-shadow: 0 2.5em 0 0;\n\t}\n}\n\n@keyframes load7 {\n\t0%, 80%, 100% {\n\t\tbox-shadow: 0 2.5em 0 -1.3em;\n\t}\n\t40% {\n\t\tbox-shadow: 0 2.5em 0 0;\n\t}\n}\n\n.em {\n\topacity: 0;\n}\n\nul {\n\tdisplay: flex;\n\tlist-style-type: none;\n\t-webkit-margin-before: 0em;\n\t        margin-block-start: 0em;\n\t-webkit-margin-after: 0em;\n\t        margin-block-end: 0em;\n\t-webkit-padding-start: 0px;\n\t        padding-inline-start: 0px;\n}\n\nli {\n\tdisplay: list-item;\n\ttext-align: -webkit-match-parent;\n\tcolor: #FFFFFF66;\n}\n\nli.s {\n\tcolor: #DB8B1D;\n}\n\n.f {\n\twidth: 100%;\n\theight: 100%;\n}\n\n.flex {\n\tdisplay: flex;\n}\n\n.fC {\n\tdisplay: flex;\n\tflex-direction: column;\n}\n\n.fR {\n\tdisplay: flex;\n\tflex-direction: row;\n}\n\n.fSB {\n\tjustify-content: space-between;\n}\n\n.wrap {\n\tflex-wrap: wrap;\n}\n\n.fh {\n\theight: 100%;\n}\n\n.fw {\n\twidth: 100%;\n}\n\n#bg {\n\theight: 100vh;\n\twidth: 100vw;\n\tposition: fixed;\n\tz-index: -10;\n\tbackground-position: 30%;\n\tbackground-repeat: no-repeat;\n\tbackground-size: cover;\n\topacity: 1;\n\ttransition: opacity 2s;\n    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#1d0143 0,#293b7c, #300a52);\n}\n\n#app {\n\tdisplay: flex;\n\tflex-direction: column;\n\tpadding: 23px 23px 0 23px;\n\theight: calc(100% - (63px + 23px));\n\toverflow-y: scroll;\n}\n\n.overlay {\n\tposition: fixed;\n\theight: 100%;\n\twidth: 100%;\n\ttop: 0;\n\tleft: 0;\n\tbackground-color: #333;\n\tfont-size: 24px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tz-index: 11;\n\topacity: 0.95;\n\ttransition: 0.7s;\n\tpointer-events: none;\n}";
+styleInject(css_248z);
+
+const ns = {
+    test: true,
+};
+window.wblinds = ns;
+window.onload = () => run(ns);
