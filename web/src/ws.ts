@@ -1,3 +1,4 @@
+import { OrderedEventFlags } from "./eventFlags";
 import { debug } from "./util";
 
 export interface WSController {
@@ -19,14 +20,25 @@ export interface WSUpdateStateEvent {
   test?: boolean;
 }
 
-export interface WSIncomingEvent {
-  test?: boolean;
+export interface WSIncomingStateEvent {
+  type: WSEventType.UpdateState;
+  mac: string;
+  tPos?: number;
+  pos?: number;
+  accel?: number;
+  speed?: number;
 }
+export interface WSIncomingSettingsEvent {
+  type: WSEventType.UpdateSettings;
+  mac: string;
+  deviceName?: number;
+}
+export type WSIncomingEvent = WSIncomingStateEvent | WSIncomingSettingsEvent;
 
 export interface WSOptions {
   onDisconnect?(e: CloseEvent, reconnectAttempt: number): void;
   onConnect?(e: Event, reconnectAttempt: number): void;
-  onMessage?(msg: WSIncomingEvent, reconnectAttempt: number): void;
+  onMessage?(e: WSIncomingEvent): void;
   onError?(e: any, reconnectAttempt: number): void;
 }
 
@@ -39,7 +51,6 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
 
   function connect() {
     ws = new WebSocket(`ws://${window.location.hostname}/ws`);
-
     ws.onopen = (e: Event) => {
       debug("[ws] onOpen(): ", e);
       _enabled = true;
@@ -61,8 +72,10 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
     ws.onmessage = (e: MessageEvent<any>) => {
       debug("[ws] onMessage(): ", e, e.data);
       // TODO: parse packed message
-      const unpacked = unpackMessage(e.data);
-      opts.onMessage && opts.onMessage(e as any, _reconnectAttempt);
+      const unpacked = unpackMessages(e.data);
+      if (opts.onMessage) {
+        unpacked.map((m) => opts.onMessage(m));
+      }
     };
 
     ws.onerror = (e: any) => {
@@ -87,8 +100,38 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
     return "";
   }
 
-  function unpackMessage(data: string): any {
+  function unpackMessages(data: string): WSIncomingEvent[] {
     // TODO: convert string message to object
+    console.log("unpackMessages: ", data);
+    const spl = data.split("/");
+    const mac = spl.shift();
+    const mask = parseInt(spl.shift());
+    // for each event flag, add to event
+    const stateEv: WSIncomingStateEvent = {
+      type: WSEventType.UpdateState,
+      mac,
+    };
+    const settingsEv: WSIncomingSettingsEvent = {
+      type: WSEventType.UpdateSettings,
+      mac,
+    };
+
+    let j = 1;
+    for (let i = 0, len = OrderedEventFlags.length; i < len; i++) {
+      if (j & mask) {
+        const v = spl.shift();
+        if (i < 4) {
+          const k = OrderedEventFlags[i];
+          stateEv[k as "pos"] = parseInt(v);
+        } else {
+          const k = OrderedEventFlags[i];
+          settingsEv[k as "deviceName"] = parseInt(v);
+        }
+      }
+      j = j << 1;
+    }
+
+    return [stateEv, settingsEv].filter((e) => Object.keys(e).length > 2);
   }
 
   return { ws, push };

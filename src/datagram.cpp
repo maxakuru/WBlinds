@@ -15,6 +15,7 @@ namespace Datagram {
     String packString(const StateEvent& event) {
         auto state = State::getInstance();
         String s = "";
+        s += macAddress;
 
         s += delimiter;
         s += event.flags_.mask_;
@@ -58,15 +59,15 @@ namespace Datagram {
      * @param event
      * @return byte*
      */
-    // byte* pack(const StateEvent& event) {
+     // byte* pack(const StateEvent& event) {
 
-    //     byte b[1024] = {};
-    //     auto maskSize = sizeof(event.flags_.mask_);
-    //     memcpy(b, static_cast<const char*>(static_cast<const void*>(&event.flags_.mask_)), maskSize);
-    //     if (event.flags_.pos_) {
+     //     byte b[1024] = {};
+     //     auto maskSize = sizeof(event.flags_.mask_);
+     //     memcpy(b, static_cast<const char*>(static_cast<const void*>(&event.flags_.mask_)), maskSize);
+     //     if (event.flags_.pos_) {
 
-    //     }
-    // }
+     //     }
+     // }
 
     std::map<type_t, const uint8_t> SizeMap = {
     {type_t::Hello, 128},
