@@ -7,6 +7,7 @@
     "url": "https://github.com/maxakuru/WBlinds"
   },
   "scripts": {
+    "prepare": "husky install",
     "build:dev": "cross-env NODE_ENV=dev rollup -w -c rollup.config.ts",
     "build": "yarn build:ui && yarn build:uih",
     "build:ui": "rollup -c rollup.config.ts",
@@ -65,7 +66,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "yarn build:ui && lint-staged"
     }
   },
   "lint-staged": {
