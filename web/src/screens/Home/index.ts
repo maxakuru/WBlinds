@@ -1,9 +1,17 @@
-import { appendChild, createDiv, getElement, nextTick } from "../../util";
-import { ComponentFunction, Component } from "../../components/Component";
+import {
+  addClass,
+  appendChild,
+  createDiv,
+  getElement,
+  nextTick,
+  removeClass,
+  displayNone,
+} from "@Util";
+import { ComponentFunction, Component, Tile } from "@Components";
 import template from "./Home.html";
-import { State } from "../../state";
-import { Tile } from "../../components";
+import { State } from "@State";
 import "./Home.css";
+import { DEVICES, PRESETS } from "@Const";
 
 type DeviceClickHandler = (device: any) => void;
 export interface HomeAPI {
@@ -27,8 +35,8 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       if (!_loading) return;
       const spinner = getElement("hl");
       const content = getElement("hlc");
-      spinner.style.display = "none";
-      content.classList.remove("hide");
+      displayNone(spinner);
+      removeClass(content, "hide");
       _loading = false;
     }
 
@@ -49,7 +57,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       let len = tiles.length;
       while (len % perRow !== 0) {
         const e = createDiv();
-        e.classList.add("tile", "sq", "em");
+        addClass(e, "tile", "sq", "em");
         appendChild(container, e);
         len++;
       }
@@ -76,7 +84,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
         });
         t.onClick((data) => handleTileClick(type, data));
         _tiles.push(t);
-        container.appendChild(t.node);
+        appendChild(container, t.node);
       }
       padTiles(type);
     }
@@ -90,14 +98,14 @@ const _Home: ComponentFunction<HomeAPI> = function () {
     }
 
     nextTick(() => {
-      State.observe((PRESET_TILE + "s") as "presets", ({ value, prev }) => {
+      State.observe(PRESETS, ({ value, prev }) => {
         console.log("presets updated: ", value, prev);
         loaded();
 
         updateTiles(PRESET_TILE, value);
       });
 
-      State.observe((DEVICE_TILE + "s") as "devices", ({ value, prev }) => {
+      State.observe(DEVICES, ({ value, prev }) => {
         console.log("devices updated: ", value, prev);
         loaded();
 

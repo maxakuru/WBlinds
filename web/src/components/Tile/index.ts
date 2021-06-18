@@ -1,7 +1,7 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component } from "@Components";
 import template from "./Tile.html";
 import "./Tile.css";
-import { querySelector } from "../../util";
+import { querySelector } from "@Util";
 
 type ClickHandler = (data: TileProps) => unknown;
 export interface TileAPI {

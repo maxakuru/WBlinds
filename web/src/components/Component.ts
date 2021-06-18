@@ -1,5 +1,3 @@
-import { getComponentContainer, getElement } from "../util";
-
 export function Component<T, U>(
   c: ComponentFunction<T, U>
 ): (args: U) => Component<T> {

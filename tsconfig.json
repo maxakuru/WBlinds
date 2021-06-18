@@ -11,7 +11,28 @@
             "ES2019"
         ],
         "target": "ES2019",
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "baseUrl": "./web/src",
+        "paths": {
+            "@Util": [
+                "util"
+            ],
+            "@Screens": [
+                "screens"
+            ],
+            "@Components": [
+                "components"
+            ],
+            "@State": [
+                "state"
+            ],
+            "@Api": [
+                "api"
+            ],
+            "@Const": [
+                "const"
+            ]
+        }
     },
     "include": [
         "web/**/*",

@@ -1,17 +1,25 @@
 import {
+  addClass,
   appendChild,
   createDiv,
   createElement,
   getElement,
   nextTick,
   querySelector,
-} from "../../util";
-import { ComponentFunction, Component } from "../../components/Component";
+  removeClass,
+  displayNone,
+} from "@Util";
+import {
+  ComponentFunction,
+  Component,
+  Input,
+  Selector,
+  InputType,
+} from "@Components";
 import template from "./Settings.html";
-import { State, SettingsData, DEFAULT_SETTINGS_DATA } from "../../state";
-import { Input, Selector } from "../../components";
+import { State, SettingsData, DEFAULT_SETTINGS_DATA } from "@State";
 import "./Settings.css";
-import { InputType } from "../../components/Input";
+import { SETTINGS } from "@Const";
 
 type DeviceClickHandler = (device: any) => void;
 export interface SettingsAPI {
@@ -202,8 +210,8 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       if (!_loading) return;
       const spinner = getElement("sl");
       const container = getElement("slc");
-      spinner.style.display = "none";
-      container.classList.remove("hide");
+      displayNone(spinner);
+      removeClass(container, "hide");
       container.prepend(selector.node);
       _loading = false;
 
@@ -220,7 +228,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     }
 
     nextTick(() => {
-      State.observe("settings", ({ value, prev }) => {
+      State.observe(SETTINGS, ({ value, prev }) => {
         console.log("settings updated: ", value, prev);
         loaded();
       });
@@ -243,7 +251,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       }
       if (groupDivs[groupNum] == null) {
         const d = createDiv();
-        d.classList.add("igroup");
+        addClass(d, "igroup");
         groupDivs[groupNum] = d;
         appendChild(container, d);
       }
@@ -254,7 +262,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         k
       ] as SettingsInputEntry;
 
-      const stateKey = `settings.${key}.${k}`;
+      const stateKey = `${SETTINGS}.${key}.${k}`;
       console.log("state key: ", stateKey);
       console.log(" State.get(stateKey): ", State.get(stateKey));
 

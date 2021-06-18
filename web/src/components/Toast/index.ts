@@ -1,7 +1,7 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component } from "@Components";
 import template from "./Toast.html";
 import "./Toast.css";
-import { querySelector } from "../../util";
+import { querySelector } from "@Util";
 
 type ClickHandler = (data: Pick<ToastProps, "id">) => unknown;
 export interface ToastAPI {

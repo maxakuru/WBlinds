@@ -1,8 +1,7 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component, Toast } from "@Components";
 import template from "./ToastContainer.html";
 import "./ToastContainer.css";
-import { Toast } from "../Toast";
-import { appendChild } from "../../util";
+import { appendChild } from "@Util";
 
 type ClickHandler = (data: ToastContainerProps) => unknown;
 export interface ToastContainerAPI {

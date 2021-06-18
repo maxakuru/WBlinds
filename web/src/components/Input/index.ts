@@ -1,7 +1,13 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component } from "@Components";
 import template from "./Input.html";
 import "./Input.css";
-import { appendChild, createElement, querySelector } from "../../util";
+import {
+  addClass,
+  appendChild,
+  createElement,
+  querySelector,
+  toggleClass,
+} from "@Util";
 
 type ClickHandler = (data: InputProps) => unknown;
 export interface InputAPI {
@@ -57,9 +63,9 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
     input.id = id;
     if (type === InputType.Boolean) {
       input.checked = value;
-      value && input.classList.add("on");
+      value && addClass(input, "on");
       input.onchange = () => {
-        input.classList.toggle("on");
+        toggleClass(input, "on");
       };
     }
 

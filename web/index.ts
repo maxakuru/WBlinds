@@ -1,9 +1,6 @@
 import run from "./src";
-import { WBlindsNamespace } from "./src/types";
+import { WBlindsNamespace } from "./src/namespace";
 import "./index.css";
 
-const ns: WBlindsNamespace = {
-  test: true,
-};
-(window as any).wblinds = ns;
+const ns = (window.wblinds = {});
 window.onload = () => run(ns);

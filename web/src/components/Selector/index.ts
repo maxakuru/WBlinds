@@ -1,7 +1,7 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component } from "@Components";
 import template from "./Selector.html";
 import "./Selector.css";
-import { appendChild, createDiv } from "../../util";
+import { addClass, appendChild, createDiv, removeClass } from "@Util";
 
 export type ChangeHandler = (index: number) => unknown;
 export interface SelectorAPI {
@@ -29,11 +29,11 @@ const _Selector: ComponentFunction<SelectorAPI, SelectorProps> = function ({
     items.map((i, index) => {
       const e = createDiv();
       e.innerText = i;
-      index === _index && e.classList.add("sel");
+      index === _index && addClass(e, "sel");
       e.onclick = () => {
-        _items[_index].classList.remove("sel");
+        removeClass(_items[_index], "sel");
         _index = index;
-        e.classList.add("sel");
+        addClass(e, "sel");
         _changeHandlers.map((c) => c(index));
       };
       _items.push(e);

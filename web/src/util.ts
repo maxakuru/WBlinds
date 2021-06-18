@@ -1,3 +1,5 @@
+export * from "./min";
+
 export function isObject(o: unknown): o is Record<string, unknown> {
   return o && typeof o === "object" && !Array.isArray(o);
 }
@@ -24,20 +26,9 @@ export function debug(...msgs: any[]): void {
   if (process.env.NODE_ENV === "dev") console.debug(...msgs);
 }
 
-export const nextTick = setTimeout;
-
 export function emptyObject(obj: any): boolean {
   return Object.keys(obj).length === 0;
 }
-
-export const createElement: <K extends keyof HTMLElementTagNameMap>(
-  tagName: K
-) => HTMLElementTagNameMap[K] = document.createElement.bind(document);
-
-export const createDiv: <T = HTMLElement>() => T = document.createElement.bind(
-  document,
-  "div"
-);
 
 export function pruneUndef<T>(obj: T): T {
   const o: T = {} as T;
@@ -51,29 +42,3 @@ export function pruneUndef<T>(obj: T): T {
 
 export const appendChild = (parent: HTMLElement, child: HTMLElement) =>
   parent.appendChild(child);
-
-/**
- * Alias to document.getElementById,
- * so closure can trim a few extra characters.
- */
-export const getElement: (id: string) => HTMLElement =
-  document.getElementById.bind(document);
-
-export const querySelector = <T = HTMLElement>(
-  selectors: keyof HTMLElementTagNameMap,
-  elem: HTMLElement | Document = document
-): T => elem.querySelector.call(elem, selectors);
-
-export const stopPropagation = (e: Event): void => e.stopPropagation();
-/**
- * Type alias for containers
- */
-export const getComponentContainer: (id: "nav-c") => HTMLElement = getElement;
-
-export function setLoading(segName: string, loading = false) {
-  if (loading) {
-    // todo
-  } else {
-    getElement(`${segName}-s`).style.display = "none";
-  }
-}

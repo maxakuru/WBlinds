@@ -1,6 +1,7 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component } from "@Components";
 import template from "./Nav.html";
 import "./Nav.css";
+import { addClass, removeClass } from "@Util";
 
 type ClickHandler = (index: number) => unknown;
 interface NavAPI {
@@ -22,9 +23,9 @@ const _Nav: ComponentFunction<NavAPI> = function () {
         _i = index;
         buttons.forEach((b2, i2) => {
           if (i2 === _i) {
-            b2.classList.add("sel");
+            addClass(b2, "sel");
           } else {
-            b2.classList.remove("sel");
+            removeClass(b2, "sel");
           }
         });
         _clickHandlers.map((c) => c.call(undefined, index));

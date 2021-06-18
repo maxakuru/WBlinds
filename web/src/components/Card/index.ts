@@ -1,8 +1,7 @@
-import { ComponentFunction, Component } from "../Component";
+import { ComponentFunction, Component, Slider } from "@Components";
 import template from "./Card.html";
 import "./Card.css";
-import { Slider } from "../Slider";
-import { appendChild } from "../../util";
+import { addClass, appendChild, removeClass } from "@Util";
 
 export interface CardAPI {
   temp?: any;
@@ -70,7 +69,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
     function toggleAnimations(newState = false) {
       if (newState === animated) return;
-      newState ? elem.classList.add("an") : elem.classList.remove("an");
+      newState ? addClass(elem, "an") : removeClass(elem, "an");
       animated = newState;
     }
 

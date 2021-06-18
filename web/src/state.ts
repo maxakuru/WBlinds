@@ -1,4 +1,4 @@
-import { emptyObject, mergeDeep, nextTick, pruneUndef } from "./util";
+import { emptyObject, mergeDeep, nextTick, pruneUndef } from "@Util";
 
 type StateHandler<T = any> = (u: { value: T; prev: T }) => void;
 export interface CurrentData {
@@ -126,6 +126,10 @@ class _State {
       curr = curr[spl.shift()];
     }
     return curr;
+  }
+
+  isLoaded(key: keyof StateData): boolean {
+    return this._loadedKeys[key];
   }
 
   /**
