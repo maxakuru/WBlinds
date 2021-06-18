@@ -1,9 +1,3 @@
-:root {
-	--blue: #06c;
-	--green: #32D74B;
-	--input: #DB8B1D;
-}
-
 html {
 	touch-action: manipulation;
 }

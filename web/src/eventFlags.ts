@@ -16,7 +16,7 @@ export const OrderedEventFlags = [
   "speed",
   "accel",
   "deviceName",
-  "mDnsName",
+  "mdnsName",
   "emitSyncData",
   "pinStep",
   "pinDir",

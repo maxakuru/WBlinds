@@ -19,6 +19,8 @@ plugins.push(
     preventAssignment: true,
     "process.env.NODE_ENV": JSON.stringify(env.MODE),
     "process.env.USE_MOCKS": JSON.stringify(env.USE_MOCKS),
+    "process.env.API_ENDPOINT": JSON.stringify(env.API_ENDPOINT || ""),
+    "process.env.WS_ENDPOINT": JSON.stringify(env.WS_ENDPOINT || ""),
   }),
   typescript({
     sourceMap: dev,

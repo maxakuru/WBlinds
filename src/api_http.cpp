@@ -72,10 +72,11 @@ static bool handleFileRead(AsyncWebServerRequest* request, String path) {
 
 
 static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag) {
-   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+   WLOG_I(TAG, "%s (%d args), etag %s", request->url().c_str(), request->params(), etag);
 
    AsyncWebHeader* header = request->getHeader("If-None-Match");
    if (header && header->value() == etag) {
+      WLOG_D(TAG, "matched etag, 304");
       request->send(304);
       return true;
    }
@@ -83,6 +84,11 @@ static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String 
 }
 
 static void setCacheControlHeaders(AsyncWebServerResponse* response, String etag) {
+   if (response == nullptr) {
+      WLOG_D(TAG, "response nullptr");
+      return;
+   }
+   WLOG_D(TAG, "add response cache headers");
    response->addHeader(F("Cache-Control"), "no-cache");
    response->addHeader(F("ETag"), etag);
 }
@@ -98,6 +104,13 @@ static void serveIndex(AsyncWebServerRequest* request) {
    setCacheControlHeaders(response, String(VERSION));
 
    request->send(response);
+}
+
+static void setCORSHeaders(AsyncWebServerResponse* response) {
+   if (response == nullptr) {
+      return;
+   }
+   response->addHeader(F("Access-Control-Allow-Origin"), "*");
 }
 
 static void handleNotFound(AsyncWebServerRequest* request) {
@@ -128,7 +141,9 @@ static void getState(AsyncWebServerRequest* request) {
          return request->send(404, stdBlinds::MT_HTML, "Not found");
       }
    };
-   request->send(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
+   AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
+   setCORSHeaders(response);
+   request->send(response);
 }
 
 static void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
@@ -180,7 +195,6 @@ static void getSettings(AsyncWebServerRequest* request) {
 
    String data;
    String etag;
-   AsyncWebServerResponse* response;
    if (request->hasArg("type")) {
       auto p = request->getParam("type")->value();
       if (!strcmp(p.c_str(), "mqtt")) {
@@ -205,10 +219,12 @@ static void getSettings(AsyncWebServerRequest* request) {
    else {
       etag = state->getAllSettingsEtag();
       if (handleIfNoneMatchCacheHeader(request, etag)) return;
-      data = state->serializeSettings(setting_t::kGeneral);
+      data = state->serializeSettings(setting_t::kAll);
    }
-   request->beginResponse(200, stdBlinds::MT_JSON, data);
+   AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, data);
    setCacheControlHeaders(response, etag);
+   setCORSHeaders(response);
+   request->send(response);
 }
 
 void BlindsHTTPAPI::init() {

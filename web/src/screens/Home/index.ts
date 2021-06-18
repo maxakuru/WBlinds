@@ -1,8 +1,9 @@
-import { getElement } from "../../util";
-import { _Component, Component } from "../../components/Component";
+import { appendChild, createDiv, getElement, nextTick } from "../../util";
+import { ComponentFunction, Component } from "../../components/Component";
 import template from "./Home.html";
 import { State } from "../../state";
 import { Tile } from "../../components";
+import "./Home.css";
 
 type DeviceClickHandler = (device: any) => void;
 export interface HomeAPI {
@@ -13,7 +14,7 @@ export interface HomeAPI {
 const DEVICE_TILE = "device";
 const PRESET_TILE = "preset";
 
-const _Home: Component<HomeAPI> = function () {
+const _Home: ComponentFunction<HomeAPI> = function () {
   let _loading = true;
   let _tiles: Tile[] = [];
   let _deviceClickHandlers: DeviceClickHandler[] = [];
@@ -22,20 +23,11 @@ const _Home: Component<HomeAPI> = function () {
     // initially spinner is showing,
     // rest is hidden in a div
 
-    // const buttons = elem.querySelectorAll("li");
-    // buttons.forEach((b, index) => {
-    //   b.addEventListener("click", () => {
-    //     i = index;
-    //     clickHandlers.map((c) => c.call(undefined, index));
-    //   });
-    // });
-
     function loaded() {
       if (!_loading) return;
       const spinner = getElement("hl");
-      spinner.style.display = "none";
-
       const content = getElement("hlc");
+      spinner.style.display = "none";
       content.classList.remove("hide");
       _loading = false;
     }
@@ -52,11 +44,13 @@ const _Home: Component<HomeAPI> = function () {
       const { container, tiles } = getAllTiles(type);
       const w = container.clientWidth;
       const perRow = Math.floor(w / 110);
+      console.log("client width: ", w);
+      console.log("perRow: ", perRow);
       let len = tiles.length;
       while (len % perRow !== 0) {
-        const e = document.createElement("div");
+        const e = createDiv();
         e.classList.add("tile", "sq", "em");
-        container.appendChild(e);
+        appendChild(container, e);
         len++;
       }
     }
@@ -95,18 +89,20 @@ const _Home: Component<HomeAPI> = function () {
       }
     }
 
-    State.observe((PRESET_TILE + "s") as "presets", ({ value, prev }) => {
-      console.log("presets updated: ", value, prev);
-      loaded();
+    nextTick(() => {
+      State.observe((PRESET_TILE + "s") as "presets", ({ value, prev }) => {
+        console.log("presets updated: ", value, prev);
+        loaded();
 
-      updateTiles(PRESET_TILE, value);
-    });
+        updateTiles(PRESET_TILE, value);
+      });
 
-    State.observe((DEVICE_TILE + "s") as "devices", ({ value, prev }) => {
-      console.log("devices updated: ", value, prev);
-      loaded();
+      State.observe((DEVICE_TILE + "s") as "devices", ({ value, prev }) => {
+        console.log("devices updated: ", value, prev);
+        loaded();
 
-      updateTiles(DEVICE_TILE, value);
+        updateTiles(DEVICE_TILE, value);
+      });
     });
 
     return {
@@ -123,5 +119,5 @@ const _Home: Component<HomeAPI> = function () {
   return template;
 };
 
-export type Home = _Component<HomeAPI>;
-export const Home = _Component(_Home);
+export type Home = Component<HomeAPI>;
+export const Home = Component(_Home);

@@ -1,4 +1,4 @@
-import { _Component, Component } from "../Component";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Tile.html";
 import "./Tile.css";
 import { querySelector } from "../../util";
@@ -14,7 +14,7 @@ interface TileProps {
   id: string;
 }
 
-const _Tile: Component<TileAPI, TileProps> = function ({
+const _Tile: ComponentFunction<TileAPI, TileProps> = function ({
   name,
   id,
 }: TileProps) {
@@ -38,5 +38,5 @@ const _Tile: Component<TileAPI, TileProps> = function ({
   return template;
 };
 
-export type Tile = _Component<TileAPI>;
-export const Tile = _Component(_Tile);
+export type Tile = Component<TileAPI>;
+export const Tile = Component(_Tile);

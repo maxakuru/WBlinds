@@ -1,7 +1,8 @@
-import { _Component, Component } from "../Component";
+import { ComponentFunction, Component } from "../Component";
 import template from "./ToastContainer.html";
 import "./ToastContainer.css";
 import { Toast } from "../Toast";
+import { appendChild } from "../../util";
 
 type ClickHandler = (data: ToastContainerProps) => unknown;
 export interface ToastContainerAPI {
@@ -19,49 +20,51 @@ interface ToastContainerProps {
   id?: string;
 }
 
-const _ToastContainer: Component<ToastContainerAPI, ToastContainerProps> =
-  function ({ name, id }: ToastContainerProps) {
-    let _index = 0;
-    let _toasts: Toast[] = [];
+const _ToastContainer: ComponentFunction<
+  ToastContainerAPI,
+  ToastContainerProps
+> = function ({ name, id }: ToastContainerProps) {
+  let _index = 0;
+  let _toasts: Toast[] = [];
 
-    this.init = function (elem: HTMLElement) {
-      console.log("toast container: ", elem);
+  this.init = function (elem: HTMLElement) {
+    console.log("toast container: ", elem);
 
-      function pushToast(
-        message: string,
-        isError?: boolean,
-        isPersistent?: boolean,
-        timeout = 2500
-      ) {
-        const t = Toast({ message, isError, id: _index++ });
+    function pushToast(
+      message: string,
+      isError?: boolean,
+      isPersistent?: boolean,
+      timeout = 2500
+    ) {
+      const t = Toast({ message, isError, id: _index++ });
+      t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
+      t.onClick(remove);
+      _toasts.push(t);
+      appendChild(elem, t.node);
+
+      function remove() {
         t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
-        t.onClick(remove);
-        _toasts.push(t);
-        elem.appendChild(t.node);
-
-        function remove() {
-          t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
-          setTimeout(() => {
-            t.node.remove();
-          }, 500);
-        }
-
         setTimeout(() => {
-          t.node.style.bottom = `0px`;
-          !isPersistent && setTimeout(remove, timeout);
-        });
+          t.node.remove();
+        }, 500);
       }
-      return {
-        destroy: () => {
-          _toasts.map((t) => t.destroy());
-          _toasts = [];
-          _index = 0;
-        },
-        pushToast,
-      };
-    };
-    return template;
-  };
 
-export type ToastContainer = _Component<ToastContainerAPI>;
-export const ToastContainer = _Component(_ToastContainer);
+      setTimeout(() => {
+        t.node.style.bottom = `0px`;
+        !isPersistent && setTimeout(remove, timeout);
+      });
+    }
+    return {
+      destroy: () => {
+        _toasts.map((t) => t.destroy());
+        _toasts = [];
+        _index = 0;
+      },
+      pushToast,
+    };
+  };
+  return template;
+};
+
+export type ToastContainer = Component<ToastContainerAPI>;
+export const ToastContainer = Component(_ToastContainer);

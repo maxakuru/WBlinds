@@ -1,39 +1,112 @@
+import { emptyObject, mergeDeep, nextTick, pruneUndef } from "./util";
+
 type StateHandler<T = any> = (u: { value: T; prev: T }) => void;
-interface _State {
-  _observers: Record<string, StateHandler[]>;
-  _state: {
-    state: {
-      tPos: number;
-      pos: number;
-      accel: number;
-      speed: number;
-    };
-    settings: {
-      deviceName: string;
-    };
-    devices: Record<string, any>;
-    presets: Record<string, any>;
+export interface CurrentData {
+  tPos: number;
+  pos: number;
+  accel: number;
+  speed: number;
+}
+export interface SettingsData {
+  gen: {
+    deviceName: string;
+    mdnsName: string;
+    emitSync: boolean;
+  };
+  hw: {
+    pStep: number;
+    pDir: number;
+    pEn: number;
+    pSleep: number;
+    pReset: number;
+    pMs1: number;
+    pMs2: number;
+    pMs3: number;
+    pHome: number;
+    cLen: number;
+    cDia: number;
+    axDia: number;
+    stepsPerRev: number;
+    res: number;
+  };
+  mqtt: {
+    enabled: boolean;
+    host: string;
+    port: number;
+    topic: string;
+    user: string;
   };
 }
+// TODO
+interface DeviceRecord {
+  [key: string]: any;
+}
+// TODO
+interface PresetRecord {
+  [key: string]: any;
+}
+export interface StateData {
+  state: CurrentData;
+  pendingState: Partial<CurrentData>;
+  settings: SettingsData;
+  devices: Record<string, DeviceRecord>;
+  presets: Record<string, PresetRecord>;
+}
+
+interface _State {
+  _observers: Record<string, StateHandler[]>;
+  _state: StateData;
+}
+
+export const DEFAULT_SETTINGS_DATA = {
+  gen: {
+    deviceName: "WBlinds",
+    mdnsName: "WBlinds",
+    emitSync: false,
+  },
+  hw: {
+    pStep: 19,
+    pDir: 18,
+    pEn: 13,
+    pSleep: 21,
+    pReset: 3,
+    pMs1: 1,
+    pMs2: 5,
+    pMs3: 17,
+    pHome: 4,
+    cLen: 1650,
+    cDia: 0.1,
+    axDia: 15,
+    stepsPerRev: 200,
+    res: 16,
+  },
+  mqtt: {
+    enabled: false,
+    host: "192.168.0.99",
+    port: 1833,
+    topic: "wblinds",
+    user: "user",
+  },
+};
+const DEFAULT_STATE_DATA = {
+  state: {
+    pos: 0,
+    tPos: 0,
+    accel: 0,
+    speed: 0,
+  },
+  settings: mergeDeep({}, DEFAULT_SETTINGS_DATA),
+  pendingState: mergeDeep({}, DEFAULT_SETTINGS_DATA),
+  devices: {},
+  presets: {},
+};
 class _State {
   //   private _observers: Record<string, StateHandler[]>;
   //   private _state: any;
 
   constructor() {
     this._observers = {};
-    this._state = {
-      state: {
-        pos: 0,
-        tPos: 0,
-        accel: 0,
-        speed: 0,
-      },
-      settings: {
-        deviceName: "",
-      },
-      devices: {},
-      presets: {},
-    };
+    this._state = mergeDeep({}, DEFAULT_STATE_DATA);
   }
 
   get<T>(path: string): T {
@@ -51,13 +124,10 @@ class _State {
    * @param key
    * @param value
    */
-  update<T extends keyof _State["_state"], U extends _State["_state"][T]>(
-    key: T,
-    value: U
-  ) {
+  update<T extends keyof StateData, U extends StateData[T]>(key: T, value: U) {
     this._observers[key] ??= [];
     const prev = this._state[key];
-    this._state[key] = value;
+    this._state[key] = mergeDeep({}, prev, pruneUndef(value));
     this._observers[key].forEach((h) => {
       h({
         value: { ...(value as U) },
@@ -66,13 +136,13 @@ class _State {
     });
   }
 
-  observe<T extends keyof _State["_state"], U extends _State["_state"][T]>(
+  observe<T extends keyof StateData, U extends StateData[T]>(
     key: T,
     handler: StateHandler<U>
   ) {
     this._observers[key] ??= [];
     this._observers[key].push(handler);
-    if (this._state[key]) {
+    if (!emptyObject(this._state[key])) {
       handler({
         value: { ...(this._state[key] as U) },
         prev: undefined,

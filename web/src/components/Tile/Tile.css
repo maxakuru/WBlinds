@@ -1,7 +1,7 @@
-
-.dt {
-	/* margin: 0 10px 0 -10px; */
-	justify-content: space-between;
+:root {
+	/* --wid: calc((100vw - 30px) / 3);  */
+	/* Always 3 columns */
+	--wid: min(calc((100vw - 60px) / 3), 110px);
 }
 
 .tile {
@@ -12,15 +12,15 @@
 }
 
 .tile.sq {
-	width: 110px;
-	height: 110px;
-	margin: 20px;
+	width: var(--wid);
+	height: var(--wid);
+	/* margin: 20px; */
 	margin: 5px 0px 5px 0px;
 	position: relative;
 }
 
-.tile.sq >span {
-	width: 109px;
+.tile.sq>span {
+	width: calc(var(--wid) - 1px);
 	max-height: 90px;
 	top: 10px;
 	position: absolute;

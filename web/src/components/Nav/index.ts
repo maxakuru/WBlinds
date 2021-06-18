@@ -1,4 +1,4 @@
-import { _Component, Component } from "../Component";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Nav.html";
 import "./Nav.css";
 
@@ -9,7 +9,7 @@ interface NavAPI {
   destroy(): void;
 }
 
-const _Nav: Component<NavAPI> = function () {
+const _Nav: ComponentFunction<NavAPI> = function () {
   let _i = 0;
   let _clickHandlers: ClickHandler[] = [];
 
@@ -44,5 +44,5 @@ const _Nav: Component<NavAPI> = function () {
   return template;
 };
 
-export type Nav = _Component<NavAPI>;
-export const Nav = _Component(_Nav);
+export type Nav = Component<NavAPI>;
+export const Nav = Component(_Nav);

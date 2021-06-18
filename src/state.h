@@ -3,8 +3,8 @@
 
 #include "defines.h"
 
-extern DynamicJsonDocument stateDoc;
-extern DynamicJsonDocument settingsDoc;
+// extern DynamicJsonDocument stateDoc;
+// extern DynamicJsonDocument settingsDoc;
 extern char deviceName[64];
 extern char mDnsName[64];
 extern char mqttHost[128];

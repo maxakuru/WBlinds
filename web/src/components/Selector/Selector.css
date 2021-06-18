@@ -1,0 +1,39 @@
+:root {
+	--bord: 1px solid rgba(0, 0, 0, 0.034);
+}
+
+#pas {
+	border-radius: 7px;
+    justify-content: center;
+    background: #7676803D;
+	border: 2px solid #00000000;
+}
+
+#pas>div {
+	/* width: 10px; */
+	padding: 2px 0 2px;
+	flex-grow: 1;
+	text-align: center;
+	font-size: 14px;
+	border: 1px #FFFFFF00 solid;
+}
+
+#pas>div.sel {
+	background-color: #676769a3;
+	border-radius: 7px;
+	border: 1px #00000024 solid
+}
+
+#pas>div::after {
+	height: 13px;
+    content: "";
+    display: block;
+    position: absolute;
+    border-left: 1px solid #8e8e9373;
+    border-radius: 0.5px;
+    transform: translate(-1px, -110%);
+}
+
+#pas>div:first-child::after {
+	border-left: none;
+}

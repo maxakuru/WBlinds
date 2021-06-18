@@ -59,7 +59,9 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
   connect();
 
   function connect() {
-    ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+    ws = new WebSocket(
+      `ws://${process.env.WS_ENDPOINT || window.location.hostname}/ws`
+    );
     ws.onopen = (e: Event) => {
       debug("[ws] onOpen(): ", e);
       _enabled = true;

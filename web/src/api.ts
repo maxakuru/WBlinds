@@ -3,12 +3,12 @@ export const enum HTTPMethod {
   POST = "POST",
 }
 
+const api = process.env.API_ENDPOINT;
 /**
  *
  */
-export function fetchJson(url: string, method?: HTTPMethod): Promise<any> {
-  console.log("this: ", this);
-  return fetch(url, {
+export function fetchJson(href: string, method?: HTTPMethod): Promise<any> {
+  return fetch(`${api}${href}`, {
     method,
   }).then((res) => {
     if (!res.ok) {

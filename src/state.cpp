@@ -1,8 +1,8 @@
 #include "state.h"
 
 State* State::instance = 0;
-DynamicJsonDocument stateDoc(512);
-DynamicJsonDocument settingsDoc(512);
+// DynamicJsonDocument stateDoc(512);
+// DynamicJsonDocument settingsDoc(512);
 
 // TODO: define real sizes
 char deviceName[64] = "WBlinds";
@@ -63,25 +63,28 @@ void State::Notify(StateObserver* that, EventFlags const& flags) {
 }
 
 String State::serialize() {
-    stateDoc["pos"] = data_.pos;
-    stateDoc["speed"] = data_.speed;
-    stateDoc["accel"] = data_.accel;
+    DynamicJsonDocument doc(512);
+    doc["pos"] = data_.pos;
+    doc["speed"] = data_.speed;
+    doc["accel"] = data_.accel;
 
     String output;
-    serializeJson(stateDoc, output);
+    serializeJson(doc, output);
     return output;
 }
 
 String State::serializeSettings(setting_t settingType) {
     DynamicJsonDocument doc(512);
     String output;
+    WLOG_D(TAG, "setting type: %i", settingType);
 
+    auto genObj = doc.createNestedObject("gen");
     if (settingType == setting_t::kAll || settingType == setting_t::kGeneral) {
-        doc["deviceName"] = settingsGeneral_.deviceName;
-        doc["mdnsName"] = settingsGeneral_.mDnsName;
-        doc["emitSync"] = settingsGeneral_.emitSyncData;
+        genObj["deviceName"] = settingsGeneral_.deviceName;
+        genObj["mdnsName"] = settingsGeneral_.mDnsName;
+        genObj["emitSync"] = settingsGeneral_.emitSyncData;
         if (settingType == setting_t::kGeneral) {
-            serializeJson(doc, output);
+            serializeJson(genObj, output);
             return output;
         }
     }
@@ -127,6 +130,7 @@ String State::serializeSettings(setting_t settingType) {
 
 void State::load_() {
     WLOG_I(TAG, "LOAD STATE/SETTINGS");
+    DynamicJsonDocument doc(512);
 
     init_();
 
@@ -140,22 +144,22 @@ void State::load_() {
         return saveSettings();
     }
 
-    DeserializationError stateError = deserializeJson(stateDoc, stateFile.readString());
+    DeserializationError stateError = deserializeJson(doc, stateFile.readString());
     if (stateError) {
         // TODO: fix broken save state
     }
     else {
-        JsonObject obj = stateDoc.as<JsonObject>();
+        JsonObject obj = doc.as<JsonObject>();
         setFieldsFromJSON_(nullptr, obj, false);
         data_.targetPos = data_.pos;
     }
 
-    DeserializationError settingsError = deserializeJson(stateDoc, settingsFile.readString());
+    DeserializationError settingsError = deserializeJson(doc, settingsFile.readString());
     if (settingsError) {
         // TODO: fix broken save state
     }
     else {
-        JsonObject obj = stateDoc.as<JsonObject>();
+        JsonObject obj = doc.as<JsonObject>();
         setSettingsFromJSON_(nullptr, obj, false);
     }
 }
@@ -245,32 +249,37 @@ stdBlinds::error_code_t State::loadFromObject(StateObserver* that, JsonObject& j
 }
 
 stdBlinds::error_code_t State::loadFromJSONString(StateObserver* that, String jsonStr) {
-    DeserializationError error = deserializeJson(stateDoc, jsonStr);
+    DynamicJsonDocument doc(512);
+    DeserializationError error = deserializeJson(doc, jsonStr);
     if (error) {
         return stdBlinds::error_code_t::InvalidJson;
     }
 
-    JsonObject obj = stateDoc.as<JsonObject>();
+    JsonObject obj = doc.as<JsonObject>();
     return setFieldsFromJSON_(that, obj, true);
 }
 
 void State::save() {
+    // TODO: decrease this size
+    DynamicJsonDocument doc(512);
     WLOG_I(TAG, "SAVE STATE");
     // TODO: sanitize
-    stateDoc["accel"] = data_.accel;
-    stateDoc["pos"] = data_.pos;
-    stateDoc["speed"] = data_.speed;
+    doc["accel"] = data_.accel;
+    doc["pos"] = data_.pos;
+    doc["speed"] = data_.speed;
     // TODO:? save target pos
 
     File stateFile = LITTLEFS.open("/state.json", "w");
-    serializeJson(stateDoc, stateFile);
+    serializeJson(doc, stateFile);
     isDirty_ = false;
 }
 
 void State::saveSettings() {
-    settingsDoc["deviceName"] = settingsGeneral_.deviceName;
+    // TODO: tweak this size
+    DynamicJsonDocument doc(512);
+    doc["deviceName"] = settingsGeneral_.deviceName;
     File settingsFile = LITTLEFS.open("/settings.json", "w");
-    serializeJson(settingsDoc, settingsFile);
+    serializeJson(doc, settingsFile);
     isSettingsDirty_ = false;
 }
 

@@ -2,13 +2,17 @@
 	background-color: #00000070;
     box-shadow: 1px 1px 8px #54545473;
     border-radius: 10px;
+	font-size: 13px;
 	margin: 10px;
-	height: 80px;
+	height: 60px;
 	display: flex;
-	max-width: 700px;
+	/* width: 80%; */
+	min-width: 250px;
+	max-width: 500px;
 	position: relative;
 	transition: 0.5s bottom ease-in-out;
 	pointer-events: all;
+	align-self: center;
 }
 
 .tom {

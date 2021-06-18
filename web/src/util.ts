@@ -24,6 +24,34 @@ export function debug(...msgs: any[]): void {
   if (process.env.NODE_ENV === "dev") console.debug(...msgs);
 }
 
+export const nextTick = setTimeout;
+
+export function emptyObject(obj: any): boolean {
+  return Object.keys(obj).length === 0;
+}
+
+export const createElement: <K extends keyof HTMLElementTagNameMap>(
+  tagName: K
+) => HTMLElementTagNameMap[K] = document.createElement.bind(document);
+
+export const createDiv: <T = HTMLElement>() => T = document.createElement.bind(
+  document,
+  "div"
+);
+
+export function pruneUndef<T>(obj: T): T {
+  const o: T = {} as T;
+  for (const k in obj) {
+    if (obj[k] != null) {
+      o[k] = obj[k];
+    }
+  }
+  return o;
+}
+
+export const appendChild = (parent: HTMLElement, child: HTMLElement) =>
+  parent.appendChild(child);
+
 /**
  * Alias to document.getElementById,
  * so closure can trim a few extra characters.

@@ -1,4 +1,4 @@
-import { _Component, Component } from "../Component";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Toast.html";
 import "./Toast.css";
 import { querySelector } from "../../util";
@@ -15,7 +15,7 @@ interface ToastProps {
   isError?: boolean;
 }
 
-const _Toast: Component<ToastAPI, ToastProps> = function ({
+const _Toast: ComponentFunction<ToastAPI, ToastProps> = function ({
   message,
   id,
   isError = false,
@@ -39,5 +39,5 @@ const _Toast: Component<ToastAPI, ToastProps> = function ({
   return template;
 };
 
-export type Toast = _Component<ToastAPI>;
-export const Toast = _Component(_Toast);
+export type Toast = Component<ToastAPI>;
+export const Toast = Component(_Toast);

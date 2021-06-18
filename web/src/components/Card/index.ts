@@ -1,7 +1,8 @@
-import { _Component, Component } from "../Component";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Card.html";
 import "./Card.css";
 import { Slider } from "../Slider";
+import { appendChild } from "../../util";
 
 export interface CardAPI {
   temp?: any;
@@ -18,7 +19,9 @@ interface Coords {
   y: number;
 }
 
-const _Card: Component<CardAPI, CardProps> = function ({ temp }: CardProps) {
+const _Card: ComponentFunction<CardAPI, CardProps> = function ({
+  temp,
+}: CardProps) {
   let draggingCard = false;
   let yOffset = 0;
   let yStart = 0;
@@ -29,7 +32,7 @@ const _Card: Component<CardAPI, CardProps> = function ({ temp }: CardProps) {
     toggleAnimations(true);
 
     const slider = Slider({ id: "position", label: "Position", value: "50" });
-    elem.appendChild(slider.node);
+    appendChild(elem, slider.node);
 
     const onPress = (coords: Coords) => {
       lastCoords = coords;
@@ -104,5 +107,5 @@ const _Card: Component<CardAPI, CardProps> = function ({ temp }: CardProps) {
   return template;
 };
 
-export type Card = _Component<CardAPI>;
-export const Card = _Component(_Card);
+export type Card = Component<CardAPI>;
+export const Card = Component(_Card);

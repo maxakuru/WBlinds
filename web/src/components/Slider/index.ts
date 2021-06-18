@@ -1,4 +1,4 @@
-import { _Component, Component } from "../Component";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Slider.html";
 import "./Slider.css";
 import { querySelector, stopPropagation } from "../../util";
@@ -13,7 +13,7 @@ interface SliderProps {
   id: string;
 }
 
-const _Slider: Component<SliderAPI, SliderProps> = function ({
+const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
   label,
   value,
   id,
@@ -50,5 +50,5 @@ const _Slider: Component<SliderAPI, SliderProps> = function ({
   return template;
 };
 
-export type Slider = _Component<SliderAPI>;
-export const Slider = _Component(_Slider);
+export type Slider = Component<SliderAPI>;
+export const Slider = Component(_Slider);

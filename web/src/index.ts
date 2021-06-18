@@ -1,5 +1,5 @@
 import { Nav, Card } from "./components";
-import { Home } from "./pages";
+import { Home, Settings } from "./screens";
 import { WBlindsNamespace } from "./types";
 import { debug, getElement, querySelector } from "./util";
 import { mock } from "../tools/mock";
@@ -10,6 +10,7 @@ import { ToastContainer } from "./components/ToastContainer";
 
 export default function (ns: WBlindsNamespace): void {
   debug("onLoad(): ", ns);
+  let loadedSettings = false;
   mock.init();
   const body = querySelector("body");
   const app = getElement("app");
@@ -22,24 +23,8 @@ export default function (ns: WBlindsNamespace): void {
     tc.pushToast(e.toString(), true);
   };
 
-  fetchJson("/state").then((res) => {
-    console.log("state res: ", res);
-    State.update("state", res);
-  });
-
-  // fetch home state
-  fetchJson("/presets").then((res) => {
-    console.log("presets res: ", res);
-    State.update("presets", res);
-  });
-
-  fetchJson("/devices").then((res) => {
-    console.log("devices res: ", res);
-    State.update("devices", res);
-  });
-
   let currentIndex = -1;
-  let currentTab: Home;
+  let currentTab: Home | Settings;
   function handleTabChange(nextIndex: number) {
     console.log("on click! ", nextIndex);
     if (currentIndex === nextIndex) return;
@@ -56,18 +41,33 @@ export default function (ns: WBlindsNamespace): void {
         const t = Home();
         t.onDeviceClick(handleDeviceClick);
         currentTab = t;
-        console.log("node: ", currentTab.node);
-
         break;
       }
+
       // Routines
       case 1: {
         currentTab = null;
         break;
       }
+
       // Settings
       case 2: {
-        currentTab = null;
+        const t = Settings();
+        currentTab = t;
+        if (!loadedSettings) {
+          fetchJson("/settings")
+            .then((res) => {
+              console.log("settings res: ", res);
+              State.update("pendingState", res);
+              State.update("settings", res);
+            })
+            .catch((e) => {
+              loadedSettings = false;
+              tc.pushToast("Failed to fetch settings!", true, false, 5000);
+              console.error(e);
+            });
+          loadedSettings = true;
+        }
         break;
       }
     }
@@ -82,6 +82,23 @@ export default function (ns: WBlindsNamespace): void {
     body.appendChild(card.node);
     setTimeout(card.show);
   }
+
+  // Data
+  fetchJson("/state").then((res) => {
+    console.log("state res: ", res);
+    State.update("state", res);
+  });
+
+  // fetch home state
+  fetchJson("/presets").then((res) => {
+    console.log("presets res: ", res);
+    State.update("presets", res);
+  });
+
+  fetchJson("/devices").then((res) => {
+    console.log("devices res: ", res);
+    State.update("devices", res);
+  });
 
   // Websocket
   const wsc = makeWebsocket({
