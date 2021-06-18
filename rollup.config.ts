@@ -10,7 +10,11 @@ import postcss from "rollup-plugin-postcss";
 import path from "path";
 
 const { parsed: env } = require("dotenv-flow").config();
-const dev = env.MODE !== "deploy";
+const dev = env.MODE !== "prod";
+if (process.env.CI) {
+  env.USE_MOCKS = false;
+}
+
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 const plugins = [];

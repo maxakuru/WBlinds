@@ -5,7 +5,6 @@ export function Component<T, U>(
     const ctx: Partial<ComponentCtx<T>> = {};
     const toRender = c.call(ctx, ...args);
     const elem = new DOMParser().parseFromString(toRender, "text/html");
-    console.log("ctx: ", ctx);
     const node = elem.getElementsByTagName("body").item(0).firstChild;
     const api: Component<T> = ctx.init.call(ctx, node) as Component<T>;
     api.node = node as HTMLElement;

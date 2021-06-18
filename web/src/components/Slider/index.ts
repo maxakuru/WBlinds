@@ -33,7 +33,6 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
         100;
       slider.style.background = `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${value}%, #606060 ${value}%, #606060 100%`;
     };
-    console.log("slider: ", slider, value);
     slider.value = value;
 
     return {

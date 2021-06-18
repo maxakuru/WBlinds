@@ -8,6 +8,7 @@ import {
   querySelector,
   removeClass,
   displayNone,
+  debug,
 } from "@Util";
 import {
   ComponentFunction,
@@ -176,7 +177,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     selector.onChange(displayTab);
 
     function displayTab(index: number) {
-      console.log("display tab: ", index);
       const div = getElement(id);
       let content: HTMLElement;
       if (index === 0) {
@@ -190,12 +190,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         content = mqtt;
       }
       div.innerHTML = "";
-      console.log("append: ", content);
-      // content.childNodes.forEach((c: HTMLElement) => {
-      //   console.log("child node: ", c);
-      //   appendChild(div, c);
-      // });
-      appendChild(div, content as HTMLElement);
+      appendChild(div, content);
     }
 
     function setDirty(newState: boolean) {
@@ -206,7 +201,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     }
 
     function loaded() {
-      console.log("settings loaded: ", State._state);
+      debug("settings loaded: ", State._state);
       if (!_loading) return;
       const spinner = getElement("sl");
       const container = getElement("slc");
@@ -229,7 +224,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
 
     nextTick(() => {
       State.observe(SETTINGS, ({ value, prev }) => {
-        console.log("settings updated: ", value, prev);
+        debug("settings updated: ", value, prev);
         loaded();
       });
     });
@@ -263,9 +258,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       ] as SettingsInputEntry;
 
       const stateKey = `${SETTINGS}.${key}.${k}`;
-      console.log("state key: ", stateKey);
-      console.log(" State.get(stateKey): ", State.get(stateKey));
-
       const inp = Input({ label, type, enumOpts, value: State.get(stateKey) });
       appendChild(getContainer(group), inp.node);
     }

@@ -42,27 +42,16 @@ module.exports = {
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: "module",
-        project: ["./tsconfig.json"],
-        // compilerOptions: {
-        //   include: ["**/*.ts"],
-        // },
+        project: ["./tsconfig.json", "./tsconfig.eslint.json"],
+        compilerOptions: {
+          include: ["**/*.ts"],
+        },
       },
       plugins: ["@typescript-eslint", "import", "prettier"],
       rules: {
         "@typescript-eslint/no-explicit-any": 0,
         "prettier/prettier": 2,
       },
-      // settings: {
-      //   "import/parsers": {
-      //     "@typescript-eslint/parser": [".ts", ".tsx"],
-      //   },
-      //   "import/resolver": {
-      //     typescript: {
-      //       alwaysTryTypes: true,
-      //       project: "./tsconfig.json",
-      //     },
-      //   },
-      // },
     },
   ],
   settings: {

@@ -28,8 +28,6 @@ const _ToastContainer: ComponentFunction<
   let _toasts: Toast[] = [];
 
   this.init = function (elem: HTMLElement) {
-    console.log("toast container: ", elem);
-
     function pushToast(
       message: string,
       isError?: boolean,

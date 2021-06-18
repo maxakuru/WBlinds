@@ -113,7 +113,7 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
 
   function unpackMessages(data: string): WSIncomingEvent[] {
     // TODO: convert string message to object
-    console.log("unpackMessages: ", data);
+    debug("unpackMessages: ", data);
     const spl = data.split("/");
     const mac = spl.shift();
     const mask = parseInt(spl.shift());

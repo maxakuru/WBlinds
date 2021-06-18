@@ -1,4 +1,5 @@
-import { ComponentFunction, Component, Slider } from "@Components";
+import { ComponentFunction, Component } from "../Component";
+import { Slider } from "@Components";
 import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, removeClass } from "@Util";
@@ -74,7 +75,6 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     }
 
     function destroy(ev?: any) {
-      console.log("on transition end: ", ev);
       elem.remove();
     }
 
@@ -84,7 +84,6 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     elem.onmousemove = elem.ontouchmove = (e: TouchEvent | MouseEvent) =>
       onMove(firstTouchXY(e));
     function firstTouchXY(e: TouchEvent | MouseEvent): Coords {
-      console.log("move event: ", e);
       let { x, y } = e as MouseEvent;
       if (x == null) {
         // touch event

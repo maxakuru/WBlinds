@@ -30,12 +30,10 @@ export default function (ns: WBlindsNamespace): void {
   let currentIndex = -1;
   let currentTab: Home | Settings;
   function handleTabChange(nextIndex: number) {
-    console.log("on click! ", nextIndex);
     if (currentIndex === nextIndex) return;
 
     currentIndex = nextIndex;
     currentTab?.destroy?.();
-    console.log("currentTab.node: ", currentTab?.node);
     currentTab?.node.remove();
 
     // change app screen
@@ -69,7 +67,6 @@ export default function (ns: WBlindsNamespace): void {
   handleTabChange(0);
 
   function handleDeviceClick(device: any) {
-    console.log("device clicked: ", device);
     // Show device card
     const card = Card({});
     appendChild(body, card.node);
@@ -93,7 +90,7 @@ export default function (ns: WBlindsNamespace): void {
   // Websocket
   const wsc = makeWebsocket({
     onMessage(msg: WSIncomingEvent) {
-      console.log("WS msg: ", msg);
+      debug("WS msg: ", msg);
       if (msg.type === WSEventType.UpdateSettings) {
         State.update(SETTINGS, {
           ...State.get<StateData["settings"]>(SETTINGS),
@@ -107,13 +104,13 @@ export default function (ns: WBlindsNamespace): void {
       }
     },
     onConnect(e: Event, num: number) {
-      console.log("WS connect: ", e);
+      debug("WS connect: ", e);
       if (num) {
         tc.pushToast("Websocket connected!");
       }
     },
     onDisconnect(e: CloseEvent) {
-      console.log("WS disconnect: ", e);
+      debug("WS disconnect: ", e);
     },
   });
 
@@ -127,8 +124,6 @@ export default function (ns: WBlindsNamespace): void {
 
   // Nav
   const nav = Nav();
-  console.log("node: ", nav.node);
   appendChild(getElement("nav"), nav.node);
-  console.log("nav: ", nav.currentIndex());
   nav.onClick(handleTabChange);
 }

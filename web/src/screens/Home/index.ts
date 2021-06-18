@@ -6,6 +6,7 @@ import {
   nextTick,
   removeClass,
   displayNone,
+  debug,
 } from "@Util";
 import { ComponentFunction, Component, Tile } from "@Components";
 import template from "./Home.html";
@@ -52,8 +53,6 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       const { container, tiles } = getAllTiles(type);
       const w = container.clientWidth;
       const perRow = Math.floor(w / 110);
-      console.log("client width: ", w);
-      console.log("perRow: ", perRow);
       let len = tiles.length;
       while (len % perRow !== 0) {
         const e = createDiv();
@@ -99,14 +98,14 @@ const _Home: ComponentFunction<HomeAPI> = function () {
 
     nextTick(() => {
       State.observe(PRESETS, ({ value, prev }) => {
-        console.log("presets updated: ", value, prev);
+        debug("presets updated: ", value, prev);
         loaded();
 
         updateTiles(PRESET_TILE, value);
       });
 
       State.observe(DEVICES, ({ value, prev }) => {
-        console.log("devices updated: ", value, prev);
+        debug("devices updated: ", value, prev);
         loaded();
 
         updateTiles(DEVICE_TILE, value);
