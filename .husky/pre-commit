@@ -3,3 +3,4 @@
 
 yarn build:ui
 ./node_modules/.bin/lint-staged
+git add ./public/*
