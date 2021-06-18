@@ -100,6 +100,7 @@ const DEFAULT_STATE_DATA = {
   devices: {},
   presets: {},
 };
+
 class _State {
   //   private _observers: Record<string, StateHandler[]>;
   //   private _state: any;
@@ -108,6 +109,14 @@ class _State {
     this._observers = {};
     this._state = mergeDeep({}, DEFAULT_STATE_DATA);
   }
+
+  private _loadedKeys: Record<keyof StateData, boolean> = {
+    devices: false,
+    presets: false,
+    pendingState: false,
+    settings: false,
+    state: false,
+  };
 
   get<T>(path: string): T {
     const spl = path.split(".");
@@ -128,6 +137,7 @@ class _State {
     this._observers[key] ??= [];
     const prev = this._state[key];
     this._state[key] = mergeDeep({}, prev, pruneUndef(value));
+    this._loadedKeys[key] = true;
     this._observers[key].forEach((h) => {
       h({
         value: { ...(value as U) },
@@ -142,9 +152,9 @@ class _State {
   ) {
     this._observers[key] ??= [];
     this._observers[key].push(handler);
-    if (!emptyObject(this._state[key])) {
+    if (this._loadedKeys[key]) {
       handler({
-        value: { ...(this._state[key] as U) },
+        value: mergeDeep({}, this._state[key] as U),
         prev: undefined,
       });
     }

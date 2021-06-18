@@ -1,6 +1,7 @@
 import {
   appendChild,
   createDiv,
+  createElement,
   getElement,
   nextTick,
   querySelector,
@@ -41,13 +42,13 @@ const SETTING_INPUT_MAP: Record<
       type: InputType.String,
       label: "Device name",
     },
-    emitSync: {
-      type: InputType.Boolean,
-      label: "Emit sync data",
-    },
     mdnsName: {
       type: InputType.String,
       label: "mDNS Name",
+    },
+    emitSync: {
+      type: InputType.Boolean,
+      label: "Emit sync data",
     },
   },
   mqtt: {
@@ -181,7 +182,12 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         content = mqtt;
       }
       div.innerHTML = "";
-      appendChild(div, content);
+      console.log("append: ", content);
+      // content.childNodes.forEach((c: HTMLElement) => {
+      //   console.log("child node: ", c);
+      //   appendChild(div, c);
+      // });
+      appendChild(div, content as HTMLElement);
     }
 
     function setDirty(newState: boolean) {
@@ -229,17 +235,17 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   };
 
   function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
-    const div = createDiv();
+    const container = createElement("span");
     const groupDivs: HTMLElement[] = [];
-    function getDiv(groupNum?: number) {
+    function getContainer(groupNum?: number) {
       if (groupNum == null) {
-        return div;
+        return container;
       }
       if (groupDivs[groupNum] == null) {
         const d = createDiv();
         d.classList.add("igroup");
         groupDivs[groupNum] = d;
-        appendChild(div, d);
+        appendChild(container, d);
       }
       return groupDivs[groupNum];
     }
@@ -248,10 +254,14 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         k
       ] as SettingsInputEntry;
 
-      const inp = Input({ label, type, enumOpts });
-      appendChild(getDiv(group), inp.node);
+      const stateKey = `settings.${key}.${k}`;
+      console.log("state key: ", stateKey);
+      console.log(" State.get(stateKey): ", State.get(stateKey));
+
+      const inp = Input({ label, type, enumOpts, value: State.get(stateKey) });
+      appendChild(getContainer(group), inp.node);
     }
-    return div;
+    return container;
   }
 
   return template;

@@ -113,9 +113,6 @@ function debug(...msgs) {
     console.debug(...msgs);
 }
 const nextTick = setTimeout;
-function emptyObject(obj) {
-    return Object.keys(obj).length === 0;
-}
 const createElement = document.createElement.bind(document);
 const createDiv = document.createElement.bind(document, "div");
 function pruneUndef(obj) {
@@ -240,7 +237,7 @@ const Card = Component(_Card);
 
 var template$6 = "<div class=\"tile sq\"><span></span><p>Bedroom Left</p></div>";
 
-var css_248z$7 = "\n:root {\n\t/* --wid: calc((100vw - 30px) / 3);  */ /* Always 3 columns */\n\t--wid: min(calc((100vw - 60px) / 3), 110px);\n}\n\n.tile {\n\tbackground: #0000004D;\n\tborder-radius: 12px;\n\tdisplay: flex;\n\t/* justify-content: space-around; */\n}\n\n.tile.sq {\n\twidth:var(--wid);\n\theight:var(--wid);\n\t/* margin: 20px; */\n\tmargin: 5px 0px 5px 0px;\n\tposition: relative;\n}\n\n.tile.sq >span {\n\twidth: calc(--wid - 1px);\n\tmax-height: 90px;\n\ttop: 10px;\n\tposition: absolute;\n\tright: 0px;\n\tborder-right: 1px dashed white;\n\tborder-right-style: groove;\n}\n\n.pt>.sq {\n\theight: 50px;\n\twidth: auto;\n\tmin-width: 150px;\n}\n\n.pt>.sq>span {\n\tdisplay: none;\n}\n\n.tile.sq p {\n\tfont-size: 11px;\n\tmargin: auto 21px 10px 9px;\n\tfont-weight: 500;\n}";
+var css_248z$7 = ":root {\n\t/* --wid: calc((100vw - 30px) / 3);  */\n\t/* Always 3 columns */\n\t--wid: min(calc((100vw - 60px) / 3), 110px);\n}\n\n.tile {\n\tbackground: #0000004D;\n\tborder-radius: 12px;\n\tdisplay: flex;\n\t/* justify-content: space-around; */\n}\n\n.tile.sq {\n\twidth: var(--wid);\n\theight: var(--wid);\n\t/* margin: 20px; */\n\tmargin: 5px 0px 5px 0px;\n\tposition: relative;\n}\n\n.tile.sq>span {\n\twidth: calc(var(--wid) - 1px);\n\tmax-height: 90px;\n\ttop: 10px;\n\tposition: absolute;\n\tright: 0px;\n\tborder-right: 1px dashed white;\n\tborder-right-style: groove;\n}\n\n.pt>.sq {\n\theight: 50px;\n\twidth: auto;\n\tmin-width: 150px;\n}\n\n.pt>.sq>span {\n\tdisplay: none;\n}\n\n.tile.sq p {\n\tfont-size: 11px;\n\tmargin: auto 21px 10px 9px;\n\tfont-weight: 500;\n}";
 styleInject(css_248z$7);
 
 const _Tile = function ({ name, id, }) {
@@ -331,9 +328,9 @@ const _Toast = function ({ message, id, isError = false, }) {
 };
 const Toast = Component(_Toast);
 
-var template$3 = "<div class=\"in\"><h4></h4></div>";
+var template$3 = "<div class=\"fR in\"><label></label></div>";
 
-var css_248z$4 = ".in {\n\t\n}";
+var css_248z$4 = ".in {\n\tjustify-content: space-between;\n\theight: 50px;\n\talign-items: center;\n\tbackground: #0000008F;\n\tpadding: 0px 15px 0px 15px;\n\tmargin-top: 10px;\n\tborder-radius: 15px;\n\t/* width: min(90%, 300px); */\n\tmin-width: 300px;\n}\n\n.in>label {\n\tfont-weight: bold;\n\tfont-size: 14px;\n}\n\n.igroup>.in {\n\tmargin-top: 0px;\n\tborder-radius: 0px;\n\tborder-bottom: 1px solid #FFFFFF4D;\n}\n\n.igroup>.in:first-child {\n\tborder-radius: 15px 15px 0px 0px;\n}\n\n.igroup>.in:last-child {\n\tborder-radius: 0px 0px 15px 15px;\n\tmargin-bottom: 10px;\n\tborder-bottom: none;\n}\n\n.in>input {\n\tbackground-color: #00000000;\n    border: none;\n\ttext-align: right;\n\tcolor: #DB8B1D;\n}\n\n[type=\"checkbox\"] {\n\t-webkit-appearance: none;\n\t   -moz-appearance: none;\n\t        appearance: none;\n\twidth: 51px;\n\theight: 31px;\n\tborder-radius: 50px;\n\tbackground-color: #94949a33 !important;\n}\n\n[type=\"checkbox\"]:after {\n\tcontent: \"\";\n    width: 50%;\n    border-radius: 100%;\n    height: 80%;\n    display: block;\n    position: relative;\n    background-color: white;\n    top: 12%;\n    left: 3%;\n    transition: 0.2s left ease-in-out;\n}\n\n[type=\"checkbox\"].on {\n\tbackground-color: #34C759 !important;\n}\n\n[type=\"checkbox\"].on::after {\n\tleft: 45%;\n}\n\n/* \n[type=\"checkbox\"]:not(:checked),\n  [type=\"checkbox\"]:checked {\n    position: absolute;\n    left: 0;\n    opacity: 0.01;\n  }\n  [type=\"checkbox\"]:not(:checked) + label,\n  [type=\"checkbox\"]:checked + label {\n    position: relative;\n    padding-left: 2.3em;\n    font-size: 1.05em;\n    line-height: 1.7;\n    cursor: pointer;\n  }\n\n  [type=\"checkbox\"]:not(:checked) + label:before,\n  [type=\"checkbox\"]:checked + label:before {\n    content: '';\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 1.4em;\n    height: 1.4em;\n    border: 1px solid #aaa;\n    background: #FFF;\n    border-radius: .2em;\n    box-shadow: inset 0 1px 3px rgba(0,0,0, .1), 0 0 0 rgba(203, 34, 237, .2);\n    -webkit-transition: all .275s;\n        transition: all .275s;\n  } */\n\n";
 styleInject(css_248z$4);
 
 var InputType;
@@ -349,12 +346,24 @@ const InputTypeMap = {
     [2]: "number",
     [3]: "select",
 };
-const _Input = function ({ label, type, enumOpts, }) {
+const _Input = function ({ label, type, enumOpts, value, }) {
     let _clickHandlers = [];
     this.init = function (elem) {
-        elem.firstChild.innerText = label;
+        const id = `cb-${label.split(" ").join("-")}`;
+        const l = elem.firstChild;
+        l.innerText = label;
+        l.htmlFor = id;
         const input = createElement("input");
         input.type = InputTypeMap[type];
+        input.placeholder = "placeholder";
+        input.id = id;
+        if (type === 1) {
+            input.checked = value;
+            value && input.classList.add("on");
+            input.onchange = () => {
+                input.classList.toggle("on");
+            };
+        }
         appendChild(elem, input);
         return {
             onClick: (h) => {
@@ -455,6 +464,13 @@ const DEFAULT_STATE_DATA = {
 };
 class _State {
     constructor() {
+        this._loadedKeys = {
+            devices: false,
+            presets: false,
+            pendingState: false,
+            settings: false,
+            state: false,
+        };
         this._observers = {};
         this._state = mergeDeep({}, DEFAULT_STATE_DATA);
     }
@@ -474,6 +490,7 @@ class _State {
         (_a = (_b = this._observers)[key]) !== null && _a !== void 0 ? _a : (_b[key] = []);
         const prev = this._state[key];
         this._state[key] = mergeDeep({}, prev, pruneUndef(value));
+        this._loadedKeys[key] = true;
         this._observers[key].forEach((h) => {
             h({
                 value: { ...value },
@@ -486,9 +503,9 @@ class _State {
         var _b;
         (_a = (_b = this._observers)[key]) !== null && _a !== void 0 ? _a : (_b[key] = []);
         this._observers[key].push(handler);
-        if (!emptyObject(this._state[key])) {
+        if (this._loadedKeys[key]) {
             handler({
-                value: { ...this._state[key] },
+                value: mergeDeep({}, this._state[key]),
                 prev: undefined,
             });
         }
@@ -589,7 +606,7 @@ const Home = Component(_Home);
 
 var template = "<div id=\"ps\" class=\"f flex\"><div id=\"sl\" class=\"loader\"></div><div id=\"slc\" class=\"hide fw\" style=\"text-align: left;\"></div></div>";
 
-var css_248z$1 = "";
+var css_248z$1 = "#pas {\n    margin-bottom: 20px;\n}\n\n#stcc {\n    display: flex;\n}\n\n#stcc>span {\n    margin: auto;\n}\n\n#stcc>div {\n    justify-content: center;\n}";
 styleInject(css_248z$1);
 
 var InputGroup;
@@ -604,13 +621,13 @@ const SETTING_INPUT_MAP = {
             type: 0,
             label: "Device name",
         },
-        emitSync: {
-            type: 1,
-            label: "Emit sync data",
-        },
         mdnsName: {
             type: 0,
             label: "mDNS Name",
+        },
+        emitSync: {
+            type: 1,
+            label: "Emit sync data",
         },
     },
     mqtt: {
@@ -718,13 +735,12 @@ const _Settings = function () {
     let _loading = true;
     let _inputs = [];
     const id = "stcc";
-    const pages = ["General", "Hardware", "MQTT"];
-    const selector = Selector({ items: pages });
+    const tabs = ["General", "Hardware", "MQTT"];
+    const selector = Selector({ items: tabs });
     let general;
     let hardware;
     let mqtt;
     this.init = function (elem) {
-        console.log("settings page: ", elem);
         selector.onChange(displayTab);
         function displayTab(index) {
             console.log("display tab: ", index);
@@ -740,6 +756,7 @@ const _Settings = function () {
                 content = mqtt;
             }
             div.innerHTML = "";
+            console.log("append: ", content);
             appendChild(div, content);
         }
         function loaded() {
@@ -774,29 +791,29 @@ const _Settings = function () {
         };
     };
     function makeTab(key) {
-        const div = createDiv();
+        const container = createElement("span");
         const groupDivs = [];
-        function getDiv(groupNum) {
-            console.log("getDiv: ", groupNum);
+        function getContainer(groupNum) {
             if (groupNum == null) {
-                return div;
+                return container;
             }
             if (groupDivs[groupNum] == null) {
                 const d = createDiv();
                 d.classList.add("igroup");
                 groupDivs[groupNum] = d;
-                appendChild(div, d);
+                appendChild(container, d);
             }
             return groupDivs[groupNum];
         }
         for (const k in SETTING_INPUT_MAP[key]) {
-            console.log("k : ", k);
             const { group, label, type, enumOpts } = SETTING_INPUT_MAP[key][k];
-            const inp = Input({ label, type, enumOpts });
-            console.log("inp: ", inp);
-            appendChild(getDiv(group), inp.node);
+            const stateKey = `settings.${key}.${k}`;
+            console.log("state key: ", stateKey);
+            console.log(" State.get(stateKey): ", State.get(stateKey));
+            const inp = Input({ label, type, enumOpts, value: State.get(stateKey) });
+            appendChild(getContainer(group), inp.node);
         }
-        return div;
+        return container;
     }
     return template;
 };
@@ -1047,7 +1064,7 @@ function run (ns) {
     nav.onClick(handleTabChange);
 }
 
-var css_248z = "html {\n\ttouch-action: manipulation;\n}\n\nbody {\n\tmargin: 0;\n\tbackground-color: #111;\n\tfont-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;;\n\tfont-size: 17px;\n\tfont-weight: 400;\n\tcolor: #fff;\n\ttext-align: center;\n\t-webkit-touch-callout: none;\n\t-webkit-user-select: none;\n\t-moz-user-select: none;\n\t-ms-user-select: none;\n\tuser-select: none;\n\t-webkit-tap-highlight-color: transparent;\n\tscrollbar-width: 6px;\n\tscrollbar-color: var(--c-sb) transparent;\n}\n\nhtml, body {\n\theight: 100%;\n\twidth: 100%;\n\tposition: fixed;\n\t-ms-scroll-chaining: none;\n\t    overscroll-behavior: none;\n}\n\nh1, h4 {\n\tfont-weight: 400;\n}\n\nh1 {\n\tfont-size: 32px;\n}\n\nh4 {\n\t-webkit-margin-after: 0.3em;\n\t        margin-block-end: 0.3em;\n\tfont-size: 14px;\n\tpadding-left: 5px;\n}\n\n.hide {\n\tdisplay: none;\n}\n\n.loader, .loader:before, .loader:after {\n\tborder-radius: 50%;\n\twidth: 2.5em;\n\theight: 2.5em;\n\t-webkit-animation-fill-mode: both;\n\tanimation-fill-mode: both;\n\t-webkit-animation: load7 1.8s infinite ease-in-out;\n\tanimation: load7 1.8s infinite ease-in-out;\n}\n\n.loader {\n\tmargin: auto;\n\tcolor: #ffffff;\n\tfont-size: 10px;\n\ttext-indent: -9999em;\n\ttransform: translate3d(0, -100px, 0);\n\t-webkit-animation-delay: -0.16s;\n\tanimation-delay: -0.16s;\n\talign-self: center;\n}\n\n.loader:before, .loader:after {\n\tcontent: '';\n\tposition: absolute;\n\ttop: 0;\n}\n\n.loader:before {\n\tleft: -3.5em;\n\t-webkit-animation-delay: -0.32s;\n\tanimation-delay: -0.32s;\n}\n\n.loader:after {\n\tleft: 3.5em;\n}\n\n@-webkit-keyframes load7 {\n\t0%, 80%, 100% {\n\t\tbox-shadow: 0 2.5em 0 -1.3em;\n\t}\n\t40% {\n\t\tbox-shadow: 0 2.5em 0 0;\n\t}\n}\n\n@keyframes load7 {\n\t0%, 80%, 100% {\n\t\tbox-shadow: 0 2.5em 0 -1.3em;\n\t}\n\t40% {\n\t\tbox-shadow: 0 2.5em 0 0;\n\t}\n}\n\n.em {\n\topacity: 0;\n}\n\nul {\n\tdisplay: flex;\n\tlist-style-type: none;\n\t-webkit-margin-before: 0em;\n\t        margin-block-start: 0em;\n\t-webkit-margin-after: 0em;\n\t        margin-block-end: 0em;\n\t-webkit-padding-start: 0px;\n\t        padding-inline-start: 0px;\n}\n\nli {\n\tdisplay: list-item;\n\ttext-align: -webkit-match-parent;\n\tcolor: #FFFFFF66;\n}\n\nli.s {\n\tcolor: #DB8B1D;\n}\n\n.f {\n\twidth: 100%;\n\theight: 100%;\n}\n\n.flex {\n\tdisplay: flex;\n}\n\n.fC {\n\tdisplay: flex;\n\tflex-direction: column;\n}\n\n.fR {\n\tdisplay: flex;\n\tflex-direction: row;\n}\n\n.fSB {\n\tjustify-content: space-between;\n}\n\n.wrap {\n\tflex-wrap: wrap;\n}\n\n.fh {\n\theight: 100%;\n}\n\n.fw {\n\twidth: 100%;\n}\n\n#bg {\n\theight: 100vh;\n\twidth: 100vw;\n\tposition: fixed;\n\tz-index: -10;\n\tbackground-position: 30%;\n\tbackground-repeat: no-repeat;\n\tbackground-size: cover;\n\topacity: 1;\n\ttransition: opacity 2s;\n    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#1d0143 0,#293b7c, #300a52);\n}\n\n#app {\n\tdisplay: flex;\n\tflex-direction: column;\n\tpadding: 23px 23px 0 23px;\n\theight: calc(100% - (63px + 23px));\n\toverflow-y: scroll;\n}\n\n.overlay {\n\tposition: fixed;\n\theight: 100%;\n\twidth: 100%;\n\ttop: 0;\n\tleft: 0;\n\tbackground-color: #333;\n\tfont-size: 24px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tz-index: 11;\n\topacity: 0.95;\n\ttransition: 0.7s;\n\tpointer-events: none;\n}";
+var css_248z = "html {\n\ttouch-action: manipulation;\n}\n\nbody {\n\tmargin: 0;\n\tbackground-color: #111;\n\tfont-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;;\n\tfont-size: 17px;\n\tfont-weight: 400;\n\tcolor: #fff;\n\ttext-align: center;\n\t-webkit-touch-callout: none;\n\t-webkit-user-select: none;\n\t-moz-user-select: none;\n\t-ms-user-select: none;\n\tuser-select: none;\n\t-webkit-tap-highlight-color: transparent;\n\tscrollbar-width: 6px;\n\tscrollbar-color: var(--c-sb) transparent;\n}\n\nhtml, body {\n\theight: 100%;\n\twidth: 100%;\n\tposition: fixed;\n\t-ms-scroll-chaining: none;\n\t    overscroll-behavior: none;\n}\n\n*:focus {\n    outline: none;\n}\n\nh1, h4 {\n\tfont-weight: 400;\n}\n\nh1 {\n\tfont-size: 32px;\n}\n\nh4 {\n\t-webkit-margin-after: 0.3em;\n\t        margin-block-end: 0.3em;\n\tfont-size: 14px;\n\tpadding-left: 5px;\n}\n\n.hide {\n\tdisplay: none;\n}\n\n.loader, .loader:before, .loader:after {\n\tborder-radius: 50%;\n\twidth: 2.5em;\n\theight: 2.5em;\n\t-webkit-animation-fill-mode: both;\n\tanimation-fill-mode: both;\n\t-webkit-animation: load7 1.8s infinite ease-in-out;\n\tanimation: load7 1.8s infinite ease-in-out;\n}\n\n.loader {\n\tmargin: auto;\n\tcolor: #ffffff;\n\tfont-size: 10px;\n\ttext-indent: -9999em;\n\ttransform: translate3d(0, -100px, 0);\n\t-webkit-animation-delay: -0.16s;\n\tanimation-delay: -0.16s;\n\talign-self: center;\n}\n\n.loader:before, .loader:after {\n\tcontent: '';\n\tposition: absolute;\n\ttop: 0;\n}\n\n.loader:before {\n\tleft: -3.5em;\n\t-webkit-animation-delay: -0.32s;\n\tanimation-delay: -0.32s;\n}\n\n.loader:after {\n\tleft: 3.5em;\n}\n\n@-webkit-keyframes load7 {\n\t0%, 80%, 100% {\n\t\tbox-shadow: 0 2.5em 0 -1.3em;\n\t}\n\t40% {\n\t\tbox-shadow: 0 2.5em 0 0;\n\t}\n}\n\n@keyframes load7 {\n\t0%, 80%, 100% {\n\t\tbox-shadow: 0 2.5em 0 -1.3em;\n\t}\n\t40% {\n\t\tbox-shadow: 0 2.5em 0 0;\n\t}\n}\n\n.em {\n\topacity: 0;\n}\n\nul {\n\tdisplay: flex;\n\tlist-style-type: none;\n\t-webkit-margin-before: 0em;\n\t        margin-block-start: 0em;\n\t-webkit-margin-after: 0em;\n\t        margin-block-end: 0em;\n\t-webkit-padding-start: 0px;\n\t        padding-inline-start: 0px;\n}\n\nli {\n\tdisplay: list-item;\n\ttext-align: -webkit-match-parent;\n\tcolor: #FFFFFF66;\n}\n\nli.s {\n\tcolor: #DB8B1D;\n}\n\n.f {\n\twidth: 100%;\n\theight: 100%;\n}\n\n.flex {\n\tdisplay: flex;\n}\n\n.fC {\n\tdisplay: flex;\n\tflex-direction: column;\n}\n\n.fR {\n\tdisplay: flex;\n\tflex-direction: row;\n}\n\n.fSB {\n\tjustify-content: space-between;\n}\n\n.wrap {\n\tflex-wrap: wrap;\n}\n\n.fh {\n\theight: 100%;\n}\n\n.fw {\n\twidth: 100%;\n}\n\n#bg {\n\theight: 100vh;\n\twidth: 100vw;\n\tposition: fixed;\n\tz-index: -10;\n\tbackground-position: 30%;\n\tbackground-repeat: no-repeat;\n\tbackground-size: cover;\n\topacity: 1;\n\ttransition: opacity 2s;\n    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#1d0143 0,#293b7c, #300a52);\n}\n\n#app {\n\tdisplay: flex;\n\tflex-direction: column;\n\tpadding: 23px 23px 0 23px;\n\theight: calc(100% - (63px + 23px));\n\toverflow-y: scroll;\n}\n\n.overlay {\n\tposition: fixed;\n\theight: 100%;\n\twidth: 100%;\n\ttop: 0;\n\tleft: 0;\n\tbackground-color: #333;\n\tfont-size: 24px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tz-index: 11;\n\topacity: 0.95;\n\ttransition: 0.7s;\n\tpointer-events: none;\n}";
 styleInject(css_248z);
 
 const ns = {

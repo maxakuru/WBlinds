@@ -1,0 +1,15 @@
+#pas {
+    margin-bottom: 20px;
+}
+
+#stcc {
+    display: flex;
+}
+
+#stcc>span {
+    margin: auto;
+}
+
+#stcc>div {
+    justify-content: center;
+}

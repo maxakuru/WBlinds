@@ -28,25 +28,41 @@ type InputProps =
       label: string;
       type: InputType.Enum;
       enumOpts: any[];
+      value: any;
     }
   | {
       label: string;
       type: Exclude<InputType, InputType.Enum>;
       enumOpts?: any[];
+      value: any;
     };
 
 const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   label,
   type,
   enumOpts,
+  value,
 }: InputProps) {
   let _clickHandlers: ClickHandler[] = [];
 
   this.init = function (elem: HTMLElement) {
-    (elem.firstChild as HTMLElement).innerText = label;
+    const id = `cb-${label.split(" ").join("-")}`;
+    const l = elem.firstChild as HTMLLabelElement;
+    l.innerText = label;
+    l.htmlFor = id;
 
     const input = createElement("input");
     input.type = InputTypeMap[type];
+    input.placeholder = "placeholder";
+    input.id = id;
+    if (type === InputType.Boolean) {
+      input.checked = value;
+      value && input.classList.add("on");
+      input.onchange = () => {
+        input.classList.toggle("on");
+      };
+    }
+
     appendChild(elem, input);
     return {
       onClick: (h) => {
