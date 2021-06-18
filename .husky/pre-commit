@@ -1,6 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-CI=true yarn build:ui
+CI=true yarn build
 ./node_modules/.bin/lint-staged
 git add ./public/*
