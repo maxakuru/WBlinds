@@ -1,4 +1,4 @@
-import { ComponentFunction, Component } from "@Components";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Nav.html";
 import "./Nav.css";
 import { addClass, removeClass } from "@Util";

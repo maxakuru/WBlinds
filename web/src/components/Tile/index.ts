@@ -1,4 +1,4 @@
-import { ComponentFunction, Component } from "@Components";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Tile.html";
 import "./Tile.css";
 import { querySelector } from "@Util";

@@ -1,4 +1,4 @@
-import { ComponentFunction, Component } from "@Components";
+import { ComponentFunction, Component } from "../Component";
 import template from "./Selector.html";
 import "./Selector.css";
 import { addClass, appendChild, createDiv, removeClass } from "@Util";

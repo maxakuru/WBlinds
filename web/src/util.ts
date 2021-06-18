@@ -39,6 +39,3 @@ export function pruneUndef<T>(obj: T): T {
   }
   return o;
 }
-
-export const appendChild = (parent: HTMLElement, child: HTMLElement) =>
-  parent.appendChild(child);
