@@ -39,5 +39,20 @@ export const displayNone = (elem: HTMLElement) => {
   elem.style.display = "none";
 };
 
-export const appendChild = (parent: HTMLElement, child: HTMLElement) =>
-  parent.appendChild(child);
+export const appendChild = <T extends HTMLElement>(
+  parent: HTMLElement,
+  child: HTMLElement
+): T => {
+  return _appendChild.call(parent, child) as T;
+};
+
+const _appendChild = document.appendChild;
+
+export const prependChild = <T extends HTMLElement>(
+  parent: HTMLElement,
+  child: HTMLElement
+): T => {
+  return _prependChild.call(parent, child) as T;
+};
+
+const _prependChild = document.prepend;

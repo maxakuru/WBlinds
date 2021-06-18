@@ -18,7 +18,7 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
   value,
   id,
 }: SliderProps) {
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     elem.id = id;
     querySelector("h4", elem).innerText = label;
 
@@ -26,7 +26,7 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
     slider.onmousedown = stopPropagation;
     slider.ontouchstart = stopPropagation;
 
-    slider.oninput = function () {
+    slider.oninput = () => {
       const value =
         ((parseInt(slider.value) - parseInt(slider.min)) /
           (parseInt(slider.max) - parseInt(slider.min))) *

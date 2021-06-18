@@ -27,7 +27,7 @@ void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
 
    // auto b = datagramToWSMessage()
    String m = Datagram::packString(event);
-   WLOG_I(TAG, "DG message: %s", m);
+   WLOG_I(TAG, "DG message: %s", m.c_str());
 
    ws.textAll(m);
 }
@@ -244,17 +244,13 @@ void BlindsHTTPAPI::init() {
 
    server.on("/state", HTTP_GET, getState);
 
-   AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/state", updateState);
-   server.addHandler(handler);
-
-   // server.on("/state", HTTP_POST,
-   //    [this](AsyncWebServerRequest* request) {
-   //       this->updateState(request);
-   //    }
-   // );
+   AsyncCallbackJsonWebHandler* stateHandler = new AsyncCallbackJsonWebHandler("/state", updateState);
+   stateHandler->setMethod(HTTP_PUT);
+   server.addHandler(stateHandler);
 
    server.on("/settings", HTTP_GET, getSettings);
    AsyncCallbackJsonWebHandler* settingsHandler = new AsyncCallbackJsonWebHandler("/settings", updateSettings);
+   settingsHandler->setMethod(HTTP_PUT);
    server.addHandler(settingsHandler);
 
    server.onNotFound(handleNotFound);

@@ -3,12 +3,10 @@
 ![License](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
 ![Releasde](https://img.shields.io/static/v1?label=Release&message=WIP&color=blue&style=flat-square)
 
-<br>
 
-### ESP32 controller for smart blinds!
+#### ESP32 controller for smart blinds!
 
 
-<br>
 
 ## 🌟 Features
 * MQTT API
@@ -17,7 +15,6 @@
 * Handles halting on home detection
 * Web UI for controlling/configuring
 
-<br>
 
 ## ✏️ Setup
 1. `git clone https://github.com/maxakuru/WBlinds.git`
@@ -26,7 +23,6 @@
 4. Setup `platformio.ini` to your liking
 5. Build & flash
 
-<br>
 
 ## ⏳ TODO
 - [x] Parameterize pins
@@ -47,12 +43,10 @@
 - [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
 - [ ] State approximation with Hall effect sensor (built-in on ESP32)
 
-<br>
 
 ## 💻 Web UI
 TODO
 
-<br>
 
 ## 🔧 Configuration
 There are a few ways to configure WBlinds. Eventually the goal is to provide a way to easily calibrate top and bottom ranges of the blinds, but for now the distances are either manually set or (by default) calculated from configuration values.
@@ -78,7 +72,6 @@ There are a few ways to configure WBlinds. Eventually the goal is to provide a w
 | `17` | pMs3 | Microstep resolution pin 3 (optional)
 | `4` | pHomeSw | Home trigger switch, recommended as a way to hard stop when the blinds reach the fully contracted position to avoid damaging hardware when steps are skipped or malfunctions. (optional)
 
-<br>
 
 
 ## 🔌 APIs
@@ -86,7 +79,8 @@ These APIs are in flux!
 
 ### HTTP
 ```js
-POST <host:port>/state
+PUT <host:port>/state
+// All fields optional
 { 
     "tPos": 50, //[0-100] (target position %, starts move)
     "pos": 50, // [0-100] (current position %)
@@ -112,9 +106,47 @@ POST <host:port>
 }
 ```
 
+```js
+PUT <host:port>/settings
+// All fields optional
+// NOTE: MQTT password is sent in body unencoded/unencrypted.
+// If that isn't acceptable for your use-case, set it at compile time.
+{ 
+    gen: { 
+        deviceName: "WBlinds", 
+        mdnsName: "WBlinds", 
+        emitSync: true 
+    },
+    hw: {
+        pStep: 19,
+        pDir: 18,
+        pEn: 23,
+        pSleep: 21,
+        pReset: 3,
+        pMs1: 1,
+        pMs2: 5,
+        pMs3: 17,
+        pHome: 4,
+        cLen: 1650,
+        cDia: 0.1,
+        axDia: 15,
+        stepsPerRev: 200,
+        res: 16,
+    },
+    mqtt: {
+        enabled: true,
+        host: "192.168.1.99",
+        port: 1883,
+        topic: "WBlinds",
+        user: "max",
+        pass: "mysupersecurepassword"
+    }
+}
+```
+
 ### MQTT
-WBlinds subscribes to a wildcard based on the device name provided.
-For example, a device name `blinds/living_room` will subscribe to `blinds/living_room/#`.
+WBlinds subscribes to a wildcard based on the topic provided.
+For example, a topic name `blinds/living_room` will subscribe to `blinds/living_room/#`.
 
 The topic defines a number of actions without any payload, for example:
 ```sh
@@ -133,14 +165,13 @@ topic="blinds/living_room/sleep"
 Some topics can specify additional data:
 ```sh
 topic="blinds/living_room/move"
-body="{\"pos\":50,\"speed\":10,\"accel\":10}"
+body="{\"pos\":50,\"speed\":1000,\"accel\":1000}"
 ```
 Where `pos` is %, `speed` is Hz, and `accel` is steps/s^2.
 
 ### Homekit
 Native Homekit integration allows the ESP32 to be detected as a device without a bridge/emulator. This mode requires percentage-based position values, so it's important to calibrate the settings first.
 
-<br>
 
 ## 📝 Development
 There are 2 main projects that make up this repo: the C++ ESP controller and a TypeScript-based web UI. The web UI is transpiled to Javascript and gzipped/chunked into header files with a script. All generated header files as well as transpiled JS is included in the repo, so no additional build steps are needed.
@@ -209,7 +240,6 @@ public:
 }
 ```
 
-<br>
 
 ## 🔗 Other files
 The `/etc` directory contains some STL files that may be useful for building WBlinds. Those are designed for use with IKEA HOPPVALS, but would be close to the TRIPPVALS, too.

@@ -1,15 +1,46 @@
+/* uncss:ignore */
 #pas {
     margin-bottom: 20px;
 }
 
+/* uncss:ignore */
 #stcc {
     display: flex;
 }
 
+/* uncss:ignore */
 #stcc>span {
     margin: auto;
 }
 
+/* uncss:ignore */
 #stcc>div {
     justify-content: center;
+}
+
+/* uncss:ignore */
+#slc-act {
+    position: fixed;
+    bottom: 70px;
+    justify-content: space-evenly;
+    width: 100%;
+    left: 0%;
+}
+
+#slc-act>* {
+    border-radius: 25px;
+    width: 120px;
+    height: 41px;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#s-save {
+    background: #007AFF;
+}
+
+#s-can {
+    background: tomato;
 }

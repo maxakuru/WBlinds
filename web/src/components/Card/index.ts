@@ -1,5 +1,5 @@
 import { ComponentFunction, Component } from "../Component";
-import { Slider } from "@Components";
+import { Slider } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, removeClass } from "@Util";
@@ -28,7 +28,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
   let animated = false;
   let lastCoords: Coords = {} as Coords;
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     toggleAnimations(true);
 
     const slider = Slider({ id: "position", label: "Position", value: "50" });
@@ -74,16 +74,11 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       animated = newState;
     }
 
-    function destroy(ev?: any) {
+    const destroy = (ev?: any) => {
       elem.remove();
-    }
+    };
 
-    elem.onmousedown = elem.ontouchstart = (e: TouchEvent | MouseEvent) =>
-      onPress(firstTouchXY(e));
-    elem.onmouseup = elem.onmouseout = elem.ontouchend = onRelease;
-    elem.onmousemove = elem.ontouchmove = (e: TouchEvent | MouseEvent) =>
-      onMove(firstTouchXY(e));
-    function firstTouchXY(e: TouchEvent | MouseEvent): Coords {
+    const firstTouchXY = (e: TouchEvent | MouseEvent): Coords => {
       let { x, y } = e as MouseEvent;
       if (x == null) {
         // touch event
@@ -94,7 +89,12 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
         x,
         y,
       };
-    }
+    };
+    elem.onmousedown = elem.ontouchstart = (e: TouchEvent | MouseEvent) =>
+      onPress(firstTouchXY(e));
+    elem.onmouseup = elem.onmouseout = elem.ontouchend = onRelease;
+    elem.onmousemove = elem.ontouchmove = (e: TouchEvent | MouseEvent) =>
+      onMove(firstTouchXY(e));
     return {
       destroy,
       show: () => {

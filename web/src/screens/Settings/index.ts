@@ -20,24 +20,30 @@ import {
 import template from "./Settings.html";
 import { State, SettingsData, DEFAULT_SETTINGS_DATA } from "@State";
 import "./Settings.css";
-import { SETTINGS } from "@Const";
+import { PENDING_STATE, SETTINGS } from "@Const";
+import {
+  InputType_Boolean,
+  InputType_Enum,
+  InputType_Number,
+  InputType_String,
+} from "components/Input";
 
-type DeviceClickHandler = (device: any) => void;
+type ActHandler = () => void;
 export interface SettingsAPI {
   destroy(): void;
+  onSave: (h: ActHandler) => void;
+  onCancel: (h: ActHandler) => void;
 }
 
-const enum InputGroup {
-  Pins = 0,
-  Physical = 1,
-  MQTT = 2,
-}
+const InputGroup_Pins = 0;
+const InputGroup_Physical = 1;
+const InputGroup_MQTT = 2;
 
 interface SettingsInputEntry {
-  type: InputType;
-  label: string;
-  group?: InputGroup;
-  enumOpts?: any[];
+  t?: InputType; // defaults to Number, most common
+  l: string;
+  g?: number;
+  o?: any[];
 }
 
 const SETTING_INPUT_MAP: Record<
@@ -48,123 +54,113 @@ const SETTING_INPUT_MAP: Record<
   Record<"mqtt", Record<keyof SettingsData["mqtt"], SettingsInputEntry>> = {
   gen: {
     deviceName: {
-      type: InputType.String,
-      label: "Device name",
+      t: InputType_String,
+      l: "Device name",
     },
     mdnsName: {
-      type: InputType.String,
-      label: "mDNS Name",
+      t: InputType_String,
+      l: "mDNS Name",
     },
     emitSync: {
-      type: InputType.Boolean,
-      label: "Emit sync data",
+      t: InputType_Boolean,
+      l: "Emit sync data",
     },
   },
   mqtt: {
     enabled: {
-      type: InputType.Boolean,
-      label: "Enabled",
-      group: InputGroup.MQTT,
+      t: InputType_Boolean,
+      l: "Enabled",
+      g: InputGroup_MQTT,
     },
     host: {
-      type: InputType.String,
-      label: "Host",
-      group: InputGroup.MQTT,
+      t: InputType_String,
+      l: "Host",
+      g: InputGroup_MQTT,
     },
     port: {
-      type: InputType.Number,
-      label: "Port",
-      group: InputGroup.MQTT,
+      l: "Port",
+      g: InputGroup_MQTT,
     },
     topic: {
-      type: InputType.String,
-      label: "Topic",
-      group: InputGroup.MQTT,
+      t: InputType_String,
+      l: "Topic",
+      g: InputGroup_MQTT,
     },
     user: {
-      type: InputType.String,
-      label: "Username",
-      group: InputGroup.MQTT,
+      t: InputType_String,
+      l: "Username",
+      g: InputGroup_MQTT,
     },
   },
   hw: {
     axDia: {
-      type: InputType.Number,
-      label: "Axis diameter",
-      group: InputGroup.Physical,
+      l: "Axis diameter",
+      g: InputGroup_Physical,
     },
     cDia: {
-      type: InputType.Number,
-      label: "Cord diameter",
-      group: InputGroup.Physical,
+      l: "Cord diameter",
+      g: InputGroup_Physical,
     },
     cLen: {
-      type: InputType.Number,
-      label: "Cord length",
-      group: InputGroup.Physical,
+      l: "Cord length",
+      g: InputGroup_Physical,
     },
     pDir: {
-      type: InputType.Number,
-      label: "Direction pin",
-      group: InputGroup.Pins,
+      l: "Direction pin",
+      g: InputGroup_Pins,
     },
     pEn: {
-      type: InputType.Number,
-      label: "Enable pin",
-      group: InputGroup.Pins,
+      l: "Enable pin",
+      g: InputGroup_Pins,
     },
     pHome: {
-      type: InputType.Number,
-      label: "Home switch pin",
-      group: InputGroup.Pins,
+      l: "Home switch pin",
+      g: InputGroup_Pins,
     },
     pMs1: {
-      type: InputType.Number,
-      label: "Microstep pin 1",
-      group: InputGroup.Pins,
+      l: "Microstep pin 1",
+      g: InputGroup_Pins,
     },
     pMs2: {
-      type: InputType.Number,
-      label: "Microstep pin 2",
-      group: InputGroup.Pins,
+      l: "Microstep pin 2",
+      g: InputGroup_Pins,
     },
     pMs3: {
-      type: InputType.Number,
-      label: "Microstep pin 3",
-      group: InputGroup.Pins,
+      l: "Microstep pin 3",
+      g: InputGroup_Pins,
     },
     pReset: {
-      type: InputType.Number,
-      label: "Reset pin",
-      group: InputGroup.Pins,
+      l: "Reset pin",
+      g: InputGroup_Pins,
     },
     pSleep: {
-      type: InputType.Number,
-      label: "Sleep pin",
-      group: InputGroup.Pins,
+      l: "Sleep pin",
+      g: InputGroup_Pins,
     },
     pStep: {
-      type: InputType.Number,
-      label: "Step pin",
-      group: InputGroup.Pins,
+      l: "Step pin",
+      g: InputGroup_Pins,
     },
     stepsPerRev: {
-      type: InputType.Number,
-      label: "Steps/revolution",
-      group: InputGroup.Physical,
+      l: "Steps/revolution",
+      g: InputGroup_Physical,
     },
     res: {
-      type: InputType.Enum,
-      label: "Resolution",
-      group: InputGroup.Physical,
-      enumOpts: [1, 4, 8, 16],
+      t: InputType_Enum,
+      l: "Resolution",
+      g: InputGroup_Physical,
+      o: [1, 4, 8, 16],
     },
   },
 };
 
-let _dirty = false;
 const _Settings: ComponentFunction<SettingsAPI> = function () {
   let _loading = true;
+  let _saving = false;
+  let _dirty = false;
+  let _saveHandlers: ActHandler[] = [];
+  let _cancelHandlers: ActHandler[] = [];
+
   let _inputs: any[] = [];
   const id = "stcc";
   const tabs = ["General", "Hardware", "MQTT"];
@@ -173,7 +169,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   let hardware: HTMLElement;
   let mqtt: HTMLElement;
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     selector.onChange(displayTab);
 
     function displayTab(index: number) {
@@ -193,27 +189,24 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       appendChild(div, content);
     }
 
-    function setDirty(newState: boolean) {
-      if (newState !== _dirty) {
-        _dirty = newState;
-        // TODO: validate inputs, show save/cancel buttons
-      }
-    }
-
     function loaded() {
       debug("settings loaded: ", State._state);
-      if (!_loading) return;
+      if (!_loading && !_saving) return;
       const spinner = getElement("sl");
       const container = getElement("slc");
       displayNone(spinner);
       removeClass(container, "hide");
       container.prepend(selector.node);
       _loading = false;
+      _saving && _setDirty(false);
 
       // make content container, add it
-      const div = createDiv();
-      div.id = id;
-      appendChild(container, div);
+      let div = getElement(id);
+      if (!div) {
+        div = createDiv();
+        div.id = id;
+        appendChild(container, div);
+      }
 
       general = makeTab("gen");
       hardware = makeTab("hw");
@@ -233,14 +226,44 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       destroy: () => {
         _inputs.forEach((t) => t.destroy());
         _inputs = [];
+        _saveHandlers = [];
+        _cancelHandlers = [];
+      },
+      onCancel: (h) => {
+        _cancelHandlers.push(h);
+      },
+      onSave: (h) => {
+        _saveHandlers.push(h);
       },
     };
   };
 
+  const _setDirty = (newState: boolean) => {
+    if (newState !== _dirty) {
+      _saving = false;
+      _dirty = newState;
+      const act = getElement("slc-act");
+      if (_dirty) {
+        // show save
+        getElement("s-save").onclick = () => {
+          _saving = true;
+          _saveHandlers.map((h) => h());
+        };
+        getElement("s-can").onclick = () => {
+          _cancelHandlers.map((h) => h());
+        };
+        removeClass(act, "hide");
+      } else {
+        addClass(act, "hide");
+      }
+    }
+  };
+
   function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
+    console.log("makeTab: ", SETTING_INPUT_MAP);
     const container = createElement("span");
     const groupDivs: HTMLElement[] = [];
-    function getContainer(groupNum?: number) {
+    const getContainer = (groupNum?: number) => {
       if (groupNum == null) {
         return container;
       }
@@ -251,16 +274,35 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         appendChild(container, d);
       }
       return groupDivs[groupNum];
-    }
+    };
+    console.log("SETTING_INPUT_MAP[key]: ", SETTING_INPUT_MAP[key]);
     for (const k in SETTING_INPUT_MAP[key]) {
-      const { group, label, type, enumOpts } = (SETTING_INPUT_MAP[key] as any)[
+      // group, label, type, enum options
+      const { g, l, t, o } = (SETTING_INPUT_MAP[key] as any)[
         k
       ] as SettingsInputEntry;
 
       const stateKey = `${SETTINGS}.${key}.${k}`;
-      const inp = Input({ label, type, enumOpts, value: State.get(stateKey) });
-      appendChild(getContainer(group), inp.node);
+      const pendingKey = `${PENDING_STATE}.${key}.${k}`;
+
+      console.log("stateKey: ", stateKey);
+      console.log("State.get(stateKey): ", State.get(stateKey));
+      const inp = Input({
+        label: l,
+        type: t || InputType_Number,
+        enumOpts: o,
+        value: State.get(stateKey),
+      });
+
+      inp.onChange((v) => {
+        _setDirty(true);
+        console.log("pendingKey: ", pendingKey, v);
+        State.set(pendingKey, v);
+      });
+      _inputs.push(inp);
+      appendChild(getContainer(g), inp.node);
     }
+
     return container;
   }
 

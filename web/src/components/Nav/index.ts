@@ -14,7 +14,7 @@ const _Nav: ComponentFunction<NavAPI> = function () {
   let _i = 0;
   let _clickHandlers: ClickHandler[] = [];
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     const buttons = elem.querySelectorAll("li");
     buttons.forEach((b, index) => {
       b.addEventListener("click", () => {

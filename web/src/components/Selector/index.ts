@@ -21,10 +21,10 @@ const _Selector: ComponentFunction<SelectorAPI, SelectorProps> = function ({
   let _changeHandlers: ChangeHandler[] = [];
   let _items: HTMLElement[] = [];
 
-  this.init = function (elem: HTMLElement) {
-    function onChange(h: ChangeHandler) {
+  this.init = (elem: HTMLElement) => {
+    const onChange = (h: ChangeHandler) => {
       _changeHandlers.push(h);
-    }
+    };
 
     items.map((i, index) => {
       const e = createDiv();

@@ -9,36 +9,36 @@ import {
   toggleClass,
 } from "@Util";
 
-type ClickHandler = (data: InputProps) => unknown;
+type ChangeHandler = (newVal: any) => unknown;
 export interface InputAPI {
-  onClick: (handler: ClickHandler) => void;
+  onChange: (handler: ChangeHandler) => void;
+  setDisabled(v: boolean): void;
   destroy(): void;
 }
 
-export const enum InputType {
-  String = 0,
-  Boolean = 1,
-  Number = 2,
-  Enum = 3,
-}
+export const InputType_Number = 0;
+export const InputType_String = 1;
+export const InputType_Boolean = 2;
+export const InputType_Enum = 3;
+export type InputType = 0 | 1 | 2 | 3;
 
 const InputTypeMap: Record<InputType, string> = {
-  [InputType.String]: "text",
-  [InputType.Boolean]: "checkbox",
-  [InputType.Number]: "number",
-  [InputType.Enum]: "select",
+  [InputType_String]: "text",
+  [InputType_Boolean]: "checkbox",
+  [InputType_Number]: "number",
+  [InputType_Enum]: "select",
 };
 
 type InputProps =
   | {
       label: string;
-      type: InputType.Enum;
+      type: typeof InputType_Enum;
       enumOpts: any[];
       value: any;
     }
   | {
       label: string;
-      type: Exclude<InputType, InputType.Enum>;
+      type: Exclude<InputType, typeof InputType_Enum>;
       enumOpts?: any[];
       value: any;
     };
@@ -49,9 +49,10 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   enumOpts,
   value,
 }: InputProps) {
-  let _clickHandlers: ClickHandler[] = [];
+  const _valid = true;
+  let _onChangeHandlers: ChangeHandler[] = [];
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     const id = `cb-${label.split(" ").join("-")}`;
     const l = elem.firstChild as HTMLLabelElement;
     l.innerText = label;
@@ -61,21 +62,51 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
     input.type = InputTypeMap[type];
     input.placeholder = "placeholder";
     input.id = id;
-    if (type === InputType.Boolean) {
+    input.value = value;
+    value && addClass(input, "on");
+    if (type === InputType_Boolean) {
       input.checked = value;
-      value && addClass(input, "on");
-      input.onchange = () => {
+      input.onchange = (e) => {
         toggleClass(input, "on");
+        _onChange(e);
       };
+    } else {
+      // input.on
+      input.oninput = _onChange;
     }
+
+    const _showError = (err: string) => {
+      // TODO:
+    };
+
+    function _onChange(e: Event) {
+      console.log("_onChange: ", e);
+      const err = _validate();
+      if (err) {
+        return _showError(err);
+      }
+      _onChangeHandlers.map((h) => h((e.target as any).value));
+    }
+
+    const setDisabled = (val: boolean) => {
+      input.disabled = val;
+    };
+
+    function _validate(): string | undefined {
+      // TODO: show error hint
+      return;
+    }
+
+    console.log("input: ", input);
 
     appendChild(elem, input);
     return {
-      onClick: (h) => {
-        _clickHandlers.push(h);
+      onChange: (h) => {
+        _onChangeHandlers.push(h);
       },
+      setDisabled,
       destroy: () => {
-        _clickHandlers = [];
+        _onChangeHandlers = [];
       },
     };
   };

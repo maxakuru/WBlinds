@@ -15,7 +15,7 @@ import {
   PENDING_STATE,
 } from "@Const";
 
-export default function (ns: WBlindsNamespace): void {
+export default (ns: WBlindsNamespace): void => {
   debug("onLoad(): ", ns);
   mock.init();
   const body = querySelector("body");
@@ -29,7 +29,7 @@ export default function (ns: WBlindsNamespace): void {
 
   let currentIndex = -1;
   let currentTab: Home | Settings;
-  function handleTabChange(nextIndex: number) {
+  const handleTabChange = (nextIndex: number) => {
     if (currentIndex === nextIndex) return;
 
     currentIndex = nextIndex;
@@ -55,16 +55,30 @@ export default function (ns: WBlindsNamespace): void {
       // Settings
       case 2: {
         const t = Settings();
+        t.onSave(saveSettings);
+        t.onCancel(cancelSettings);
+
         currentTab = t;
         if (!State.isLoaded(SETTINGS)) {
-          load(SETTINGS).then((res) => res && State.update(PENDING_STATE, res));
+          load(SETTINGS, [PENDING_STATE, SETTINGS]);
         }
         break;
       }
     }
     currentTab && appendChild(app, currentTab.node);
-  }
+  };
   handleTabChange(0);
+
+  function saveSettings() {
+    console.log("saveSettings: ", State._state);
+    // TODO: API call
+    State.update(SETTINGS, State._state.pendingState);
+  }
+
+  function cancelSettings() {
+    console.log("cancelSettings: ", State._state);
+    State.update(PENDING_STATE, State._state.settings);
+  }
 
   function handleDeviceClick(device: any) {
     // Show device card
@@ -78,10 +92,10 @@ export default function (ns: WBlindsNamespace): void {
   load(PRESETS);
   load(DEVICES);
 
-  function load(key: keyof StateData) {
+  function load(key: keyof StateData, updates: (keyof StateData)[] = [key]) {
     return doFetch(`/${key}`)
       .then((r) => {
-        State.update(key, r);
+        updates.map((k) => State.update(k, r));
         return r;
       })
       .catch(handleError);
@@ -126,4 +140,4 @@ export default function (ns: WBlindsNamespace): void {
   const nav = Nav();
   appendChild(getElement("nav"), nav.node);
   nav.onClick(handleTabChange);
-}
+};

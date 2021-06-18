@@ -1,7 +1,9 @@
+/* uncss:ignore */
 :root {
 	--bord: 1px solid rgba(0, 0, 0, 0.034);
 }
 
+/* uncss:ignore */
 #pas {
 	border-radius: 7px;
     justify-content: center;
@@ -9,6 +11,7 @@
 	border: 2px solid #00000000;
 }
 
+/* uncss:ignore */
 #pas>div {
 	/* width: 10px; */
 	padding: 2px 0 2px;
@@ -18,12 +21,14 @@
 	border: 1px #FFFFFF00 solid;
 }
 
+/* uncss:ignore */
 #pas>div.sel {
 	background-color: #676769a3;
 	border-radius: 7px;
 	border: 1px #00000024 solid
 }
 
+/* uncss:ignore */
 #pas>div::after {
 	height: 13px;
     content: "";
@@ -34,6 +39,7 @@
     transform: translate(-1px, -110%);
 }
 
+/* uncss:ignore */
 #pas>div:first-child::after {
 	border-left: none;
 }

@@ -51,7 +51,7 @@ export interface WSOptions {
   onError?(e: any, reconnectAttempt: number): void;
 }
 
-export function makeWebsocket(opts: WSOptions = {}): WSController {
+export const makeWebsocket = (opts: WSOptions = {}): WSController => {
   let ws: WebSocket;
   let _enabled = false;
   let _reconnectAttempt = 0;
@@ -164,4 +164,4 @@ export function makeWebsocket(opts: WSOptions = {}): WSController {
   }
 
   return { ws, push };
-}
+};

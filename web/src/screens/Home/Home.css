@@ -2,3 +2,15 @@
 	/* margin: 0 10px 0 -10px; */
 	justify-content: space-between;
 }
+
+/* uncss:ignore */
+.pt>.sq {
+	height: 50px;
+	width: auto;
+	min-width: 150px;
+}
+
+/* uncss:ignore */
+.pt>.sq>span {
+	display: none;
+}

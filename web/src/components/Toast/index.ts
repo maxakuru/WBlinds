@@ -22,7 +22,7 @@ const _Toast: ComponentFunction<ToastAPI, ToastProps> = function ({
 }: ToastProps) {
   let _clickHandlers: ClickHandler[] = [];
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     elem.onclick = (e) => {
       _clickHandlers.forEach((h) => h({ id }));
     };

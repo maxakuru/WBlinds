@@ -20,7 +20,7 @@ const _Tile: ComponentFunction<TileAPI, TileProps> = function ({
 }: TileProps) {
   let _clickHandlers: ClickHandler[] = [];
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     elem.id = id;
     elem.onclick = (e) => {
       _clickHandlers.forEach((h) => h({ id, name }));

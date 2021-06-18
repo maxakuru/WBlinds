@@ -6,7 +6,7 @@ export function Component<T, U>(
     const toRender = c.call(ctx, ...args);
     const elem = new DOMParser().parseFromString(toRender, "text/html");
     const node = elem.getElementsByTagName("body").item(0).firstChild;
-    const api: Component<T> = ctx.init.call(ctx, node) as Component<T>;
+    const api: Component<T> = ctx.init(node as HTMLElement) as Component<T>;
     api.node = node as HTMLElement;
     return api;
   };

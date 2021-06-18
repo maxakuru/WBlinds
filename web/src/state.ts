@@ -47,7 +47,7 @@ interface PresetRecord {
 }
 export interface StateData {
   state: CurrentData;
-  pendingState: Partial<CurrentData>;
+  pendingState: Partial<SettingsData>;
   settings: SettingsData;
   devices: Record<string, DeviceRecord>;
   presets: Record<string, PresetRecord>;
@@ -128,6 +128,17 @@ class _State {
     return curr;
   }
 
+  set<T>(path: string, val: T): void {
+    const spl = path.split(".");
+    const last = spl.pop();
+    let curr: any = this._state;
+    while (spl.length > 0) {
+      if (typeof curr !== "object") return;
+      curr = curr[spl.shift()];
+    }
+    curr[last] = val;
+  }
+
   isLoaded(key: keyof StateData): boolean {
     return this._loadedKeys[key];
   }
@@ -137,7 +148,10 @@ class _State {
    * @param key
    * @param value
    */
-  update<T extends keyof StateData, U extends StateData[T]>(key: T, value: U) {
+  update<T extends keyof StateData, U extends StateData[T]>(
+    key: T,
+    value: Partial<U>
+  ) {
     this._observers[key] ??= [];
     const prev = this._state[key];
     this._state[key] = mergeDeep({}, prev, pruneUndef(value));

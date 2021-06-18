@@ -15,21 +15,25 @@
 	font-size: 14px;
 }
 
+/* uncss:ignore */
 .igroup>.in {
 	margin-top: 0px;
 	border-radius: 0px;
 	border-bottom: 1px solid #FFFFFF4D;
 }
 
+/* uncss:ignore */
 .igroup>.in:first-child {
 	border-radius: 15px 15px 0px 0px;
 }
+/* uncss:ignore */
 .igroup>.in:last-child {
 	border-radius: 0px 0px 15px 15px;
 	margin-bottom: 10px;
 	border-bottom: none;
 }
 
+/* uncss:ignore */
 .in>input {
 	background-color: #00000000;
     border: none;
@@ -37,6 +41,7 @@
 	color: #DB8B1D;
 }
 
+/* uncss:ignore */
 [type="checkbox"] {
 	appearance: none;
 	width: 51px;
@@ -44,6 +49,7 @@
 	border-radius: 50px;
 	background-color: #94949a33 !important;
 }
+/* uncss:ignore */
 [type="checkbox"]:after {
 	content: "";
     width: 50%;
@@ -56,9 +62,11 @@
     left: 3%;
     transition: 0.2s left ease-in-out;
 }
+/* uncss:ignore */
 [type="checkbox"].on {
 	background-color: #34C759 !important;
 }
+/* uncss:ignore */
 [type="checkbox"].on::after {
 	left: 45%;
 }

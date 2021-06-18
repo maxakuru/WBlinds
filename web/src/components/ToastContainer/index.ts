@@ -27,7 +27,7 @@ const _ToastContainer: ComponentFunction<
   let _index = 0;
   let _toasts: Toast[] = [];
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     function pushToast(
       message: string,
       isError?: boolean,

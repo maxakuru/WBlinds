@@ -28,28 +28,30 @@ const _Home: ComponentFunction<HomeAPI> = function () {
   let _tiles: Tile[] = [];
   let _deviceClickHandlers: DeviceClickHandler[] = [];
 
-  this.init = function (elem: HTMLElement) {
+  this.init = (elem: HTMLElement) => {
     // initially spinner is showing,
     // rest is hidden in a div
 
-    function loaded() {
+    const loaded = () => {
       if (!_loading) return;
       const spinner = getElement("hl");
       const content = getElement("hlc");
       displayNone(spinner);
       removeClass(content, "hide");
       _loading = false;
-    }
+    };
 
-    function getAllTiles(type: "preset" | "device"): {
+    const getAllTiles = (
+      type: "preset" | "device"
+    ): {
       container: HTMLElement;
       tiles: NodeListOf<HTMLDivElement>;
-    } {
+    } => {
       const container = getElement(`${type}-tiles`);
       return { container, tiles: container.querySelectorAll("div") };
-    }
+    };
 
-    function padTiles(type: "preset" | "device") {
+    const padTiles = (type: "preset" | "device") => {
       const { container, tiles } = getAllTiles(type);
       const w = container.clientWidth;
       const perRow = Math.floor(w / 110);
@@ -60,9 +62,9 @@ const _Home: ComponentFunction<HomeAPI> = function () {
         appendChild(container, e);
         len++;
       }
-    }
+    };
 
-    function updateTiles(type: "preset" | "device", o: any) {
+    const updateTiles = (type: "preset" | "device", o: any) => {
       const { container, tiles } = getAllTiles(type);
       tiles.forEach((tile) => {
         if (!(tile.id in o)) {
@@ -86,7 +88,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
         appendChild(container, t.node);
       }
       padTiles(type);
-    }
+    };
 
     function handleTileClick(type: "device" | "preset", data: any) {
       if (type === "device") {

@@ -11,6 +11,7 @@
 	/* justify-content: space-around; */
 }
 
+/* uncss:ignore */
 .tile.sq {
 	width: var(--wid);
 	height: var(--wid);
@@ -19,6 +20,7 @@
 	position: relative;
 }
 
+/* uncss:ignore */
 .tile.sq>span {
 	width: calc(var(--wid) - 1px);
 	max-height: 90px;
@@ -29,16 +31,7 @@
 	border-right-style: groove;
 }
 
-.pt>.sq {
-	height: 50px;
-	width: auto;
-	min-width: 150px;
-}
-
-.pt>.sq>span {
-	display: none;
-}
-
+/* uncss:ignore */
 .tile.sq p {
 	font-size: 11px;
 	margin: auto 21px 10px 9px;

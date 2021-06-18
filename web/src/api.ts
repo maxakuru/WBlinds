@@ -1,7 +1,7 @@
-export const enum HTTPMethod {
-  GET = "GET",
-  POST = "POST",
-}
+export const HTTP_POST = "POST";
+export const HTTP_PUT = "PUT";
+export const HTTP_GET = "GET";
+export type HTTPMethod = typeof HTTP_POST | typeof HTTP_PUT | typeof HTTP_GET;
 
 const api = process.env.API_ENDPOINT;
 /**

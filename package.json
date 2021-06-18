@@ -1,6 +1,6 @@
 {
   "name": "wblinds",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "web/index.ts",
   "license": "MIT",
   "repository": {
@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "./node_modules/.bin/eslint web/**/*.ts",
-    "build:dev": "cross-env NODE_ENV=dev rollup -w -c rollup.config.ts",
+    "dev": "cross-env NODE_ENV=dev rollup -w -c rollup.config.ts",
     "build": "yarn build:ui && yarn build:uih",
     "build:ui": "rollup -c rollup.config.ts",
     "build:uih": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"] }' ts-node ./scripts/build.uih.ts",
