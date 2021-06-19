@@ -3,14 +3,10 @@
 
 #include "defines.h"
 
-// extern DynamicJsonDocument stateDoc;
-// extern DynamicJsonDocument settingsDoc;
-extern char deviceName[64];
-extern char mDnsName[64];
-extern char mqttHost[128];
-extern char mqttTopic[128];
-extern char mqttUser[41];
-extern char mqttPass[41];
+extern char mqttHost[MAX_MQTT_HOST_LENGTH];
+extern char mqttTopic[MAX_MQTT_TOPIC_LENGTH];
+extern char mqttUser[MAX_MQTT_USER_LENGTH];
+extern char mqttPass[MAX_MQTT_PASS_LENGTH];
 
 
 class EventFlags {
@@ -60,11 +56,11 @@ public:
 };
 
 enum class setting_t {
-        kAll = 0,
-        kGeneral = 1,
-        kHardware = 2,
-        kMqtt = 3,
-    };
+    kAll = 0,
+    kGeneral = 1,
+    kHardware = 2,
+    kMqtt = 3,
+};
 
 struct StateData {
     int32_t pos;
@@ -154,7 +150,7 @@ public:
     String serialize();
     String serializeSettings(setting_t settingType);
     stdBlinds::error_code_t loadFromJSONString(StateObserver* that, String jsonStr);
-    stdBlinds::error_code_t loadFromObject(StateObserver* that, JsonObject& jsonObj);
+    stdBlinds::error_code_t loadFromObject(StateObserver* that, JsonObject& jsonObj, boolean isSettings = false);
 
     // Observer
     void Attach(StateObserver* observer, EventFlags const& flags) override;
@@ -248,6 +244,9 @@ private:
 
     stdBlinds::error_code_t setFieldsFromJSON_(StateObserver* that, JsonObject& obj, bool makesDirty);
     stdBlinds::error_code_t setSettingsFromJSON_(StateObserver* that, JsonObject& obj, bool shouldSave);
+    stdBlinds::error_code_t setGeneralSettingsFromJSON_(const JsonObject& obj, bool& shouldSave);
+    stdBlinds::error_code_t setHardwareSettingsFromJSON_(const JsonObject& obj, bool& shouldSave);
+    stdBlinds::error_code_t setMQTTSettingsFromJSON_(const JsonObject& obj, bool& shouldSave);
 
     // observers
     typedef std::vector<ObserverItem> Observers;

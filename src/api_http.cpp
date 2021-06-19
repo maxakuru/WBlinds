@@ -21,6 +21,44 @@ BlindsHTTPAPI::~BlindsHTTPAPI() {
    ws.cleanupClients();
 };
 
+bool isIp(String str) {
+   for (size_t i = 0; i < str.length(); i++) {
+      int c = str.charAt(i);
+      if (c != '.' && (c < '0' || c > '9')) {
+         return false;
+      }
+   }
+   return true;
+}
+
+bool captivePortal(AsyncWebServerRequest* request) {
+   if (ON_STA_FILTER(request)) return false; // only serve captive in AP mode
+   String hostH;
+   if (!request->hasHeader("Host")) return false;
+   hostH = request->getHeader("Host")->value();
+
+   if (!isIp(hostH) && hostH.indexOf(mDnsName) < 0) {
+      AsyncWebServerResponse* response = request->beginResponse(302);
+      response->addHeader(F("Location"), F("http://4.3.2.1/settings?tab=general"));
+      request->send(response);
+      return true;
+   }
+   return false;
+}
+
+bool configRedirect(AsyncWebServerRequest* request) {
+   WLOG_D(TAG, "ON_STA_FILTER(request): %i", ON_STA_FILTER(request));
+
+   if (ON_STA_FILTER(request)) return false; // only redirect in AP mode
+   const String& url = request->url();
+   if (needsConfig && url.indexOf("/settings") < 0 && url.indexOf("tab=gen") < 0) {
+      request->redirect("/settings?tab=gen");
+      request->send(302);
+      return true;
+   }
+   return false;
+}
+
 void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
    // TODO: send data over websocket to connected web clients
    WLOG_I(TAG, "event mask: %i", event.flags_.mask_);
@@ -113,11 +151,11 @@ static void setCORSHeaders(AsyncWebServerResponse* response) {
    response->addHeader(F("Access-Control-Allow-Origin"), "*");
 }
 
-static void handleNotFound(AsyncWebServerRequest* request) {
-   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+// static void handleNotFound(AsyncWebServerRequest* request) {
+//    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
 
-   request->send(404, stdBlinds::MT_HTML);
-}
+//    request->send(404);
+// }
 
 // void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
 //    if (handleFileRead(request, "/bg.jpg")) return;
@@ -138,7 +176,7 @@ static void getState(AsyncWebServerRequest* request) {
    bool fromFile = request->hasParam("f");
    if (fromFile) {
       if (!handleFileRead(request, "/state.json")) {
-         return request->send(404, stdBlinds::MT_HTML, "Not found");
+         return request->send(404);
       }
    };
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
@@ -152,7 +190,7 @@ static void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
    JsonObject obj = json.as<JsonObject>();
    auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
    if (errCode == stdBlinds::error_code_t::NoError) {
-      return request->send(200, stdBlinds::MT_HTML, "Ok");
+      return request->send(204);
    }
    char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
    return request->send(400, stdBlinds::MT_JSON, err);
@@ -163,7 +201,7 @@ static void serveOps(AsyncWebServerRequest* request, bool post) {
    if (post) {
       auto errCode = BlindsAPI::doOperation(request->arg("plain").c_str());
       if (errCode == stdBlinds::error_code_t::NoError) {
-         return request->send_P(200, stdBlinds::MT_HTML, "Ok");
+         return request->send(202);
       }
       char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
       return request->send(400, stdBlinds::MT_JSON, err);
@@ -174,9 +212,9 @@ static void serveOps(AsyncWebServerRequest* request, bool post) {
 static void updateSettings(AsyncWebServerRequest* request, JsonVariant& json) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
    JsonObject obj = json.as<JsonObject>();
-   auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
+   auto errCode = State::getInstance()->loadFromObject(nullptr, obj, true);
    if (errCode == stdBlinds::error_code_t::NoError) {
-      return request->send(204, stdBlinds::MT_HTML);
+      return request->send(204);
    }
    char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
    return request->send(400, stdBlinds::MT_JSON, err);
@@ -189,7 +227,7 @@ static void getSettings(AsyncWebServerRequest* request) {
    bool fromFile = request->hasParam("f");
    if (fromFile) {
       if (!handleFileRead(request, "/settings.json")) {
-         return request->send(404, stdBlinds::MT_HTML, "Not found");
+         return request->send(404);
       }
    };
 
@@ -240,20 +278,44 @@ void BlindsHTTPAPI::init() {
    ws.onEvent(onEvent);
    server.addHandler(&ws);
 
-   server.on("/", HTTP_GET, serveIndex);
+   server.on("/api/state", HTTP_GET, getState);
 
-   server.on("/state", HTTP_GET, getState);
-
-   AsyncCallbackJsonWebHandler* stateHandler = new AsyncCallbackJsonWebHandler("/state", updateState);
+   AsyncCallbackJsonWebHandler* stateHandler = new AsyncCallbackJsonWebHandler("/api/state", updateState);
    stateHandler->setMethod(HTTP_PUT);
    server.addHandler(stateHandler);
 
-   server.on("/settings", HTTP_GET, getSettings);
-   AsyncCallbackJsonWebHandler* settingsHandler = new AsyncCallbackJsonWebHandler("/settings", updateSettings);
+   // TODO: change this to use AsyncJsonResponse
+   server.on("/api/settings", HTTP_GET, getSettings);
+   AsyncCallbackJsonWebHandler* settingsHandler = new AsyncCallbackJsonWebHandler("/api/settings", updateSettings);
    settingsHandler->setMethod(HTTP_PUT);
    server.addHandler(settingsHandler);
 
-   server.onNotFound(handleNotFound);
+   auto handler = [](AsyncWebServerRequest* request) {
+      WLOG_D(TAG, "handle /, /settings, /routines: %s", request->url());
+      if (captivePortal(request)) return;
+      if (configRedirect(request)) return;
+      return serveIndex(request);
+   };
+   server.on("/", HTTP_GET, handler);
+   server.on("/settings", HTTP_GET, handler);
+   server.on("/routines", HTTP_GET, handler);
+
+   // server.onNotFound(handleNotFound);
+
+   server.onNotFound([](AsyncWebServerRequest* request) {
+      WLOG_D(TAG, "Handle not found: %s", request->url());
+      if (captivePortal(request)) return;
+
+      if (request->method() == HTTP_OPTIONS) {
+         AsyncWebServerResponse* response = request->beginResponse(200);
+         response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+         request->send(response);
+         return;
+      }
+
+      request->send(404);
+      }
+   );
 
    server.begin();
 }

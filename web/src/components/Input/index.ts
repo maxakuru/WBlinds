@@ -20,13 +20,15 @@ export const InputType_Number = 0;
 export const InputType_String = 1;
 export const InputType_Boolean = 2;
 export const InputType_Enum = 3;
-export type InputType = 0 | 1 | 2 | 3;
+export const InputType_Password = 4;
+export type InputType = 0 | 1 | 2 | 3 | 4;
 
 const InputTypeMap: Record<InputType, string> = {
   [InputType_String]: "text",
   [InputType_Boolean]: "checkbox",
   [InputType_Number]: "number",
   [InputType_Enum]: "select",
+  [InputType_Password]: "password",
 };
 
 type InputProps =
@@ -80,7 +82,6 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
     };
 
     function _onChange(e: Event) {
-      console.log("_onChange: ", e);
       const err = _validate();
       if (err) {
         return _showError(err);
@@ -96,8 +97,6 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
       // TODO: show error hint
       return;
     }
-
-    console.log("input: ", input);
 
     appendChild(elem, input);
     return {

@@ -18,6 +18,7 @@
  * @brief Initialize OTA updater.
  */
 void OTAinit() {
+    ArduinoOTA.setHostname(mDnsName);
     ArduinoOTA
         .onStart([]() {
             String type;

@@ -9,6 +9,7 @@ import {
   removeClass,
   displayNone,
   debug,
+  getQueryParam,
 } from "@Util";
 import {
   ComponentFunction,
@@ -26,6 +27,7 @@ import {
   InputType_Enum,
   InputType_Number,
   InputType_String,
+  InputType_Password,
 } from "components/Input";
 
 type ActHandler = () => void;
@@ -35,9 +37,10 @@ export interface SettingsAPI {
   onCancel: (h: ActHandler) => void;
 }
 
-const InputGroup_Pins = 0;
-const InputGroup_Physical = 1;
-const InputGroup_MQTT = 2;
+const InputGroup_Wifi = 0;
+const InputGroup_Pins = 1;
+const InputGroup_Physical = 2;
+const InputGroup_MQTT = 3;
 
 interface SettingsInputEntry {
   t?: InputType; // defaults to Number, most common
@@ -53,13 +56,25 @@ const SETTING_INPUT_MAP: Record<
   Record<"hw", Record<keyof SettingsData["hw"], SettingsInputEntry>> &
   Record<"mqtt", Record<keyof SettingsData["mqtt"], SettingsInputEntry>> = {
   gen: {
+    ssid: {
+      t: InputType_String,
+      l: "SSID",
+      g: InputGroup_Wifi,
+    },
+    pass: {
+      t: InputType_Password,
+      l: "Password",
+      g: InputGroup_Wifi,
+    },
     deviceName: {
       t: InputType_String,
       l: "Device name",
+      g: InputGroup_Wifi,
     },
     mdnsName: {
       t: InputType_String,
       l: "mDNS Name",
+      g: InputGroup_Wifi,
     },
     emitSync: {
       t: InputType_Boolean,
@@ -89,6 +104,11 @@ const SETTING_INPUT_MAP: Record<
     user: {
       t: InputType_String,
       l: "Username",
+      g: InputGroup_MQTT,
+    },
+    pass: {
+      t: InputType_Password,
+      l: "Password",
       g: InputGroup_MQTT,
     },
   },
@@ -191,7 +211,12 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
 
     function loaded() {
       debug("settings loaded: ", State._state);
+      // Events that come from WS shouldn't overwrite existing data.
+      // TODO: add map of key -> inputs, check state of input and allow overwriting
+      // if the input hasn't been modified by the user.
       if (!_loading && !_saving) return;
+      // Still loading, event came in between save press and response.
+      if (!_loading && State.isSaving(SETTINGS)) return;
       const spinner = getElement("sl");
       const container = getElement("slc");
       displayNone(spinner);
@@ -212,7 +237,19 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       hardware = makeTab("hw");
       mqtt = makeTab("mqtt");
 
-      displayTab(selector.index()); // or 0
+      let tab = getQueryParam("tab");
+      tab = tab && tab.toLowerCase();
+      const ind = tab
+        ? tab === "gen"
+          ? 0
+          : tab === "hw"
+          ? 1
+          : tab === "mqtt"
+          ? 2
+          : 0
+        : 0;
+      selector.setIndex(ind);
+      // return displayTab(selector.index()); // or 0
     }
 
     nextTick(() => {
@@ -260,7 +297,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   };
 
   function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
-    console.log("makeTab: ", SETTING_INPUT_MAP);
     const container = createElement("span");
     const groupDivs: HTMLElement[] = [];
     const getContainer = (groupNum?: number) => {
@@ -275,7 +311,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       }
       return groupDivs[groupNum];
     };
-    console.log("SETTING_INPUT_MAP[key]: ", SETTING_INPUT_MAP[key]);
     for (const k in SETTING_INPUT_MAP[key]) {
       // group, label, type, enum options
       const { g, l, t, o } = (SETTING_INPUT_MAP[key] as any)[
@@ -285,8 +320,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       const stateKey = `${SETTINGS}.${key}.${k}`;
       const pendingKey = `${PENDING_STATE}.${key}.${k}`;
 
-      console.log("stateKey: ", stateKey);
-      console.log("State.get(stateKey): ", State.get(stateKey));
       const inp = Input({
         label: l,
         type: t || InputType_Number,
@@ -296,7 +329,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
 
       inp.onChange((v) => {
         _setDirty(true);
-        console.log("pendingKey: ", pendingKey, v);
         State.set(pendingKey, v);
       });
       _inputs.push(inp);

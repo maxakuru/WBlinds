@@ -5,7 +5,6 @@
 #include "ui_index.h"
 #include <Credentials.h>
 #include <LITTLEFS.h>
-
 // #include "ui_fixtures.h"
 
 #ifdef WBLINDS_DEBUG
@@ -35,40 +34,24 @@
 #define TOSTRING(X) STRINGIFY(X)
 
 #ifndef W_VERSION
-#define W_VERSION "dev"
+#define W_VERSION "0.0.1"
 #endif
 
 // Global Variable definitions
 WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(W_VERSION));
 
-// #define ARDUINOJSON_DECODE_UNICODE 0
-// #include "src/dependencies/json/AsyncJson-v6.h"
-// #include "src/dependencies/json/ArduinoJson-v6.h"
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 
 
-// ESP32-WROVER features SPI RAM (aka PSRAM) which can be allocated using ps_malloc()
-// we can create custom PSRAMDynamicJsonDocument to use such feature (replacing DynamicJsonDocument)
-// The following is a construct to enable code to compile without it.
-// There is a code thet will still not use PSRAM though:
-//    AsyncJsonResponse is a derived class that implements DynamicJsonDocument (AsyncJson-v6.h)
-// #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
-// struct PSRAM_Allocator {
-//     void* allocate(size_t size) {
-//         if (psramFound()) return ps_malloc(size); // use PSRAM if it exists
-//         else              return malloc(size);    // fallback
-//     }
-//     void deallocate(void* pointer) {
-//         free(pointer);
-//     }
-// };
-// using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
-// #else
-// #define PSRAMDynamicJsonDocument DynamicJsonDocument
-// #endif
+#define WIFI_CONNECTED (WiFi.status() == WL_CONNECTED)
+#define WIFI_CONFIGURED (strlen(wifiSSID) >= 1 && strcmp(wifiSSID, DEFAULT_SSID) != 0)
 
 // DEFAULTS
+
+// Wifi
+#define DEFAULT_SSID "WBlinds"
+
 // Pin config defaults
 #define DEFAULT_DIR_PIN 18
 #define DEFAULT_STEP_PIN 19
@@ -85,6 +68,14 @@ WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(W_VERSION));
 #define DEFAULT_CORD_LENGTH_MM 1650
 #define DEFAULT_CORD_DIAMETER_MM 0.1
 #define DEFAULT_AXIS_DIAMETER_MM 15
+
+// Limits
+#define MAX_DEVICE_NAME_LENGTH 64
+#define MAX_MDNS_NAME_LENGTH 64
+#define MAX_MQTT_HOST_LENGTH 128
+#define MAX_MQTT_TOPIC_LENGTH 128
+#define MAX_MQTT_USER_LENGTH 41
+#define MAX_MQTT_PASS_LENGTH 41
 
 namespace stdBlinds {
     enum class resolution_t {
@@ -112,13 +103,26 @@ namespace stdBlinds {
 
 extern const byte MAGIC_NUMBER[4];
 extern bool forceReconnect;
-// extern bool wifiLock;
-// extern bool otaLock;
 extern bool doReboot;
-// extern byte optionType;
+extern bool needsConfig;
 extern String macAddress;
 extern String ipAddress;
 
+// Access point
+extern bool apActive;
+extern char* apSSID;
+extern char* apPass;
+extern int apChannel;
+extern bool apHide;
+
+// Device
+extern char deviceName[MAX_DEVICE_NAME_LENGTH];
+extern char mDnsName[MAX_MDNS_NAME_LENGTH];
+
+// Wifi
+extern bool wifiConfigured;
+extern char wifiSSID[64];
+extern char wifiPass[64];
 
 void setDoReboot(bool v);
 #define DO_REBOOT() setDoReboot(true);

@@ -31,6 +31,7 @@ public:
     void loop();
     void reset();
     void restore();
+    void initWiFi();
     void initAP(bool resetAP = false);
 private:
     WBlinds() {}

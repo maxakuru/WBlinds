@@ -9,6 +9,8 @@ export interface CurrentData {
 }
 export interface SettingsData {
   gen: {
+    ssid: string;
+    pass: string;
     deviceName: string;
     mdnsName: string;
     emitSync: boolean;
@@ -35,6 +37,7 @@ export interface SettingsData {
     port: number;
     topic: string;
     user: string;
+    pass: string;
   };
 }
 // TODO
@@ -108,15 +111,16 @@ class _State {
   constructor() {
     this._observers = {};
     this._state = mergeDeep({}, DEFAULT_STATE_DATA);
+    const t = {} as Record<keyof StateData, boolean>;
+    Object.keys(this._state).map((k) => {
+      t[k as keyof StateData] = false;
+    });
+    this._loadedKeys = { ...t };
+    this._savingKeys = { ...t };
   }
 
-  private _loadedKeys: Record<keyof StateData, boolean> = {
-    devices: false,
-    presets: false,
-    pendingState: false,
-    settings: false,
-    state: false,
-  };
+  private _loadedKeys: Record<keyof StateData, boolean>;
+  private _savingKeys: Record<keyof StateData, boolean>;
 
   get<T>(path: string): T {
     const spl = path.split(".");
@@ -141,6 +145,14 @@ class _State {
 
   isLoaded(key: keyof StateData): boolean {
     return this._loadedKeys[key];
+  }
+
+  setSaving(key: keyof StateData, v: boolean): void {
+    this._savingKeys[key] = v;
+  }
+
+  isSaving(key: keyof StateData): boolean {
+    return this._savingKeys[key];
   }
 
   /**

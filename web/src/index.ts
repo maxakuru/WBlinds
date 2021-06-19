@@ -1,10 +1,17 @@
 import { Nav, Card, ToastContainer } from "@Components";
 import { Home, Settings } from "@Screens";
 import { WBlindsNamespace } from "./namespace";
-import { appendChild, debug, getElement, isObject, querySelector } from "@Util";
+import {
+  appendChild,
+  debug,
+  diffDeep,
+  getElement,
+  isObject,
+  querySelector,
+} from "@Util";
 import { mock } from "../tools/mock";
-import { doFetch } from "@Api";
-import { State, StateData } from "@State";
+import { doFetch, HTTP_PUT } from "@Api";
+import { SettingsData, State, StateData } from "@State";
 import { makeWebsocket, WSEventType, WSIncomingEvent } from "./ws";
 import {
   SETTINGS,
@@ -15,12 +22,19 @@ import {
   PENDING_STATE,
 } from "@Const";
 
+const labels = ["Home", "Routines", "Settings"];
+
 export default (ns: WBlindsNamespace): void => {
   debug("onLoad(): ", ns);
   mock.init();
   const body = querySelector("body");
   const app = getElement("app");
   ns.state = State;
+
+  // Nav
+  const nav = Nav({ labels });
+  appendChild(getElement("nav"), nav.node);
+  nav.onClick(handleTabChange);
 
   // Toasts
   const tc = ToastContainer({});
@@ -29,7 +43,7 @@ export default (ns: WBlindsNamespace): void => {
 
   let currentIndex = -1;
   let currentTab: Home | Settings;
-  const handleTabChange = (nextIndex: number) => {
+  function handleTabChange(nextIndex: number) {
     if (currentIndex === nextIndex) return;
 
     currentIndex = nextIndex;
@@ -41,7 +55,13 @@ export default (ns: WBlindsNamespace): void => {
       // Home
       case 0: {
         const t = Home();
+
         t.onDeviceClick(handleDeviceClick);
+        if (!State.isLoaded(STATE)) {
+          load(STATE);
+          load(PRESETS);
+          load(DEVICES);
+        }
         currentTab = t;
         break;
       }
@@ -66,17 +86,42 @@ export default (ns: WBlindsNamespace): void => {
       }
     }
     currentTab && appendChild(app, currentTab.node);
+  }
+
+  const handleRoute = (path: string): void => {
+    console.log("handleRoute: ", path, path.substr(1));
+    let i = labels.map((l) => l.toLowerCase()).indexOf(path.substr(1));
+    console.log("i: ", i);
+    if (i < 0) i = 0;
+    nav.setIndex(i);
   };
-  handleTabChange(0);
+
+  handleRoute(window.location.pathname);
+
+  const stripPasswords = (
+    data: Partial<SettingsData>
+  ): Partial<SettingsData> => {
+    if (data?.gen?.pass) {
+      data.gen.pass = undefined;
+    }
+    if (data?.mqtt?.pass) {
+      data.mqtt.pass = undefined;
+    }
+    return data;
+  };
 
   function saveSettings() {
-    console.log("saveSettings: ", State._state);
-    // TODO: API call
-    State.update(SETTINGS, State._state.pendingState);
+    debug("saveSettings: ", State._state);
+    State.setSaving(SETTINGS, true);
+    const body = diffDeep(State._state.state, State._state.pendingState);
+    doFetch(`/${SETTINGS}`, HTTP_PUT, { body }).then(() => {
+      State.setSaving(SETTINGS, false);
+      State.update(SETTINGS, stripPasswords(State._state.pendingState));
+    });
   }
 
   function cancelSettings() {
-    console.log("cancelSettings: ", State._state);
+    debug("cancelSettings: ", State._state);
     State.update(PENDING_STATE, State._state.settings);
   }
 
@@ -86,11 +131,6 @@ export default (ns: WBlindsNamespace): void => {
     appendChild(body, card.node);
     setTimeout(card.show);
   }
-
-  // Data
-  load(STATE);
-  load(PRESETS);
-  load(DEVICES);
 
   function load(key: keyof StateData, updates: (keyof StateData)[] = [key]) {
     return doFetch(`/${key}`)
@@ -135,9 +175,4 @@ export default (ns: WBlindsNamespace): void => {
     const m = isObject(err) ? err?.message || DEFAULT_ERROR : err;
     tc.pushToast(m as string, true);
   }
-
-  // Nav
-  const nav = Nav();
-  appendChild(getElement("nav"), nav.node);
-  nav.onClick(handleTabChange);
 };

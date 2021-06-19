@@ -8,6 +8,7 @@ export interface SelectorAPI {
   onChange(h: ChangeHandler): void;
   destroy(): void;
   index(): number;
+  setIndex(ind: number): void;
 }
 
 interface SelectorProps {
@@ -26,16 +27,18 @@ const _Selector: ComponentFunction<SelectorAPI, SelectorProps> = function ({
       _changeHandlers.push(h);
     };
 
+    const _onClick = (index: number) => {
+      removeClass(_items[_index], "sel");
+      _index = index;
+      addClass(_items[_index], "sel");
+      _changeHandlers.map((c) => c(index));
+    };
+
     items.map((i, index) => {
       const e = createDiv();
       e.innerText = i;
       index === _index && addClass(e, "sel");
-      e.onclick = () => {
-        removeClass(_items[_index], "sel");
-        _index = index;
-        addClass(e, "sel");
-        _changeHandlers.map((c) => c(index));
-      };
+      e.onclick = () => _onClick(index);
       _items.push(e);
       appendChild(elem, e);
     });
@@ -50,6 +53,9 @@ const _Selector: ComponentFunction<SelectorAPI, SelectorProps> = function ({
         return _index;
       },
       onChange,
+      setIndex: (index: number) => {
+        _onClick(index);
+      },
     };
   };
   return template;

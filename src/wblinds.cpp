@@ -2,12 +2,15 @@
 #include "state.h"
 #include <WiFi.h>
 #include "api_http.h"
+#include <DNSServer.h>
 
 #ifndef DISABLE_OTA
 #include "ota_update.h"
 #endif
 
 WBlinds* WBlinds::instance = 0;
+
+DNSServer dnsServer;
 
 // ====== Optional =======
 // =======================
@@ -87,25 +90,21 @@ WBlinds* WBlinds::getInstance() {
 void WBlinds::setup() {
   Serial.begin(115200);
 
+  delay(10000);
+
+  // Read config/state from FS
+  // get SSID, password, mDNS name
+  // if not setup, will go to AP from initWiFi()
   state = State::getInstance();
   tickEv.tick_ = true;
+
+  initWiFi();
 
 #ifndef DISABLE_HOME_SWITCH
   int hp = state->getHomeSwitchPin();
   pinMode(hp, INPUT_PULLDOWN);
   attachInterrupt(digitalPinToInterrupt(hp), onHomePinChange, CHANGE);
 #endif
-
-  // setup wifi
-  // TODO: AP setup on first launch
-  WiFi.begin(WIFI_SSID, WIFI_PW);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    WLOG_I(TAG, "Connecting to WiFi..");
-  }
-  ipAddress = WiFi.localIP().toString();
-  macAddress = WiFi.macAddress();
-  WLOG_I(TAG, "Connected to the WiFi network, IP: %s", ipAddress);
 
 #ifdef STEPPER_A4988
   motor = new MotorA4988();
@@ -118,8 +117,49 @@ void WBlinds::setup() {
 
 #ifndef DISABLE_HOMEKIT
   homekit = new Homekit(*state);
-  homekit->init();
 #endif
+
+  lastHeap = ESP.getFreeHeap();
+}
+
+void WBlinds::initWiFi() {
+  if (!WIFI_CONFIGURED) {
+    WLOG_D(TAG, "Wifi not configured");
+    if (!apActive)
+      initAP();
+    return;
+  }
+  else if (!apActive) {
+    // disable AP
+    WLOG_D(TAG, "Disable AP");
+    WiFi.softAPdisconnect(true);
+    WiFi.mode(WIFI_STA);
+  }
+  WLOG_D(TAG, "Not first boot");
+  needsConfig = false;
+
+  // if not configured and AP not running, start AP
+  // if not configured and AP running, do nothing
+  // if configured,
+  WiFi.begin(wifiSSID, wifiPass);
+  WiFi.setSleep(true);
+  WiFi.setHostname(mDnsName);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(50);
+    WLOG_D(TAG, "Connecting to WiFi..");
+  }
+  ipAddress = WiFi.localIP().toString();
+  macAddress = WiFi.macAddress();
+  macAddress.replace(":", "");
+  macAddress.toLowerCase();
+  WLOG_D(TAG, "Connected to the WiFi network, IP: %s", ipAddress.c_str());
+
+  // Set state overrides
+  strcpy_P(deviceName, PSTR("wblinds-"));
+  sprintf(deviceName + 8, "%*s", 6, macAddress.c_str() + 6);
+  strcpy_P(mqttTopic, PSTR("wblinds-"));
+  sprintf(mqttTopic + 8, "%*s", 6, macAddress.c_str() + 6);
 
 #ifndef DISABLE_OTA
   _lastOTACheck = millis();
@@ -130,14 +170,35 @@ void WBlinds::setup() {
   mqttAPI.init();
 #endif
 
-  httpAPI.init();
-  lastHeap = ESP.getFreeHeap();
+#ifndef DISABLE_HOMEKIT
+  homekit->init();
+#endif
 }
 
 void WBlinds::loop() {
   if (doReboot) {
     reset();
   }
+
+
+
+  // AP handling
+  // if (!WLED_WIFI_CONFIGURED) {
+  //   DEBUG_PRINT(F("No connection configured. "));
+  //   if (!apActive)
+  //     initAP();        // instantly go to ap mode
+  //   return;
+  // }
+  // else if (!apActive) {
+  //   if (apBehavior == AP_BEHAVIOR_ALWAYS) {
+  //     initAP();
+  //   }
+  //   else {
+  //     DEBUG_PRINTLN(F("Access point disabled."));
+  //     WiFi.softAPdisconnect(true);
+  //     WiFi.mode(WIFI_STA);
+  //   }
+  // }
 
   if ((millis() - TICK_INTERVAL) > _lastTick) {
     _lastTick = millis();
@@ -166,6 +227,25 @@ void WBlinds::loop() {
     lastHeap = heap;
     _lastHeapCheck = millis();
   }
+}
+
+void WBlinds::initAP(bool resetAP) {
+  WLOG_D(TAG, "Initialize AP");
+  // if (!apSSID[0] || resetAP)
+  //   strcpy_P(apSSID, PSTR("wblinds"));
+  // if (resetAP)
+  //   strcpy_P(apPass, PSTR(DEFAULT_AP_PASS));
+
+  WiFi.softAPConfig(IPAddress(4, 3, 2, 1), IPAddress(4, 3, 2, 1), IPAddress(255, 255, 255, 0));
+  WiFi.softAP(apSSID, apPass, apChannel, apHide);
+
+  if (!apActive) {
+    httpAPI.init();
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(53, "*", WiFi.softAPIP());
+  }
+
+  apActive = true;
 }
 
 void WBlinds::reset() {

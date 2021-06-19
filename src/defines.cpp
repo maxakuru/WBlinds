@@ -23,12 +23,24 @@ namespace stdBlinds {
 }
 
 bool forceReconnect = false;
-// bool wifiLock = false;
-// bool otaLock = false;
+bool needsConfig = true;
 bool doReboot = false;
-// byte optionType;
 String macAddress = "";
 String ipAddress = "";
+
+bool apActive = false;
+char* apSSID = "WBlinds-";
+char* apPass = "WBL1nds-123";
+int apChannel = 1;
+bool apHide = 0;
+
+
+char mDnsName[MAX_MDNS_NAME_LENGTH] = "wblinds-";
+char deviceName[MAX_DEVICE_NAME_LENGTH] = "wblinds-";
+
+bool wifiConfigured = false;
+char wifiSSID[64] = DEFAULT_SSID;
+char wifiPass[64] = "";
 
 void setDoReboot(bool v) {
     doReboot = v;

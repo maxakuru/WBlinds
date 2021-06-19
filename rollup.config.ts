@@ -10,17 +10,26 @@ import postcss from "rollup-plugin-postcss";
 import path from "path";
 
 const { parsed: env } = require("dotenv-flow").config();
-const dev = env.MODE !== "prod";
 if (process.env.CI) {
+  // Force settings for precommit hooks,
+  // and (eventually) CI.
   env.USE_MOCKS = false;
+  env.DEBUG = false;
+  env.MODE = "dev";
 }
 
+if (!env.API_ENDPOINT) {
+  env.API_ENDPOINT = "/api";
+}
+
+const dev = env.MODE !== "prod";
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 const plugins = [];
 plugins.push(
   replace({
     preventAssignment: true,
+    "process.env.DEBUG": JSON.stringify(env.DEBUG || dev),
     "process.env.NODE_ENV": JSON.stringify(env.MODE),
     "process.env.USE_MOCKS": JSON.stringify(env.USE_MOCKS),
     "process.env.API_ENDPOINT": JSON.stringify(env.API_ENDPOINT || ""),

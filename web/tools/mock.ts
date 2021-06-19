@@ -3,15 +3,11 @@
 
 import { HTTPMethod } from "@Api";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-// import fetchMock from "fetch-mock";
-
 let _mock = {
   init: () => {},
   restore: () => {},
 };
 
-console.log("use mocks: ", process.env.USE_MOCKS, typeof process.env.USE_MOCKS);
 if (process.env.USE_MOCKS === "true") {
   const ogFetch = window.fetch;
 
@@ -22,7 +18,7 @@ if (process.env.USE_MOCKS === "true") {
   };
 
   const responseMap: any = {
-    "/state": {
+    "/api/state": {
       GET: {
         pos: 50,
         tPos: 50,
@@ -30,7 +26,7 @@ if (process.env.USE_MOCKS === "true") {
         accel: 9999999,
       },
     },
-    "/settings": {
+    "/api/settings": {
       GET: {
         gen: { deviceName: "WBlinds", mdnsName: "WBlinds", emitSync: true },
         hw: {
@@ -58,7 +54,7 @@ if (process.env.USE_MOCKS === "true") {
         },
       },
     },
-    "/presets": {
+    "/api/presets": {
       GET: {
         "Going to bed": {
           state: {
@@ -77,7 +73,7 @@ if (process.env.USE_MOCKS === "true") {
         },
       },
     },
-    "/devices": {
+    "/api/devices": {
       GET: {
         "mac-address": {
           name: "Bedroom Left",

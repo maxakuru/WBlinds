@@ -2,3 +2,4 @@ MODE=deploy
 USE_MOCKS=false
 API_ENDPOINT=
 WS_ENDPOINT=
+DEBUG=false
