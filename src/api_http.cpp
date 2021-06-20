@@ -169,6 +169,20 @@ static void getState(AsyncWebServerRequest* request) {
    request->send(response);
 }
 
+static void getDevices(AsyncWebServerRequest* request) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+   if (handleFileRead(request, "/devices.json")) return;
+   AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
+   request->send(response);
+}
+
+static void getRoutines(AsyncWebServerRequest* request) {
+   WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
+   if (handleFileRead(request, "/routines.json")) return;
+   AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
+   request->send(response);
+}
+
 static void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
 
@@ -280,7 +294,7 @@ void BlindsHTTPAPI::init() {
    AsyncCallbackJsonWebHandler* stateHandler = new AsyncCallbackJsonWebHandler("/api/state", updateState);
    stateHandler->setMethod(HTTP_PUT);
    server.addHandler(stateHandler);
-   
+
 
    // TODO: change this to use AsyncJsonResponse
    server.on("/api/settings", HTTP_GET, getSettings);

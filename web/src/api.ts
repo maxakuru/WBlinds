@@ -52,6 +52,6 @@ function _doFetch(
         _doFetch(resource, method, opts, attempt)
       );
     }
-    return res.json();
+    return method === HTTP_GET ? res.json() : undefined;
   });
 }

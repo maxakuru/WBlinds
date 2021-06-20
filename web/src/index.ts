@@ -60,9 +60,7 @@ export default (ns: WBlindsNamespace): void => {
 
   function handleTabChange(nextIndex: number) {
     if (currentIndex === nextIndex) return;
-    // TODO: Hacky.. settings handles it's own history
-    if (nextIndex !== 2) pushToHistory(`/${labels[nextIndex].toLowerCase()}`);
-
+    const newPath = `/${labels[nextIndex].toLowerCase()}`;
     currentIndex = nextIndex;
     currentTab?.destroy?.();
     currentTab?.node.remove();
@@ -72,7 +70,7 @@ export default (ns: WBlindsNamespace): void => {
       // Home
       case 0: {
         const t = Home();
-
+        pushToHistory(newPath, undefined, true);
         t.onDeviceClick(handleDeviceClick);
         if (!State.isLoaded(STATE)) {
           load(STATE);
@@ -85,6 +83,8 @@ export default (ns: WBlindsNamespace): void => {
 
       // Routines
       case 1: {
+        pushToHistory(newPath, undefined, true);
+
         currentTab = null;
         break;
       }
@@ -92,6 +92,8 @@ export default (ns: WBlindsNamespace): void => {
       // Settings
       case 2: {
         const t = Settings();
+        pushToHistory(newPath);
+
         t.onSave(saveSettings);
         t.onCancel(cancelSettings);
 
@@ -123,10 +125,16 @@ export default (ns: WBlindsNamespace): void => {
     debug("saveSettings: ", State._state);
     State.setSaving(SETTINGS, true);
     const body = diffDeep(State._state.state, State._state.pendingState);
-    doFetch(SETTINGS, HTTP_PUT, { body }).then(() => {
-      State.setSaving(SETTINGS, false);
-      State.update(SETTINGS, stripPasswords(State._state.pendingState));
-    });
+    doFetch(SETTINGS, HTTP_PUT, { body })
+      .then(() => {
+        State.setSaving(SETTINGS, false);
+        State.update(SETTINGS, stripPasswords(State._state.pendingState));
+        tc.pushToast("Settings saved");
+      })
+      .catch((e) => {
+        tc.pushToast("Failed to save settings");
+        throw e;
+      });
   }
 
   function cancelSettings() {

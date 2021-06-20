@@ -208,7 +208,7 @@ const SETTING_INPUT_MAP: Record<
 
 const _Settings: ComponentFunction<SettingsAPI> = function () {
   let _loading = true;
-  let _saving = false;
+  let _savingOrCanceling = false;
   let _dirty = false;
   let _saveHandlers: ActHandler[] = [];
   let _cancelHandlers: ActHandler[] = [];
@@ -251,7 +251,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       // Events that come from WS shouldn't overwrite existing data.
       // TODO: add map of key -> inputs, check state of input and allow overwriting
       // if the input hasn't been modified by the user.
-      if (!_loading && !_saving) return;
+      if (!_loading && !_savingOrCanceling) return;
       // Still loading, event came in between save press and response.
       if (!_loading && State.isSaving(SETTINGS)) return;
       const spinner = getElement("sl");
@@ -260,7 +260,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       removeClass(container, "hide");
       container.prepend(selector.node);
       _loading = false;
-      _saving && _setDirty(false);
+      _savingOrCanceling && _setDirty(false);
 
       // make content container, add it
       let div = getElement(id);
@@ -284,6 +284,86 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       });
     });
 
+    const _setDirty = (newState: boolean) => {
+      if (newState !== _dirty) {
+        _savingOrCanceling = false;
+        _dirty = newState;
+        const act = getElement("slc-act");
+        if (_dirty) {
+          // show save
+          getElement("s-save").onclick = () => {
+            _savingOrCanceling = true;
+            _saveHandlers.map((h) => h());
+          };
+          getElement("s-can").onclick = () => {
+            _savingOrCanceling = true;
+            _cancelHandlers.map((h) => h());
+            loaded();
+          };
+          removeClass(act, "hide");
+        } else {
+          addClass(act, "hide");
+        }
+      }
+    };
+
+    function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
+      const container = createElement("span");
+      const groupDivs: [HTMLElement, Input[]][] = [];
+      const addToContainer = (groupNum: number | undefined, input: Input) => {
+        if (groupNum == null) {
+          return appendChild(container, input.node);
+        }
+        // first entry in group, create the entry
+        if (groupDivs[groupNum] == null) {
+          const d = createDiv();
+          addClass(d, "igroup");
+          groupDivs[groupNum] = [d, []];
+          appendChild(container, d);
+        }
+
+        // add to group divs input list
+        groupDivs[groupNum][1].push(input);
+        // add to group
+        appendChild(groupDivs[groupNum][0], input.node);
+      };
+      for (const k in SETTING_INPUT_MAP[key]) {
+        // group, controls group, label, type, enum options
+        const {
+          g,
+          cg,
+          l,
+          t = InputType_Number,
+          o,
+          u,
+        } = (SETTING_INPUT_MAP[key] as any)[k] as SettingsInputEntry;
+
+        const stateKey = `${SETTINGS}.${key}.${k}`;
+        const pendingKey = `${PENDING_STATE}.${key}.${k}`;
+
+        const inp = Input({
+          label: l,
+          type: t,
+          enumOpts: o,
+          value: State.get(stateKey),
+          unit: u,
+        });
+        addToContainer(g, inp);
+
+        const ind = _inputs.push(inp);
+        inp.onChange((v) => {
+          if (cg) {
+            _enableDisableGroup(v, inp, groupDivs[g][0], groupDivs[g][1]);
+          }
+          _inputsDirty[ind] = inp.isDirty();
+          _setDirty(_inputsDirty.filter((d) => d === true).length > 0);
+          State.set(pendingKey, v);
+        });
+      }
+
+      return container;
+    }
+
     return {
       destroy: () => {
         // removeQh();
@@ -301,84 +381,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     };
   };
 
-  const _setDirty = (newState: boolean) => {
-    if (newState !== _dirty) {
-      _saving = false;
-      _dirty = newState;
-      const act = getElement("slc-act");
-      if (_dirty) {
-        // show save
-        getElement("s-save").onclick = () => {
-          _saving = true;
-          _saveHandlers.map((h) => h());
-        };
-        getElement("s-can").onclick = () => {
-          _cancelHandlers.map((h) => h());
-        };
-        removeClass(act, "hide");
-      } else {
-        addClass(act, "hide");
-      }
-    }
-  };
-
-  function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
-    const container = createElement("span");
-    const groupDivs: [HTMLElement, Input[]][] = [];
-    const addToContainer = (groupNum: number | undefined, input: Input) => {
-      if (groupNum == null) {
-        return appendChild(container, input.node);
-      }
-      // first entry in group, create the entry
-      if (groupDivs[groupNum] == null) {
-        const d = createDiv();
-        addClass(d, "igroup");
-        groupDivs[groupNum] = [d, []];
-        appendChild(container, d);
-      }
-
-      // add to group divs input list
-      groupDivs[groupNum][1].push(input);
-      // add to group
-      appendChild(groupDivs[groupNum][0], input.node);
-    };
-    for (const k in SETTING_INPUT_MAP[key]) {
-      // group, controls group, label, type, enum options
-      const {
-        g,
-        cg,
-        l,
-        t = InputType_Number,
-        o,
-        u,
-      } = (SETTING_INPUT_MAP[key] as any)[k] as SettingsInputEntry;
-
-      const stateKey = `${SETTINGS}.${key}.${k}`;
-      const pendingKey = `${PENDING_STATE}.${key}.${k}`;
-
-      const inp = Input({
-        label: l,
-        type: t,
-        enumOpts: o,
-        value: State.get(stateKey),
-        unit: u,
-      });
-      addToContainer(g, inp);
-
-      const ind = _inputs.push(inp);
-      inp.onChange((v) => {
-        if (cg) {
-          _enableDisableGroup(v, inp, groupDivs[g][0], groupDivs[g][1]);
-        }
-        _inputsDirty[ind] = inp.isDirty();
-        _setDirty(_inputsDirty.filter((d) => d === true).length > 0);
-        State.set(pendingKey, v);
-      });
-    }
-
-    return container;
-  }
-
   /**
    * Set a group and it's inputs disabled or enabled based on state change
    * @param value   - True = green/ON/enabled
@@ -386,18 +388,18 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
    * @param groupDiv
    * @param inputs
    */
-  function _enableDisableGroup(
+  const _enableDisableGroup = (
     value: boolean,
     toggler: Input,
     groupDiv: HTMLElement,
     inputs: Input[]
-  ) {
+  ) => {
     const d = "disabled";
     value ? removeClass(groupDiv, d) : addClass(groupDiv, d);
     inputs.forEach((i) => {
       if (toggler !== i) i.setDisabled(!value);
     });
-  }
+  };
 
   return template;
 };

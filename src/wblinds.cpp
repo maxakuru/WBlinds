@@ -91,7 +91,7 @@ WBlinds* WBlinds::getInstance() {
 void WBlinds::setup() {
   Serial.begin(115200);
   Serial.setTimeout(50);
-  // delay(10000);
+  delay(10000);
 
   // These are defaults, but may be overwritten 
   // from State/config once it's loaded.
@@ -220,13 +220,14 @@ void WBlinds::loop() {
 }
 
 void WBlinds::initAP_(bool resetAP) {
-  WLOG_D(TAG, "Initialize AP");
+  WLOG_D(TAG, "Initialize AP: %s %s", apSSID, apPass);
 
   WiFi.softAPConfig(IPAddress(4, 3, 2, 1), IPAddress(4, 3, 2, 1), IPAddress(255, 255, 255, 0));
   WiFi.softAP(apSSID, apPass, apChannel, apHide);
 
   if (!apActive_) {
-    if (!httpAPI.isInit()) httpAPI.init();
+    if (!httpAPI.isInit())
+      httpAPI.init();
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(53, "*", WiFi.softAPIP());
   }

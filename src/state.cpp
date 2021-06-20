@@ -235,7 +235,7 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateGeneralDirty_(settingsGeneral_.etag == prevEtag  && 0 != strcmp(settingsGeneral_.mDnsName, s));
+            updateGeneralDirty_(settingsGeneral_.etag == prevEtag && 0 != strcmp(settingsGeneral_.mDnsName, s));
             strlcpy(settingsGeneral_.mDnsName, s, len + 1);
             settingsGeneral_.mDnsName[len + 1] = 0;
         }
@@ -243,7 +243,7 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
     v = obj["emitSync"];
     if (!v.isNull()) {
         bool b = v.as<boolean>();
-        updateGeneralDirty_(settingsGeneral_.etag == prevEtag  && settingsGeneral_.emitSyncData != b);
+        updateGeneralDirty_(settingsGeneral_.etag == prevEtag && settingsGeneral_.emitSyncData != b);
         settingsGeneral_.emitSyncData = b;
     }
     return stdBlinds::error_code_t::NoError;
@@ -346,7 +346,7 @@ stdBlinds::error_code_t State::setHardwareSettingsFromJSON_(const JsonObject& ob
 }
 
 stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, bool& shouldSave) {
-    int prevEtag = settingsMQTT_.etag; 
+    int prevEtag = settingsMQTT_.etag;
     JsonVariant v = obj["enabled"];
     if (!v.isNull()) {
         bool b = v.as<boolean>();
@@ -449,10 +449,14 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
         }
     }
 
-    if (shouldSave) {
+    WLOG_D(TAG, "AFTER SETTINGS LOAD");
+    if (isSettingsDirty_ && shouldSave) {
+        WLOG_D(TAG, "SAVE SETTINGS");
         saveSettings();
     }
     if (isConfigDirty_) {
+        WLOG_D(TAG, "SAVE CONFIG");
+
         saveConfig();
     }
 
