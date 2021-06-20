@@ -15,7 +15,7 @@ if (process.env.CI) {
   // and (eventually) CI.
   env.USE_MOCKS = false;
   env.DEBUG = false;
-  env.MODE = "dev";
+  env.MODE = "prod";
 }
 
 if (!env.API_ENDPOINT) {

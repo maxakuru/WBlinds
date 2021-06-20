@@ -136,4 +136,8 @@ void BlindsMQTTAPI::init() {
    state->Attach(this, interestingFlags);
 }
 
+bool BlindsMQTTAPI::isInit() {
+   return isInit_;
+}
+
 #endif // DISABLE_MQTT

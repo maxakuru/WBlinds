@@ -32,7 +32,10 @@ public:
     void reset();
     void restore();
 private:
+    bool wifiInit_ = false;
+    bool peersInit_ = false;
     bool apActive_ = false;
+    bool connFailing_ = false;
     void handleWiFi_();
     void initAP_(bool resetAP = false);
 

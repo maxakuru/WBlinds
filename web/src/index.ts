@@ -185,6 +185,6 @@ export default (ns: WBlindsNamespace): void => {
     const m = isObject(err)
       ? (err?.message || DEFAULT_ERROR) + "\n" + err.stack
       : err;
-    tc.pushToast(m as string, true, true);
+    tc.pushToast(m as string, true);
   }
 };

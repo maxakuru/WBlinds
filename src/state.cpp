@@ -73,6 +73,7 @@ String State::serializeSettings(setting_t settingType) {
 
     auto genObj = doc.createNestedObject("gen");
     if (settingType == setting_t::kAll || settingType == setting_t::kGeneral) {
+        genObj["ssid"] = wifiSSID;
         genObj["deviceName"] = settingsGeneral_.deviceName;
         genObj["mdnsName"] = settingsGeneral_.mDnsName;
         genObj["emitSync"] = settingsGeneral_.emitSyncData;

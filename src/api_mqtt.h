@@ -14,7 +14,9 @@ public:
    };
    void handleEvent(const StateEvent& event) override;
    void init() override;
+   bool isInit() override;
 private:
+   bool isInit_ = false;
    uint8_t connectRetryCount = 0;
    char* upTopic;
    char* downTopic;

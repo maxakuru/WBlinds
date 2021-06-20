@@ -32,7 +32,7 @@ const _ToastContainer: ComponentFunction<
       message: string,
       isError?: boolean,
       isPersistent?: boolean,
-      timeout = 2500
+      timeout?: number
     ) {
       const t = Toast({ message, isError, id: _index++ });
       t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
@@ -49,7 +49,7 @@ const _ToastContainer: ComponentFunction<
 
       setTimeout(() => {
         t.node.style.bottom = `0px`;
-        !isPersistent && setTimeout(remove, timeout);
+        !isPersistent && setTimeout(remove, timeout || isError ? 5000 : 2500);
       });
     }
     return {

@@ -318,4 +318,9 @@ void BlindsHTTPAPI::init() {
    );
 
    server.begin();
+   isInit_ = true;
+}
+
+bool BlindsHTTPAPI::isInit() {
+   return isInit_;
 }

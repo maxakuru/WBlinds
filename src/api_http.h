@@ -10,8 +10,11 @@ public:
    explicit BlindsHTTPAPI();
    ~BlindsHTTPAPI() override;
    void init() override;
+   bool isInit() override;
+
    void handleEvent(const StateEvent& event) override;
 private:
+   bool isInit_ = false;
    // void handlePOST();
    // void serveIndex(AsyncWebServerRequest* request);
    // void serveBackground(AsyncWebServerRequest* request);

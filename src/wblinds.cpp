@@ -91,6 +91,7 @@ WBlinds* WBlinds::getInstance() {
 void WBlinds::setup() {
   Serial.begin(115200);
   Serial.setTimeout(50);
+  // delay(10000);
 
   // These are defaults, but may be overwritten 
   // from State/config once it's loaded.
@@ -129,7 +130,9 @@ void WBlinds::setup() {
 }
 
 void WBlinds::handleWiFi_() {
-  if (!WIFI_CONFIGURED) {
+  if (!WIFI_CONFIGURED || connFailing_) {
+    // Wifi still set to default SSID
+    // or connection is taking a long time
     if (!apActive_)
       initAP_();
     else
@@ -144,20 +147,20 @@ void WBlinds::handleWiFi_() {
     dnsServer.stop();
     apActive_ = false;
   }
-  WLOG_D(TAG, "Not first boot");
-  needsConfig = false; // used for redirect in api_http
-
-  // if not configured and AP not running, start AP
-  // if not configured and AP running, do nothing
-  // if configured,
-  WiFi.begin(wifiSSID, wifiPass);
-  WiFi.setSleep(true);
-  WiFi.setHostname(mDnsName);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(50);
-    WLOG_D(TAG, "Connecting to WiFi..");
+  else if (!wifiInit_) {
+    // already configured wifi, waiting for connection
+    WLOG_D(TAG, "Connecting to WiFi %s - %s", wifiSSID, wifiPass);
+    WiFi.begin(wifiSSID, wifiPass);
+    WiFi.setSleep(true);
+    WiFi.setHostname(mDnsName);
+    if (!httpAPI.isInit()) httpAPI.init();
+    wifiInit_ = true;
   }
+
+  // Breaks early until connected, but only init peers once
+  if (peersInit_ || WiFi.status() != WL_CONNECTED) return;
+  peersInit_ = true;
+
   ipAddress = WiFi.localIP().toString();
   macAddress = WiFi.macAddress();
   macAddress.replace(":", "");
@@ -220,7 +223,7 @@ void WBlinds::initAP_(bool resetAP) {
   WiFi.softAP(apSSID, apPass, apChannel, apHide);
 
   if (!apActive_) {
-    httpAPI.init();
+    if (!httpAPI.isInit()) httpAPI.init();
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(53, "*", WiFi.softAPIP());
   }

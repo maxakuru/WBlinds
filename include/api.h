@@ -4,11 +4,13 @@
 #include "defines.h"
 #include "state.h"
 
-class BlindsAPI: virtual protected StateObserver {
+class BlindsAPI : virtual protected StateObserver {
 
 public:
     virtual ~BlindsAPI() {};
     virtual void init() = 0;
+    virtual bool isInit() = 0;
+
     static stdBlinds::error_code_t doOperation(const char* op, byte* jsonData, uint32_t length) {
         if (length < 2) {
             return doOperation(op, nullptr);
@@ -47,11 +49,12 @@ public:
             if (jsonDoc != nullptr && jsonDoc->containsKey("immediate")) {
                 immediate = (*jsonDoc)["immediate"];
             }
-            if(immediate){
+            if (immediate) {
                 flags.moveStop_ = true;
                 // TODO:
                 // flags.moveStopImmediate_ = true;
-            } else{
+            }
+            else {
                 flags.moveStop_ = true;
             }
         }
