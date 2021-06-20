@@ -27,26 +27,26 @@
 - [x] Parameterize pins
 - [x] Homekit integration
 - [x] Saving settings to SPIFFS
-- [x] Web UI
+- [x] Web UI - Settings
+- [x] AP & captive portal wifi setup
+- [x] WS support for web clients
 - [ ] Solidify API definitions
-- [ ] Settings page in web UI (pins, hardware, name, etc.) - WIP
 - [ ] Web calibration wizard
-- [ ] UDP Sync
-- [ ] UDP Sync Groups
-- [ ] Routines
-- [ ] WS support for web clients
-- [ ] AP wifi setup
-- [ ] Servo brake & relay for minimizing power consumption
 - [ ] Add schematic, PCB
 - [ ] Add STLs for 3D printing axis, brake, enclosure - initial
 - [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
+- [ ] Web UI - Devices
+- [ ] Web UI - Routines
+- [ ] UDP Sync
+- [ ] Routines
+- [ ] Servo brake & relay for minimizing power consumption
 - [ ] State approximation with Hall effect sensor (built-in on ESP32)
 
 
 ## 💻 Web UI
 
 ### Settings
-<img src="./etc/settings-1.png" width="200"> <img src="./etc/settings-2.png" width="200"> <img src="./etc/settings-3.png" width="200">
+<img src="./etc/settings-1.png" width="250"> <img src="./etc/settings-2.png" width="250"> <img src="./etc/settings-3.png" width="250">
 
 
 ## 🔧 Configuration
