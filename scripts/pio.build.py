@@ -23,9 +23,9 @@ def build_web():
         print("Attempting to build UI...")
         try:
             # TODO: skip depending on build flags
-            return;
+            # return;
             # print(check_output(["yarn"]))
-            # print(check_output(["yarn", "build"]))       
+            print(check_output(["yarn", "build"]))       
             # print(check_output(["yarn", "build:ui"]))
         except Exception as e:
             print("Encountered error", type(e).__name__, "building webpage:", e)

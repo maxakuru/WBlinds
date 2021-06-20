@@ -25,18 +25,19 @@
 /* uncss:ignore */
 .igroup>.in:first-child {
 	border-radius: 15px 15px 0px 0px;
+  margin-top: 20px;
 }
 /* uncss:ignore */
 .igroup>.in:last-child {
 	border-radius: 0px 0px 15px 15px;
-	margin-bottom: 10px;
+	margin-bottom: 20px;
 	border-bottom: none;
 }
 
 /* uncss:ignore */
 .in>input {
 	background-color: #00000000;
-    border: none;
+  border: none;
 	text-align: right;
 	color: #DB8B1D;
 }
@@ -71,6 +72,12 @@
 	left: 45%;
 }
 
+[type="select"] {
+  appearance: none;
+  background: transparent;
+  color: #DB8B1D;
+  border: none;
+}
 
 /* 
 [type="checkbox"]:not(:checked),

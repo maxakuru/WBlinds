@@ -147,6 +147,7 @@ public:
     bool isDirty();
     void save();
     void saveSettings();
+    void saveConfig();
     String serialize();
     String serializeSettings(setting_t settingType);
     stdBlinds::error_code_t loadFromJSONString(StateObserver* that, String jsonStr);
@@ -232,6 +233,7 @@ private:
     bool isInit_;
     bool isDirty_; // state
     bool isSettingsDirty_; // settings
+    bool isConfigDirty_; // config
 
     void load_();
     void init_();

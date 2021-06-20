@@ -51,7 +51,7 @@ bool configRedirect(AsyncWebServerRequest* request) {
 
    if (ON_STA_FILTER(request)) return false; // only redirect in AP mode
    const String& url = request->url();
-   if (needsConfig && url.indexOf("/settings") < 0 && url.indexOf("tab=gen") < 0) {
+   if (!WIFI_CONFIGURED && url.indexOf("/settings") < 0 && url.indexOf("tab=gen") < 0) {
       request->redirect("/settings?tab=gen");
       request->send(302);
       return true;

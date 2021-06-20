@@ -39,10 +39,7 @@ const _Nav: ComponentFunction<NavAPI, NavProps> = function ({ labels }) {
       l.innerText = label;
       _lis.push(l);
       appendChild(elem, l);
-
-      l.addEventListener("click", () => {
-        setIndex(i);
-      });
+      l.onclick = () => setIndex(i);
     });
 
     return {

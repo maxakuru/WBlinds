@@ -5,20 +5,28 @@ export const HTTP_PUT = "PUT";
 export const HTTP_GET = "GET";
 export type HTTPMethod = typeof HTTP_POST | typeof HTTP_PUT | typeof HTTP_GET;
 
-const api = process.env.API_ENDPOINT;
 /**
- *
+ * Begins with /
+ * Does not end with /
+ */
+const api = process.env.API_ENDPOINT;
+
+/**
+ * Do fetch on some route of the API
+ * @param resource - The resource, without "/" prefix
+ * @param method - HTTP method
+ * @param [opts]
  */
 export function doFetch(
-  href: string,
+  resource: string,
   method?: HTTPMethod,
   opts?: any
 ): Promise<any> {
-  return _doFetch(href, method, opts);
+  return _doFetch(resource, method, opts);
 }
 
 function _doFetch(
-  href: string,
+  resource: string,
   method: HTTPMethod = HTTP_GET,
   opts: any = {},
   attempt = 0
@@ -26,7 +34,8 @@ function _doFetch(
   const body = isObject(opts.body) ? JSON.stringify(opts.body) : opts.body;
   const headers = { ...(opts.headers || {}) };
   if (body) headers["content-type"] = "application/json";
-  return fetch(`${api}${href}`, {
+  const url = `${api}/${resource}`;
+  return fetch(url, {
     body,
     method,
     headers,
@@ -35,14 +44,12 @@ function _doFetch(
     if (!res.ok) {
       attempt += 1;
       if (attempt > 8 || res.status < 500) {
-        const e = new Error(
-          `Failed with ${res.status} on fetch [${method}] ${href}`
-        );
+        const e = new Error(`[${method}] ${url} failed (${res.status})`);
         (e as any).response = res;
         throw e;
       }
       return wait(attempt * 5000).then(() =>
-        _doFetch(href, method, opts, attempt)
+        _doFetch(resource, method, opts, attempt)
       );
     }
     return res.json();

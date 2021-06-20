@@ -14,6 +14,11 @@
 }
 
 /* uncss:ignore */
+#stcc>span:last-child {
+    margin-bottom: 70px;
+}
+
+/* uncss:ignore */
 #stcc>div {
     justify-content: center;
 }
@@ -21,7 +26,7 @@
 /* uncss:ignore */
 #slc-act {
     position: fixed;
-    bottom: 70px;
+    bottom: 75px;
     justify-content: space-evenly;
     width: 100%;
     left: 0%;

@@ -10,6 +10,7 @@ import {
   displayNone,
   debug,
   getQueryParam,
+  pushToHistory,
 } from "@Util";
 import {
   ComponentFunction,
@@ -43,10 +44,27 @@ const InputGroup_Physical = 2;
 const InputGroup_MQTT = 3;
 
 interface SettingsInputEntry {
-  t?: InputType; // defaults to Number, most common
+  /**
+   * Type of input
+   * Defaults to Number, most common
+   */
+  t?: InputType;
+  /**
+   * Label of input
+   */
   l: string;
+  /**
+   * Group index, adds to input group, determines order
+   */
   g?: number;
+  /**
+   * Enum options, used for enum types only
+   */
   o?: any[];
+  /**
+   * Controls group, for booleans that disable/enable input groups
+   */
+  cg?: boolean;
 }
 
 const SETTING_INPUT_MAP: Record<
@@ -86,6 +104,7 @@ const SETTING_INPUT_MAP: Record<
       t: InputType_Boolean,
       l: "Enabled",
       g: InputGroup_MQTT,
+      cg: true,
     },
     host: {
       t: InputType_String,
@@ -169,7 +188,12 @@ const SETTING_INPUT_MAP: Record<
       t: InputType_Enum,
       l: "Resolution",
       g: InputGroup_Physical,
-      o: [1, 4, 8, 16],
+      o: [
+        { l: "1", v: 1 },
+        { l: "1/4", v: 4 },
+        { l: "1/8", v: 8 },
+        { l: "1/16", v: 16 },
+      ],
     },
   },
 };
@@ -182,8 +206,10 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   let _cancelHandlers: ActHandler[] = [];
 
   let _inputs: any[] = [];
+  const _inputsDirty: boolean[] = [];
   const id = "stcc";
   const tabs = ["General", "Hardware", "MQTT"];
+  const shortTabs = Object.keys(SETTING_INPUT_MAP); // = ["gen", "hw", "mqtt"]
   const selector = Selector({ items: tabs });
   let general: HTMLElement;
   let hardware: HTMLElement;
@@ -193,6 +219,8 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     selector.onChange(displayTab);
 
     function displayTab(index: number) {
+      // set query param
+      pushToHistory(undefined, { tab: shortTabs[index] });
       const div = getElement(id);
       let content: HTMLElement;
       if (index === 0) {
@@ -233,23 +261,15 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         appendChild(container, div);
       }
 
-      general = makeTab("gen");
-      hardware = makeTab("hw");
-      mqtt = makeTab("mqtt");
+      general = makeTab(shortTabs[0] as "gen");
+      hardware = makeTab(shortTabs[1] as "hw");
+      mqtt = makeTab(shortTabs[2] as "mqtt");
 
       let tab = getQueryParam("tab");
       tab = tab && tab.toLowerCase();
-      const ind = tab
-        ? tab === "gen"
-          ? 0
-          : tab === "hw"
-          ? 1
-          : tab === "mqtt"
-          ? 2
-          : 0
-        : 0;
+      let ind = shortTabs.indexOf(tab);
+      if (ind < 0) ind = 0;
       selector.setIndex(ind);
-      // return displayTab(selector.index()); // or 0
     }
 
     nextTick(() => {
@@ -298,44 +318,75 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
 
   function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
     const container = createElement("span");
-    const groupDivs: HTMLElement[] = [];
-    const getContainer = (groupNum?: number) => {
+    const groupDivs: [HTMLElement, Input[]][] = [];
+    const addToContainer = (groupNum: number | undefined, input: Input) => {
       if (groupNum == null) {
-        return container;
+        return appendChild(container, input.node);
       }
+      // first entry in group, create the entry
       if (groupDivs[groupNum] == null) {
         const d = createDiv();
         addClass(d, "igroup");
-        groupDivs[groupNum] = d;
+        groupDivs[groupNum] = [d, []];
         appendChild(container, d);
       }
-      return groupDivs[groupNum];
+
+      // add to group divs input list
+      groupDivs[groupNum][1].push(input);
+      // add to group
+      appendChild(groupDivs[groupNum][0], input.node);
     };
     for (const k in SETTING_INPUT_MAP[key]) {
-      // group, label, type, enum options
-      const { g, l, t, o } = (SETTING_INPUT_MAP[key] as any)[
-        k
-      ] as SettingsInputEntry;
+      // group, controls group, label, type, enum options
+      const {
+        g,
+        cg,
+        l,
+        t = InputType_Number,
+        o,
+      } = (SETTING_INPUT_MAP[key] as any)[k] as SettingsInputEntry;
 
       const stateKey = `${SETTINGS}.${key}.${k}`;
       const pendingKey = `${PENDING_STATE}.${key}.${k}`;
 
       const inp = Input({
         label: l,
-        type: t || InputType_Number,
+        type: t,
         enumOpts: o,
         value: State.get(stateKey),
       });
+      addToContainer(g, inp);
 
+      const ind = _inputs.push(inp);
       inp.onChange((v) => {
-        _setDirty(true);
+        if (cg) {
+          _enableDisableGroup(v, groupDivs[g][0], groupDivs[g][1]);
+        }
+        _inputsDirty[ind] = inp.isDirty();
+        _setDirty(_inputsDirty.filter((d) => d === true).length > 0);
         State.set(pendingKey, v);
       });
-      _inputs.push(inp);
-      appendChild(getContainer(g), inp.node);
     }
 
     return container;
+  }
+
+  /**
+   * Set a group and it's inputs disabled or enabled based on state change
+   * @param value   - True = green/ON/enabled
+   * @param groupDiv
+   * @param inputs
+   */
+  function _enableDisableGroup(
+    value: boolean,
+    groupDiv: HTMLElement,
+    inputs: Input[]
+  ) {
+    const d = "disabled";
+    value ? removeClass(groupDiv, d) : addClass(groupDiv, d);
+    inputs.forEach((i) => {
+      i.setDisabled(!value);
+    });
   }
 
   return template;

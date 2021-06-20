@@ -70,6 +70,8 @@ WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(W_VERSION));
 #define DEFAULT_AXIS_DIAMETER_MM 15
 
 // Limits
+#define MAX_SSID_LENGTH 32
+#define MAX_PW_LENGTH 64
 #define MAX_DEVICE_NAME_LENGTH 64
 #define MAX_MDNS_NAME_LENGTH 64
 #define MAX_MQTT_HOST_LENGTH 128
@@ -109,9 +111,8 @@ extern String macAddress;
 extern String ipAddress;
 
 // Access point
-extern bool apActive;
-extern char* apSSID;
-extern char* apPass;
+extern char apSSID[MAX_SSID_LENGTH];
+extern char apPass[MAX_PW_LENGTH];
 extern int apChannel;
 extern bool apHide;
 
@@ -121,10 +122,12 @@ extern char mDnsName[MAX_MDNS_NAME_LENGTH];
 
 // Wifi
 extern bool wifiConfigured;
-extern char wifiSSID[64];
-extern char wifiPass[64];
+extern char wifiSSID[MAX_SSID_LENGTH];
+extern char wifiPass[MAX_PW_LENGTH];
 
 void setDoReboot(bool v);
 #define DO_REBOOT() setDoReboot(true);
+
+void uniqueTag(char* out, size_t maxLen, const char* tag);
 
 #endif // DEFINES_H_

@@ -31,9 +31,11 @@ public:
     void loop();
     void reset();
     void restore();
-    void initWiFi();
-    void initAP(bool resetAP = false);
 private:
+    bool apActive_ = false;
+    void handleWiFi_();
+    void initAP_(bool resetAP = false);
+
     WBlinds() {}
 };
 

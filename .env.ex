@@ -1,5 +1,5 @@
 MODE=deploy
 USE_MOCKS=false
-API_ENDPOINT=
+API_ENDPOINT=/api
 WS_ENDPOINT=
 DEBUG=false

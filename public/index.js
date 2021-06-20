@@ -65,9 +65,9 @@ const appendChild = (parent, child) => {
 };
 const _appendChild = document.appendChild;
 
-function isObject(o) {
+const isObject = (o) => {
     return o && typeof o === "object" && !Array.isArray(o);
-}
+};
 const mergeDeep = (target, ...sources) => {
     if (!sources.length)
         return target;
@@ -118,9 +118,9 @@ const wait = (duration) => {
         setTimeout(res, duration);
     });
 };
-function debug(...msgs) {
-}
-function pruneUndef(obj) {
+const debug = (...msgs) => {
+};
+const pruneUndef = (obj) => {
     const o = {};
     for (const k in obj) {
         if (obj[k] != null) {
@@ -128,7 +128,22 @@ function pruneUndef(obj) {
         }
     }
     return o;
-}
+};
+const pushToHistory = (path, qps = {}, resetQps) => {
+    const cPath = location.pathname;
+    const cSearch = location.search;
+    const params = new URLSearchParams(resetQps ? "" : cSearch);
+    for (const k in qps) {
+        params.set(k, qps[k]);
+    }
+    const qpStr = "?" + params.toString();
+    if (path === cPath && qpStr === cSearch) {
+        console.log("no change: ", path, cPath, qpStr, cSearch);
+        return;
+    }
+    const fullPath = (path || cPath) + qpStr;
+    history.pushState(null, "", fullPath);
+};
 
 const _Nav = function ({ labels }) {
     let _i = 0;
@@ -153,9 +168,7 @@ const _Nav = function ({ labels }) {
             l.innerText = label;
             _lis.push(l);
             appendChild(elem, l);
-            l.addEventListener("click", () => {
-                setIndex(i);
-            });
+            l.onclick = () => setIndex(i);
         });
         return {
             onClick: (h) => {
@@ -354,7 +367,7 @@ const Selector = Component(_Selector);
 
 var template$4 = "<div class=\"toast\"><p class=\"tom\"></p></div>";
 
-var css_248z$5 = ".toast {\n\tbackground-color: #00000070;\n    box-shadow: 1px 1px 8px #54545473;\n    border-radius: 10px;\n\tfont-size: 13px;\n\tmargin: 10px;\n\theight: 60px;\n\tdisplay: flex;\n\t/* width: 80%; */\n\tmin-width: 250px;\n\tmax-width: 500px;\n\tposition: relative;\n\ttransition: 0.5s bottom ease-in-out;\n\tpointer-events: all;\n\talign-self: center;\n}\n\n.tom {\n\tmargin: auto;\n}";
+var css_248z$5 = ".toast {\n\tbackground-color: #00000070;\n    box-shadow: 1px 1px 8px #54545473;\n    border-radius: 10px;\n\tfont-size: 13px;\n\tmargin: 10px;\n\theight: 60px;\n\tdisplay: flex;\n\tmin-width: 250px;\n\tmax-width: 500px;\n\tposition: relative;\n\ttransition: 0.5s bottom ease-in-out;\n\tpointer-events: all;\n\talign-self: center;\n}\n\n.tom {\n\tmargin: auto;\n}";
 styleInject(css_248z$5);
 
 const _Toast = function ({ message, id, isError = false, }) {
@@ -379,7 +392,7 @@ const Toast = Component(_Toast);
 
 var template$3 = "<div class=\"fR in\"><label></label></div>";
 
-var css_248z$4 = ".in {\n\tjustify-content: space-between;\n\theight: 50px;\n\talign-items: center;\n\tbackground: #0000008F;\n\tpadding: 0px 15px 0px 15px;\n\tmargin-top: 10px;\n\tborder-radius: 15px;\n\t/* width: min(90%, 300px); */\n\tmin-width: 300px;\n}\n\n.in>label {\n\tfont-weight: bold;\n\tfont-size: 14px;\n}\n\n/* uncss:ignore */\n\n.igroup>.in {\n\tmargin-top: 0px;\n\tborder-radius: 0px;\n\tborder-bottom: 1px solid #FFFFFF4D;\n}\n\n/* uncss:ignore */\n\n.igroup>.in:first-child {\n\tborder-radius: 15px 15px 0px 0px;\n}\n\n/* uncss:ignore */\n\n.igroup>.in:last-child {\n\tborder-radius: 0px 0px 15px 15px;\n\tmargin-bottom: 10px;\n\tborder-bottom: none;\n}\n\n/* uncss:ignore */\n\n.in>input {\n\tbackground-color: #00000000;\n    border: none;\n\ttext-align: right;\n\tcolor: #DB8B1D;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"] {\n\t-webkit-appearance: none;\n\t   -moz-appearance: none;\n\t        appearance: none;\n\twidth: 51px;\n\theight: 31px;\n\tborder-radius: 50px;\n\tbackground-color: #94949a33 !important;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"]:after {\n\tcontent: \"\";\n    width: 50%;\n    border-radius: 100%;\n    height: 80%;\n    display: block;\n    position: relative;\n    background-color: white;\n    top: 12%;\n    left: 3%;\n    transition: 0.2s left ease-in-out;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"].on {\n\tbackground-color: #34C759 !important;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"].on::after {\n\tleft: 45%;\n}\n\n/* \n[type=\"checkbox\"]:not(:checked),\n  [type=\"checkbox\"]:checked {\n    position: absolute;\n    left: 0;\n    opacity: 0.01;\n  }\n  [type=\"checkbox\"]:not(:checked) + label,\n  [type=\"checkbox\"]:checked + label {\n    position: relative;\n    padding-left: 2.3em;\n    font-size: 1.05em;\n    line-height: 1.7;\n    cursor: pointer;\n  }\n\n  [type=\"checkbox\"]:not(:checked) + label:before,\n  [type=\"checkbox\"]:checked + label:before {\n    content: '';\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 1.4em;\n    height: 1.4em;\n    border: 1px solid #aaa;\n    background: #FFF;\n    border-radius: .2em;\n    box-shadow: inset 0 1px 3px rgba(0,0,0, .1), 0 0 0 rgba(203, 34, 237, .2);\n    -webkit-transition: all .275s;\n        transition: all .275s;\n  } */\n\n";
+var css_248z$4 = ".in {\n\tjustify-content: space-between;\n\theight: 50px;\n\talign-items: center;\n\tbackground: #0000008F;\n\tpadding: 0px 15px 0px 15px;\n\tmargin-top: 10px;\n\tborder-radius: 15px;\n\t/* width: min(90%, 300px); */\n\tmin-width: 300px;\n}\n\n.in>label {\n\tfont-weight: bold;\n\tfont-size: 14px;\n}\n\n/* uncss:ignore */\n\n.igroup>.in {\n\tmargin-top: 0px;\n\tborder-radius: 0px;\n\tborder-bottom: 1px solid #FFFFFF4D;\n}\n\n/* uncss:ignore */\n\n.igroup>.in:first-child {\n\tborder-radius: 15px 15px 0px 0px;\n  margin-top: 20px;\n}\n\n/* uncss:ignore */\n\n.igroup>.in:last-child {\n\tborder-radius: 0px 0px 15px 15px;\n\tmargin-bottom: 20px;\n\tborder-bottom: none;\n}\n\n/* uncss:ignore */\n\n.in>input {\n\tbackground-color: #00000000;\n  border: none;\n\ttext-align: right;\n\tcolor: #DB8B1D;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"] {\n\t-webkit-appearance: none;\n\t   -moz-appearance: none;\n\t        appearance: none;\n\twidth: 51px;\n\theight: 31px;\n\tborder-radius: 50px;\n\tbackground-color: #94949a33 !important;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"]:after {\n\tcontent: \"\";\n    width: 50%;\n    border-radius: 100%;\n    height: 80%;\n    display: block;\n    position: relative;\n    background-color: white;\n    top: 12%;\n    left: 3%;\n    transition: 0.2s left ease-in-out;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"].on {\n\tbackground-color: #34C759 !important;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"].on::after {\n\tleft: 45%;\n}\n\n/* \n[type=\"checkbox\"]:not(:checked),\n  [type=\"checkbox\"]:checked {\n    position: absolute;\n    left: 0;\n    opacity: 0.01;\n  }\n  [type=\"checkbox\"]:not(:checked) + label,\n  [type=\"checkbox\"]:checked + label {\n    position: relative;\n    padding-left: 2.3em;\n    font-size: 1.05em;\n    line-height: 1.7;\n    cursor: pointer;\n  }\n\n  [type=\"checkbox\"]:not(:checked) + label:before,\n  [type=\"checkbox\"]:checked + label:before {\n    content: '';\n    position: absolute;\n    left: 0;\n    top: 0;\n    width: 1.4em;\n    height: 1.4em;\n    border: 1px solid #aaa;\n    background: #FFF;\n    border-radius: .2em;\n    box-shadow: inset 0 1px 3px rgba(0,0,0, .1), 0 0 0 rgba(203, 34, 237, .2);\n    -webkit-transition: all .275s;\n        transition: all .275s;\n  } */\n\n";
 styleInject(css_248z$4);
 
 const InputType_Number = 0;
@@ -394,37 +407,58 @@ const InputTypeMap = {
     [InputType_Enum]: "select",
     [InputType_Password]: "password",
 };
-const _Input = function ({ label, type, enumOpts, value, }) {
+const _Input = function ({ label, type, enumOpts, placeholder, value, }) {
+    let _currentValue = value;
+    const _firstValue = value;
     let _onChangeHandlers = [];
     this.init = (elem) => {
         const id = `cb-${label.split(" ").join("-")}`;
         const l = elem.firstChild;
         l.innerText = label;
         l.htmlFor = id;
-        const input = createElement("input");
-        input.type = InputTypeMap[type];
-        input.placeholder = "placeholder";
-        input.id = id;
-        input.value = value;
-        value && addClass(input, "on");
-        if (type === InputType_Boolean) {
+        let input;
+        if (type === InputType_Enum) {
+            input = createElement("select");
+            enumOpts.forEach((o) => {
+                const opt = createElement("option");
+                opt.value = o.v;
+                opt.innerText = o.l;
+                appendChild(input, opt);
+            });
+        }
+        else {
+            input = createElement("input");
+            input.type = InputTypeMap[type];
+            input.placeholder = placeholder || "xxxxx";
+        }
+        if (type === InputType_Boolean || type === InputType_Enum) {
             input.checked = value;
+            value && addClass(input, "on");
             input.onchange = (e) => {
                 toggleClass(input, "on");
-                _onChange(e);
+                if (type === InputType_Boolean)
+                    _onChange(input.checked);
+                else
+                    _onChange(input.value);
             };
         }
         else {
-            input.oninput = _onChange;
+            input.oninput = () => _onChange(input.value);
+            if (value != null)
+                input.value = value;
         }
+        input.id = id;
         const _showError = (err) => {
         };
-        function _onChange(e) {
+        function _onChange(v) {
+            if (v === "")
+                v = undefined;
+            _currentValue = v;
             const err = _validate();
             if (err) {
                 return _showError();
             }
-            _onChangeHandlers.map((h) => h(e.target.value));
+            _onChangeHandlers.forEach((h) => h(_currentValue));
         }
         const setDisabled = (val) => {
             input.disabled = val;
@@ -440,6 +474,10 @@ const _Input = function ({ label, type, enumOpts, value, }) {
             setDisabled,
             destroy: () => {
                 _onChangeHandlers = [];
+            },
+            isDirty: () => {
+                console.log("input is dirty? ", _firstValue, input.value, _currentValue, _firstValue !== _currentValue);
+                return _firstValue !== _currentValue;
             },
         };
     };
@@ -696,7 +734,7 @@ const Home = Component(_Home);
 
 var template = "<div id=\"ps\" class=\"f fC\"><div id=\"sl\" class=\"loader\"></div><div id=\"slc\" class=\"hide fw\" style=\"text-align: left;\"><div id=\"slc-act\" class=\"fR fw hide\"><div id=\"s-can\">Cancel</div><div id=\"s-save\">Save</div></div></div></div>";
 
-var css_248z$1 = "/* uncss:ignore */\n#pas {\n    margin-bottom: 20px;\n}\n/* uncss:ignore */\n#stcc {\n    display: flex;\n}\n/* uncss:ignore */\n#stcc>span {\n    margin: auto;\n}\n/* uncss:ignore */\n#stcc>div {\n    justify-content: center;\n}\n/* uncss:ignore */\n#slc-act {\n    position: fixed;\n    bottom: 70px;\n    justify-content: space-evenly;\n    width: 100%;\n    left: 0%;\n}\n#slc-act>* {\n    border-radius: 25px;\n    width: 120px;\n    height: 41px;\n    text-align: center;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n}\n#s-save {\n    background: #007AFF;\n}\n#s-can {\n    background: tomato;\n}\n";
+var css_248z$1 = "/* uncss:ignore */\n#pas {\n    margin-bottom: 20px;\n}\n/* uncss:ignore */\n#stcc {\n    display: flex;\n}\n/* uncss:ignore */\n#stcc>span {\n    margin: auto;\n}\n/* uncss:ignore */\n#stcc>span:last-child {\n    margin-bottom: 70px;\n}\n/* uncss:ignore */\n#stcc>div {\n    justify-content: center;\n}\n/* uncss:ignore */\n#slc-act {\n    position: fixed;\n    bottom: 75px;\n    justify-content: space-evenly;\n    width: 100%;\n    left: 0%;\n}\n#slc-act>* {\n    border-radius: 25px;\n    width: 120px;\n    height: 41px;\n    text-align: center;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n}\n#s-save {\n    background: #007AFF;\n}\n#s-can {\n    background: tomato;\n}\n";
 styleInject(css_248z$1);
 
 const InputGroup_Wifi = 0;
@@ -735,6 +773,7 @@ const SETTING_INPUT_MAP = {
             t: InputType_Boolean,
             l: "Enabled",
             g: InputGroup_MQTT,
+            cg: true,
         },
         host: {
             t: InputType_String,
@@ -818,7 +857,12 @@ const SETTING_INPUT_MAP = {
             t: InputType_Enum,
             l: "Resolution",
             g: InputGroup_Physical,
-            o: [1, 4, 8, 16],
+            o: [
+                { l: "1", v: 1 },
+                { l: "1/4", v: 4 },
+                { l: "1/8", v: 8 },
+                { l: "1/16", v: 16 },
+            ],
         },
     },
 };
@@ -829,8 +873,10 @@ const _Settings = function () {
     let _saveHandlers = [];
     let _cancelHandlers = [];
     let _inputs = [];
+    const _inputsDirty = [];
     const id = "stcc";
     const tabs = ["General", "Hardware", "MQTT"];
+    const shortTabs = Object.keys(SETTING_INPUT_MAP);
     const selector = Selector({ items: tabs });
     let general;
     let hardware;
@@ -838,6 +884,7 @@ const _Settings = function () {
     this.init = (elem) => {
         selector.onChange(displayTab);
         function displayTab(index) {
+            pushToHistory(undefined, { tab: shortTabs[index] });
             const div = getElement(id);
             let content;
             if (index === 0) {
@@ -871,20 +918,14 @@ const _Settings = function () {
                 div.id = id;
                 appendChild(container, div);
             }
-            general = makeTab("gen");
-            hardware = makeTab("hw");
-            mqtt = makeTab("mqtt");
+            general = makeTab(shortTabs[0]);
+            hardware = makeTab(shortTabs[1]);
+            mqtt = makeTab(shortTabs[2]);
             let tab = getQueryParam("tab");
             tab = tab && tab.toLowerCase();
-            const ind = tab
-                ? tab === "gen"
-                    ? 0
-                    : tab === "hw"
-                        ? 1
-                        : tab === "mqtt"
-                            ? 2
-                            : 0
-                : 0;
+            let ind = shortTabs.indexOf(tab);
+            if (ind < 0)
+                ind = 0;
             selector.setIndex(ind);
         }
         nextTick(() => {
@@ -930,36 +971,48 @@ const _Settings = function () {
     function makeTab(key) {
         const container = createElement("span");
         const groupDivs = [];
-        const getContainer = (groupNum) => {
+        const addToContainer = (groupNum, input) => {
             if (groupNum == null) {
-                return container;
+                return appendChild(container, input.node);
             }
             if (groupDivs[groupNum] == null) {
                 const d = createDiv();
                 addClass(d, "igroup");
-                groupDivs[groupNum] = d;
+                groupDivs[groupNum] = [d, []];
                 appendChild(container, d);
             }
-            return groupDivs[groupNum];
+            groupDivs[groupNum][1].push(input);
+            appendChild(groupDivs[groupNum][0], input.node);
         };
         for (const k in SETTING_INPUT_MAP[key]) {
-            const { g, l, t, o } = SETTING_INPUT_MAP[key][k];
+            const { g, cg, l, t = InputType_Number, o, } = SETTING_INPUT_MAP[key][k];
             const stateKey = `${SETTINGS}.${key}.${k}`;
             const pendingKey = `${PENDING_STATE}.${key}.${k}`;
             const inp = Input({
                 label: l,
-                type: t || InputType_Number,
+                type: t,
                 enumOpts: o,
                 value: State.get(stateKey),
             });
+            addToContainer(g, inp);
+            const ind = _inputs.push(inp);
             inp.onChange((v) => {
-                _setDirty(true);
+                if (cg) {
+                    _enableDisableGroup(v, groupDivs[g][0], groupDivs[g][1]);
+                }
+                _inputsDirty[ind] = inp.isDirty();
+                _setDirty(_inputsDirty.filter((d) => d === true).length > 0);
                 State.set(pendingKey, v);
             });
-            _inputs.push(inp);
-            appendChild(getContainer(g), inp.node);
         }
         return container;
+    }
+    function _enableDisableGroup(value, groupDiv, inputs) {
+        const d = "disabled";
+        value ? removeClass(groupDiv, d) : addClass(groupDiv, d);
+        inputs.forEach((i) => {
+            i.setDisabled(!value);
+        });
     }
     return template;
 };
@@ -968,15 +1021,16 @@ const Settings = Component(_Settings);
 const HTTP_PUT = "PUT";
 const HTTP_GET = "GET";
 const api = "/api";
-function doFetch(href, method, opts) {
-    return _doFetch(href, method, opts);
+function doFetch(resource, method, opts) {
+    return _doFetch(resource, method, opts);
 }
-function _doFetch(href, method = HTTP_GET, opts = {}, attempt = 0) {
+function _doFetch(resource, method = HTTP_GET, opts = {}, attempt = 0) {
     const body = isObject(opts.body) ? JSON.stringify(opts.body) : opts.body;
     const headers = { ...(opts.headers || {}) };
     if (body)
         headers["content-type"] = "application/json";
-    return fetch(`${api}${href}`, {
+    const url = `${api}/${resource}`;
+    return fetch(url, {
         body,
         method,
         headers,
@@ -984,11 +1038,11 @@ function _doFetch(href, method = HTTP_GET, opts = {}, attempt = 0) {
         if (!res.ok) {
             attempt += 1;
             if (attempt > 8 || res.status < 500) {
-                const e = new Error(`Failed with ${res.status} on fetch [${method}] ${href}`);
+                const e = new Error(`[${method}] ${url} failed (${res.status})`);
                 e.response = res;
                 throw e;
             }
-            return wait(attempt * 5000).then(() => _doFetch(href, method, opts, attempt));
+            return wait(attempt * 5000).then(() => _doFetch(resource, method, opts, attempt));
         }
         return res.json();
     });
@@ -1120,6 +1174,9 @@ var run = (ns) => {
     const tc = ToastContainer({});
     appendChild(body, tc.node);
     window.onerror = handleError;
+    window.onpopstate = (e) => {
+        console.log("on pop state: ", e);
+    };
     let currentIndex = -1;
     let currentTab;
     function handleTabChange(nextIndex) {
@@ -1129,6 +1186,7 @@ var run = (ns) => {
         currentIndex = nextIndex;
         (_a = currentTab === null || currentTab === void 0 ? void 0 : currentTab.destroy) === null || _a === void 0 ? void 0 : _a.call(currentTab);
         currentTab === null || currentTab === void 0 ? void 0 : currentTab.node.remove();
+        pushToHistory(`/${labels[currentIndex].toLowerCase()}`);
         switch (nextIndex) {
             case 0: {
                 const t = Home();
@@ -1159,14 +1217,12 @@ var run = (ns) => {
         currentTab && appendChild(app, currentTab.node);
     }
     const handleRoute = (path) => {
-        console.log("handleRoute: ", path, path.substr(1));
         let i = labels.map((l) => l.toLowerCase()).indexOf(path.substr(1));
-        console.log("i: ", i);
         if (i < 0)
             i = 0;
         nav.setIndex(i);
     };
-    handleRoute(window.location.pathname);
+    handleRoute(location.pathname);
     const stripPasswords = (data) => {
         var _a, _b;
         if ((_a = data === null || data === void 0 ? void 0 : data.gen) === null || _a === void 0 ? void 0 : _a.pass) {
@@ -1181,7 +1237,7 @@ var run = (ns) => {
         debug("saveSettings: ", State._state);
         State.setSaving(SETTINGS, true);
         const body = diffDeep(State._state.state, State._state.pendingState);
-        doFetch(`/${SETTINGS}`, HTTP_PUT, { body }).then(() => {
+        doFetch(SETTINGS, HTTP_PUT, { body }).then(() => {
             State.setSaving(SETTINGS, false);
             State.update(SETTINGS, stripPasswords(State._state.pendingState));
         });
@@ -1196,7 +1252,7 @@ var run = (ns) => {
         setTimeout(card.show);
     }
     function load(key, updates = [key]) {
-        return doFetch(`/${key}`)
+        return doFetch(key)
             .then((r) => {
             updates.map((k) => State.update(k, r));
             return r;
@@ -1227,8 +1283,10 @@ var run = (ns) => {
     });
     function handleError(err) {
         console.error(err);
-        const m = isObject(err) ? (err === null || err === void 0 ? void 0 : err.message) || DEFAULT_ERROR : err;
-        tc.pushToast(m, true);
+        const m = isObject(err)
+            ? ((err === null || err === void 0 ? void 0 : err.message) || DEFAULT_ERROR) + "\n" + err.stack
+            : err;
+        tc.pushToast(m, true, true);
     }
 };
 

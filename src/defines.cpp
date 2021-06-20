@@ -1,5 +1,6 @@
 #define WBLINDS_DEFINE_GLOBAL_VARS
 #include "defines.h"
+#include <esp_wifi.h>
 
 const byte MAGIC_NUMBER[4] = { 0xFE, 0xED, 0xDA, 0xBB };
 
@@ -29,19 +30,28 @@ String macAddress = "";
 String ipAddress = "";
 
 bool apActive = false;
-char* apSSID = "WBlinds-";
-char* apPass = "WBL1nds-123";
+char apSSID[MAX_SSID_LENGTH] = "";
+char apPass[MAX_PW_LENGTH] = "wblinds123";
 int apChannel = 1;
 bool apHide = 0;
 
 
-char mDnsName[MAX_MDNS_NAME_LENGTH] = "wblinds-";
-char deviceName[MAX_DEVICE_NAME_LENGTH] = "wblinds-";
+char mDnsName[MAX_MDNS_NAME_LENGTH];
+char deviceName[MAX_DEVICE_NAME_LENGTH];
 
 bool wifiConfigured = false;
-char wifiSSID[64] = DEFAULT_SSID;
-char wifiPass[64] = "";
+char wifiSSID[MAX_SSID_LENGTH] = DEFAULT_SSID;
+char wifiPass[MAX_PW_LENGTH] = "";
 
 void setDoReboot(bool v) {
     doReboot = v;
+}
+
+void uniqueTag(char* out, size_t maxLen, const char* tag) {
+    uint8_t mac[6];
+    WLOG_I(TAG, "max len: %i", maxLen);
+
+    esp_efuse_mac_get_default(mac);
+    WLOG_I(TAG, "%s-%02X%02X%02X", tag, mac[3], mac[4], mac[5]);
+    snprintf(out, maxLen, "%s-%02X%02X%02X", tag, mac[3], mac[4], mac[5]);
 }

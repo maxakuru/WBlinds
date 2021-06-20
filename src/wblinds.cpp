@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "api_http.h"
 #include <DNSServer.h>
+#include <esp_wifi.h>
 
 #ifndef DISABLE_OTA
 #include "ota_update.h"
@@ -89,16 +90,21 @@ WBlinds* WBlinds::getInstance() {
 
 void WBlinds::setup() {
   Serial.begin(115200);
+  Serial.setTimeout(50);
 
-  delay(10000);
+  // These are defaults, but may be overwritten 
+  // from State/config once it's loaded.
+  uniqueTag(deviceName, MAX_DEVICE_NAME_LENGTH, "WBlinds");
+  strcpy(mDnsName, deviceName);
+  strcpy(apSSID, deviceName);
+  strcpy(mqttTopic, deviceName);
 
   // Read config/state from FS
-  // get SSID, password, mDNS name
-  // if not setup, will go to AP from initWiFi()
+  // If not setup, will go to AP from initWiFi()
   state = State::getInstance();
   tickEv.tick_ = true;
 
-  initWiFi();
+  handleWiFi_();
 
 #ifndef DISABLE_HOME_SWITCH
   int hp = state->getHomeSwitchPin();
@@ -122,21 +128,24 @@ void WBlinds::setup() {
   lastHeap = ESP.getFreeHeap();
 }
 
-void WBlinds::initWiFi() {
+void WBlinds::handleWiFi_() {
   if (!WIFI_CONFIGURED) {
-    WLOG_D(TAG, "Wifi not configured");
-    if (!apActive)
-      initAP();
+    if (!apActive_)
+      initAP_();
+    else
+      dnsServer.processNextRequest();
     return;
   }
-  else if (!apActive) {
+  else if (apActive_) {
     // disable AP
     WLOG_D(TAG, "Disable AP");
     WiFi.softAPdisconnect(true);
     WiFi.mode(WIFI_STA);
+    dnsServer.stop();
+    apActive_ = false;
   }
   WLOG_D(TAG, "Not first boot");
-  needsConfig = false;
+  needsConfig = false; // used for redirect in api_http
 
   // if not configured and AP not running, start AP
   // if not configured and AP running, do nothing
@@ -154,12 +163,6 @@ void WBlinds::initWiFi() {
   macAddress.replace(":", "");
   macAddress.toLowerCase();
   WLOG_D(TAG, "Connected to the WiFi network, IP: %s", ipAddress.c_str());
-
-  // Set state overrides
-  strcpy_P(deviceName, PSTR("wblinds-"));
-  sprintf(deviceName + 8, "%*s", 6, macAddress.c_str() + 6);
-  strcpy_P(mqttTopic, PSTR("wblinds-"));
-  sprintf(mqttTopic + 8, "%*s", 6, macAddress.c_str() + 6);
 
 #ifndef DISABLE_OTA
   _lastOTACheck = millis();
@@ -179,26 +182,7 @@ void WBlinds::loop() {
   if (doReboot) {
     reset();
   }
-
-
-
-  // AP handling
-  // if (!WLED_WIFI_CONFIGURED) {
-  //   DEBUG_PRINT(F("No connection configured. "));
-  //   if (!apActive)
-  //     initAP();        // instantly go to ap mode
-  //   return;
-  // }
-  // else if (!apActive) {
-  //   if (apBehavior == AP_BEHAVIOR_ALWAYS) {
-  //     initAP();
-  //   }
-  //   else {
-  //     DEBUG_PRINTLN(F("Access point disabled."));
-  //     WiFi.softAPdisconnect(true);
-  //     WiFi.mode(WIFI_STA);
-  //   }
-  // }
+  handleWiFi_();
 
   if ((millis() - TICK_INTERVAL) > _lastTick) {
     _lastTick = millis();
@@ -229,23 +213,19 @@ void WBlinds::loop() {
   }
 }
 
-void WBlinds::initAP(bool resetAP) {
+void WBlinds::initAP_(bool resetAP) {
   WLOG_D(TAG, "Initialize AP");
-  // if (!apSSID[0] || resetAP)
-  //   strcpy_P(apSSID, PSTR("wblinds"));
-  // if (resetAP)
-  //   strcpy_P(apPass, PSTR(DEFAULT_AP_PASS));
 
   WiFi.softAPConfig(IPAddress(4, 3, 2, 1), IPAddress(4, 3, 2, 1), IPAddress(255, 255, 255, 0));
   WiFi.softAP(apSSID, apPass, apChannel, apHide);
 
-  if (!apActive) {
+  if (!apActive_) {
     httpAPI.init();
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(53, "*", WiFi.softAPIP());
   }
 
-  apActive = true;
+  apActive_ = true;
 }
 
 void WBlinds::reset() {

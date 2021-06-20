@@ -21,6 +21,9 @@ if (process.env.CI) {
 if (!env.API_ENDPOINT) {
   env.API_ENDPOINT = "/api";
 }
+while (env.API_ENDPOINT.endsWith("/")) {
+  env.API_ENDPOINT = env.API_ENDPOINT.substr(0, env.API_ENDPOINT.length - 1);
+}
 
 const dev = env.MODE !== "prod";
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };

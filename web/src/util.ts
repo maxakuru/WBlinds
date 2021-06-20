@@ -1,8 +1,8 @@
 export * from "./min";
 
-export function isObject(o: unknown): o is Record<string, unknown> {
+export const isObject = (o: unknown): o is Record<string, unknown> => {
   return o && typeof o === "object" && !Array.isArray(o);
-}
+};
 
 export const mergeDeep = (target: unknown, ...sources: unknown[]): any => {
   if (!sources.length) return target;
@@ -66,16 +66,16 @@ export const wait = (duration: number): Promise<void> => {
   });
 };
 
-export function debug(...msgs: any[]): void {
+export const debug = (...msgs: any[]): void => {
   // TODO: enable debugging by localstorage
   if (process.env.DEBUG === "true") console.debug(...msgs);
-}
+};
 
-export function emptyObject(obj: any): boolean {
+export const emptyObject = (obj: any): boolean => {
   return Object.keys(obj).length === 0;
-}
+};
 
-export function pruneUndef<T>(obj: T): T {
+export const pruneUndef = <T>(obj: T): T => {
   const o: T = {} as T;
   for (const k in obj) {
     if (obj[k] != null) {
@@ -83,4 +83,27 @@ export function pruneUndef<T>(obj: T): T {
     }
   }
   return o;
-}
+};
+
+export const pushToHistory = (
+  path?: string,
+  qps: Record<string, string> = {},
+  resetQps?: boolean
+): void => {
+  const cPath = location.pathname;
+  const cSearch = location.search;
+  const params = new URLSearchParams(resetQps ? "" : cSearch);
+  for (const k in qps) {
+    params.set(k, qps[k]);
+  }
+  const qpStr = "?" + params.toString();
+
+  if (path === cPath && qpStr === cSearch) {
+    // no change
+    console.log("no change: ", path, cPath, qpStr, cSearch);
+    return;
+  }
+
+  const fullPath = (path || cPath) + qpStr;
+  history.pushState(null, "", fullPath);
+};

@@ -7,6 +7,7 @@ import {
   diffDeep,
   getElement,
   isObject,
+  pushToHistory,
   querySelector,
 } from "@Util";
 import { mock } from "../tools/mock";
@@ -22,6 +23,7 @@ import {
   PENDING_STATE,
 } from "@Const";
 
+// Bottom nav bar buttons
 const labels = ["Home", "Routines", "Settings"];
 
 export default (ns: WBlindsNamespace): void => {
@@ -40,6 +42,9 @@ export default (ns: WBlindsNamespace): void => {
   const tc = ToastContainer({});
   appendChild(body, tc.node);
   window.onerror = handleError;
+  window.onpopstate = (e: any) => {
+    console.log("on pop state: ", e);
+  };
 
   let currentIndex = -1;
   let currentTab: Home | Settings;
@@ -49,6 +54,8 @@ export default (ns: WBlindsNamespace): void => {
     currentIndex = nextIndex;
     currentTab?.destroy?.();
     currentTab?.node.remove();
+
+    pushToHistory(`/${labels[currentIndex].toLowerCase()}`);
 
     // change app screen
     switch (nextIndex) {
@@ -89,21 +96,21 @@ export default (ns: WBlindsNamespace): void => {
   }
 
   const handleRoute = (path: string): void => {
-    console.log("handleRoute: ", path, path.substr(1));
     let i = labels.map((l) => l.toLowerCase()).indexOf(path.substr(1));
-    console.log("i: ", i);
     if (i < 0) i = 0;
     nav.setIndex(i);
   };
 
-  handleRoute(window.location.pathname);
+  handleRoute(location.pathname);
 
   const stripPasswords = (
     data: Partial<SettingsData>
   ): Partial<SettingsData> => {
+    // remove wifi password
     if (data?.gen?.pass) {
       data.gen.pass = undefined;
     }
+    // remove mqtt password
     if (data?.mqtt?.pass) {
       data.mqtt.pass = undefined;
     }
@@ -114,7 +121,7 @@ export default (ns: WBlindsNamespace): void => {
     debug("saveSettings: ", State._state);
     State.setSaving(SETTINGS, true);
     const body = diffDeep(State._state.state, State._state.pendingState);
-    doFetch(`/${SETTINGS}`, HTTP_PUT, { body }).then(() => {
+    doFetch(SETTINGS, HTTP_PUT, { body }).then(() => {
       State.setSaving(SETTINGS, false);
       State.update(SETTINGS, stripPasswords(State._state.pendingState));
     });
@@ -132,8 +139,11 @@ export default (ns: WBlindsNamespace): void => {
     setTimeout(card.show);
   }
 
-  function load(key: keyof StateData, updates: (keyof StateData)[] = [key]) {
-    return doFetch(`/${key}`)
+  function load(
+    key: keyof Omit<StateData, "pendingState">,
+    updates: (keyof StateData)[] = [key]
+  ) {
+    return doFetch(key)
       .then((r) => {
         updates.map((k) => State.update(k, r));
         return r;
@@ -172,7 +182,9 @@ export default (ns: WBlindsNamespace): void => {
     err: string | Event | (Error & { response?: Response; message?: string })
   ): void {
     console.error(err);
-    const m = isObject(err) ? err?.message || DEFAULT_ERROR : err;
-    tc.pushToast(m as string, true);
+    const m = isObject(err)
+      ? (err?.message || DEFAULT_ERROR) + "\n" + err.stack
+      : err;
+    tc.pushToast(m as string, true, true);
   }
 };
