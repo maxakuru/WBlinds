@@ -309,8 +309,9 @@ void BlindsHTTPAPI::init() {
       return serveIndex(request);
    };
    server.on("/", HTTP_GET, handler);
-   server.on("/settings", HTTP_GET, handler);
+   server.on("/home", HTTP_GET, handler);
    server.on("/routines", HTTP_GET, handler);
+   server.on("/settings", HTTP_GET, handler);
 
    // server.onNotFound(handleNotFound);
 

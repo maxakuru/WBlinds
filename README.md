@@ -18,10 +18,9 @@
 
 ## ✏️ Setup
 1. `git clone https://github.com/maxakuru/WBlinds.git`
-2. Configure `src/Credentials.h.ex` and rename to `src/Credentials.h`
-3. Configure pins in `src/defines.h`
-4. Setup `platformio.ini` to your liking
-5. Build & flash
+2. Build & flash
+3. Connect to access point (`WBlinds-XXXXXX`)
+4. [Configure](#configuration) SSID and password
 
 
 ## ⏳ TODO
@@ -45,7 +44,9 @@
 
 
 ## 💻 Web UI
-TODO
+
+### Settings
+<img src="./etc/settings-1.png" width="200"> <img src="./etc/settings-2.png" width="200"> <img src="./etc/settings-3.png" width="200">
 
 
 ## 🔧 Configuration
