@@ -148,6 +148,8 @@ public:
     void save();
     void saveSettings();
     void saveConfig();
+    void restore();
+
     String serialize();
     String serializeSettings(setting_t settingType);
     stdBlinds::error_code_t loadFromJSONString(StateObserver* that, String jsonStr);

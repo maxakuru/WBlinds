@@ -141,10 +141,6 @@ void State::load_() {
             if (!v.isNull()) {
                 strcpy_P(wifiPass, v.as<const char*>());
             }
-            v = doc["mdns"];
-            if (!v.isNull()) {
-                strcpy_P(mDnsName, v.as<const char*>());
-            }
         }
     }
 
@@ -176,6 +172,12 @@ void State::load_() {
         JsonObject obj = doc.as<JsonObject>();
         setSettingsFromJSON_(nullptr, obj, false);
     }
+}
+
+void State::restore() {
+    LITTLEFS.remove("/settings.json");
+    LITTLEFS.remove("/config.json");
+    LITTLEFS.remove("/state.json");
 }
 
 stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj, bool& shouldSave) {
@@ -563,7 +565,6 @@ void State::saveConfig() {
     File configFile = LITTLEFS.open("/config.json", "w");
     doc["ssid"] = wifiSSID;
     doc["pass"] = wifiPass;
-    doc["mdns"] = mDnsName;
     serializeJson(doc, configFile);
     configFile.close();
     isConfigDirty_ = false;

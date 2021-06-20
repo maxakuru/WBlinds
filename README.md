@@ -79,7 +79,7 @@ These APIs are in flux!
 
 ### HTTP
 ```js
-PUT <host:port>/state
+PUT <host:port>/api/state
 // All fields optional
 { 
     "tPos": 50, //[0-100] (target position %, starts move)
@@ -89,7 +89,7 @@ PUT <host:port>/state
 }
 ```
 ```js
-GET <host:port>/state
+GET <host:port>/api/state
 // 200
 { 
     "tPos": 50,
@@ -107,7 +107,7 @@ POST <host:port>
 ```
 
 ```js
-PUT <host:port>/settings
+PUT <host:port>/api/settings
 // All fields optional
 // NOTE: MQTT password is sent in body unencoded/unencrypted.
 // If that isn't acceptable for your use-case, set it at compile time.
@@ -142,6 +142,12 @@ PUT <host:port>/settings
         pass: "mysupersecurepassword"
     }
 }
+```
+
+```js
+POST <host:port>/api/restore
+// 202, ESP resets once completed
+// This wipes Homekit config & state files
 ```
 
 ### MQTT

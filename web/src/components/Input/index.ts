@@ -13,6 +13,7 @@ type ChangeHandler = (newVal: any) => unknown;
 export interface InputAPI {
   onChange: (handler: ChangeHandler) => void;
   setDisabled(v: boolean): void;
+  reset(): void;
   destroy(): void;
   isDirty(): boolean;
 }
@@ -39,7 +40,7 @@ interface EnumOption {
   v: any;
 }
 
-type InputProps = { min?: number; max?: number; step?: number } & (
+type InputProps = { min?: number; max?: number; unit?: string } & (
   | {
       label: string;
       type: typeof InputType_Enum;
@@ -62,57 +63,58 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   enumOpts,
   placeholder,
   value,
+  unit,
 }: InputProps) {
   const _valid = true;
   let _currentValue = value;
   const _firstValue = value;
+  let _id: string;
+  let _input: HTMLInputElement | HTMLSelectElement;
   let _onChangeHandlers: ChangeHandler[] = [];
 
-  this.init = (elem: HTMLElement) => {
-    const id = `cb-${label.split(" ").join("-")}`;
-    const l = elem.firstChild as HTMLLabelElement;
+  const setup = (elem: HTMLElement) => {
+    elem.innerHTML = "";
+    const l = createElement("label");
     l.innerText = label;
-    l.htmlFor = id;
+    appendChild(elem, l);
 
-    // const input =
-    //   type === InputType_Enum
-    //     ? createElement("select")
-    //     : createElement("input");
-    let input: HTMLInputElement | HTMLSelectElement;
     if (type === InputType_Enum) {
       // make select with options
-      input = createElement("select");
+      _input = createElement("select");
+      addClass(elem, "in-s");
       enumOpts.forEach((o) => {
         const opt = createElement("option");
         opt.value = o.v;
         opt.innerText = o.l;
-        appendChild(input, opt);
+        appendChild(_input, opt);
       });
+      _input.onchange = () =>
+        _onChange(
+          enumOpts[(_input as HTMLSelectElement).options.selectedIndex].v
+        );
     } else {
-      input = createElement("input");
-      input.type = InputTypeMap[type];
-      input.placeholder = placeholder || "xxxxx";
+      // all others are input type
+      _input = createElement("input");
+      _input.type = InputTypeMap[type];
+      _input.placeholder = placeholder || "xxxxx";
+
+      if (type === InputType_Boolean) {
+        // checkbox/select inputs, use checked for bool, value for enum
+        (_input as HTMLInputElement).checked = value;
+        value && addClass(_input, "on");
+        _input.onchange = () => {
+          toggleClass(_input, "on");
+          _onChange((_input as HTMLInputElement).checked);
+        };
+      } else {
+        // text/number inputs
+        _input.oninput = () => _onChange(_input.value);
+      }
     }
+    // set initial value
+    if (value != null) _input.value = value;
 
-    if (type === InputType_Boolean || type === InputType_Enum) {
-      // checkbox/select inputs, use checked for bool, value for enum
-      (input as HTMLInputElement).checked = value;
-      value && addClass(input, "on");
-      input.onchange = (e) => {
-        toggleClass(input, "on");
-        if (type === InputType_Boolean)
-          _onChange((input as HTMLInputElement).checked);
-        else _onChange(input.value);
-      };
-    } else {
-      // text/number inputs
-      input.oninput = () => _onChange(input.value);
-      // set initial value
-      if (value != null) input.value = value;
-    }
-
-    input.id = id;
-
+    _id = _input.id = l.htmlFor = `in-${label.split(" ").join("-")}`;
     const _showError = (err: string) => {
       // TODO:
     };
@@ -127,32 +129,39 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
       _onChangeHandlers.forEach((h) => h(_currentValue));
     }
 
-    const setDisabled = (val: boolean) => {
-      input.disabled = val;
-    };
-
     function _validate(): string | undefined {
       // TODO: show error hint
       return;
     }
 
-    appendChild(elem, input);
+    appendChild(elem, _input);
+
+    // Add unit if it exists,
+    // or an arrow for selects.
+    if (type === InputType_Enum || unit) {
+      const suf = createElement("span");
+      suf.innerText = unit ? unit : "v";
+      appendChild(elem, suf);
+    }
+  };
+
+  this.init = (elem: HTMLElement) => {
+    setup(elem);
     return {
       onChange: (h) => {
         _onChangeHandlers.push(h);
       },
-      setDisabled,
+      setDisabled: (val: boolean) => {
+        toggleClass(elem, "disabled");
+        _input.disabled = val;
+      },
       destroy: () => {
         _onChangeHandlers = [];
       },
+      reset: () => {
+        setup(elem);
+      },
       isDirty: () => {
-        console.log(
-          "input is dirty? ",
-          _firstValue,
-          input.value,
-          _currentValue,
-          _firstValue !== _currentValue
-        );
         return _firstValue !== _currentValue;
       },
     };

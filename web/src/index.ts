@@ -5,8 +5,10 @@ import {
   appendChild,
   debug,
   diffDeep,
+  emitQueryChange,
   getElement,
   isObject,
+  pathname,
   pushToHistory,
   querySelector,
 } from "@Util";
@@ -31,31 +33,39 @@ export default (ns: WBlindsNamespace): void => {
   mock.init();
   const body = querySelector("body");
   const app = getElement("app");
+  let currentIndex = -1;
+  let currentTab: Home | Settings;
   ns.state = State;
-
-  // Nav
-  const nav = Nav({ labels });
-  appendChild(getElement("nav"), nav.node);
-  nav.onClick(handleTabChange);
 
   // Toasts
   const tc = ToastContainer({});
   appendChild(body, tc.node);
   window.onerror = handleError;
-  window.onpopstate = (e: any) => {
-    console.log("on pop state: ", e);
+  window.onpopstate = (e: PopStateEvent) => {
+    // e.state
+    handleRoute(pathname());
+    emitQueryChange();
   };
 
-  let currentIndex = -1;
-  let currentTab: Home | Settings;
+  // Nav
+  const nav = Nav({ labels });
+  appendChild(getElement("nav"), nav.node);
+  nav.onClick(handleTabChange);
+  const handleRoute = (path: string): void => {
+    let i = labels.map((l) => l.toLowerCase()).indexOf(path.substr(1));
+    if (i < 0) i = 0;
+    nav.setIndex(i);
+  };
+  handleRoute(pathname());
+
   function handleTabChange(nextIndex: number) {
     if (currentIndex === nextIndex) return;
+    // TODO: Hacky.. settings handles it's own history
+    if (nextIndex !== 2) pushToHistory(`/${labels[nextIndex].toLowerCase()}`);
 
     currentIndex = nextIndex;
     currentTab?.destroy?.();
     currentTab?.node.remove();
-
-    pushToHistory(`/${labels[currentIndex].toLowerCase()}`);
 
     // change app screen
     switch (nextIndex) {
@@ -94,14 +104,6 @@ export default (ns: WBlindsNamespace): void => {
     }
     currentTab && appendChild(app, currentTab.node);
   }
-
-  const handleRoute = (path: string): void => {
-    let i = labels.map((l) => l.toLowerCase()).indexOf(path.substr(1));
-    if (i < 0) i = 0;
-    nav.setIndex(i);
-  };
-
-  handleRoute(location.pathname);
 
   const stripPasswords = (
     data: Partial<SettingsData>

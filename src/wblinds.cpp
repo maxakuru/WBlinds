@@ -182,6 +182,9 @@ void WBlinds::handleWiFi_() {
 }
 
 void WBlinds::loop() {
+  if (doRestore) {
+    restore();
+  }
   if (doReboot) {
     reset();
   }
@@ -246,10 +249,13 @@ void WBlinds::reset() {
 
 void WBlinds::restore() {
   // TODO: close server, websockets, mqtt, disable motors
+  state->restore();
+
 #ifdef ENABLE_HOMEKIT
-  homekit->resetToFactory();
+  if (homekit != nullptr)
+    homekit->resetToFactory();
 #endif
 
-  state->save();
+  // state->save();
   ESP.restart();
 }

@@ -79,6 +79,7 @@ WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(W_VERSION));
 #define MAX_MQTT_USER_LENGTH 41
 #define MAX_MQTT_PASS_LENGTH 41
 
+// Potentially useful publics
 namespace stdBlinds {
     enum class resolution_t {
         kFull = 1,
@@ -103,12 +104,8 @@ namespace stdBlinds {
     extern const char* MT_HTML;
 }
 
+// UDP
 extern const byte MAGIC_NUMBER[4];
-extern bool forceReconnect;
-extern bool doReboot;
-extern bool needsConfig;
-extern String macAddress;
-extern String ipAddress;
 
 // Access point
 extern char apSSID[MAX_SSID_LENGTH];
@@ -124,9 +121,16 @@ extern char mDnsName[MAX_MDNS_NAME_LENGTH];
 extern bool wifiConfigured;
 extern char wifiSSID[MAX_SSID_LENGTH];
 extern char wifiPass[MAX_PW_LENGTH];
+extern String macAddress;
+extern String ipAddress;
 
-void setDoReboot(bool v);
-#define DO_REBOOT() setDoReboot(true);
+// Controls
+extern bool forceReconnect;
+extern bool doReboot;
+extern bool doRestore;
+extern void DO_REBOOT();
+extern void DO_RESTORE();
+
 
 void uniqueTag(char* out, size_t maxLen, const char* tag);
 

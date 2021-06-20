@@ -11,6 +11,7 @@ import {
   debug,
   getQueryParam,
   pushToHistory,
+  onQueryChange,
 } from "@Util";
 import {
   ComponentFunction,
@@ -65,6 +66,10 @@ interface SettingsInputEntry {
    * Controls group, for booleans that disable/enable input groups
    */
   cg?: boolean;
+  /**
+   * Unit
+   */
+  u?: string;
 }
 
 const SETTING_INPUT_MAP: Record<
@@ -99,50 +104,21 @@ const SETTING_INPUT_MAP: Record<
       l: "Emit sync data",
     },
   },
-  mqtt: {
-    enabled: {
-      t: InputType_Boolean,
-      l: "Enabled",
-      g: InputGroup_MQTT,
-      cg: true,
-    },
-    host: {
-      t: InputType_String,
-      l: "Host",
-      g: InputGroup_MQTT,
-    },
-    port: {
-      l: "Port",
-      g: InputGroup_MQTT,
-    },
-    topic: {
-      t: InputType_String,
-      l: "Topic",
-      g: InputGroup_MQTT,
-    },
-    user: {
-      t: InputType_String,
-      l: "Username",
-      g: InputGroup_MQTT,
-    },
-    pass: {
-      t: InputType_Password,
-      l: "Password",
-      g: InputGroup_MQTT,
-    },
-  },
   hw: {
     axDia: {
       l: "Axis diameter",
       g: InputGroup_Physical,
+      u: "mm",
     },
     cDia: {
       l: "Cord diameter",
       g: InputGroup_Physical,
+      u: "mm",
     },
     cLen: {
       l: "Cord length",
       g: InputGroup_Physical,
+      u: "mm",
     },
     pDir: {
       l: "Direction pin",
@@ -196,6 +172,38 @@ const SETTING_INPUT_MAP: Record<
       ],
     },
   },
+  mqtt: {
+    enabled: {
+      t: InputType_Boolean,
+      l: "Enabled",
+      g: InputGroup_MQTT,
+      cg: true,
+    },
+    host: {
+      t: InputType_String,
+      l: "Host",
+      g: InputGroup_MQTT,
+    },
+    port: {
+      l: "Port",
+      g: InputGroup_MQTT,
+    },
+    topic: {
+      t: InputType_String,
+      l: "Topic",
+      g: InputGroup_MQTT,
+    },
+    user: {
+      t: InputType_String,
+      l: "Username",
+      g: InputGroup_MQTT,
+    },
+    pass: {
+      t: InputType_Password,
+      l: "Password",
+      g: InputGroup_MQTT,
+    },
+  },
 };
 
 const _Settings: ComponentFunction<SettingsAPI> = function () {
@@ -204,23 +212,24 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   let _dirty = false;
   let _saveHandlers: ActHandler[] = [];
   let _cancelHandlers: ActHandler[] = [];
-
+  const _index = -1;
   let _inputs: any[] = [];
   const _inputsDirty: boolean[] = [];
   const id = "stcc";
   const tabs = ["General", "Hardware", "MQTT"];
   const shortTabs = Object.keys(SETTING_INPUT_MAP); // = ["gen", "hw", "mqtt"]
-  const selector = Selector({ items: tabs });
   let general: HTMLElement;
   let hardware: HTMLElement;
   let mqtt: HTMLElement;
 
   this.init = (elem: HTMLElement) => {
+    const selector = Selector({ items: tabs, queries: shortTabs });
     selector.onChange(displayTab);
 
     function displayTab(index: number) {
       // set query param
-      pushToHistory(undefined, { tab: shortTabs[index] });
+      // pushToHistory(undefined, { tab: shortTabs[index] });
+
       const div = getElement(id);
       let content: HTMLElement;
       if (index === 0) {
@@ -265,11 +274,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       hardware = makeTab(shortTabs[1] as "hw");
       mqtt = makeTab(shortTabs[2] as "mqtt");
 
-      let tab = getQueryParam("tab");
-      tab = tab && tab.toLowerCase();
-      let ind = shortTabs.indexOf(tab);
-      if (ind < 0) ind = 0;
-      selector.setIndex(ind);
+      selector.setIndex(selector.index());
     }
 
     nextTick(() => {
@@ -281,6 +286,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
 
     return {
       destroy: () => {
+        // removeQh();
         _inputs.forEach((t) => t.destroy());
         _inputs = [];
         _saveHandlers = [];
@@ -344,6 +350,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         l,
         t = InputType_Number,
         o,
+        u,
       } = (SETTING_INPUT_MAP[key] as any)[k] as SettingsInputEntry;
 
       const stateKey = `${SETTINGS}.${key}.${k}`;
@@ -354,13 +361,14 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
         type: t,
         enumOpts: o,
         value: State.get(stateKey),
+        unit: u,
       });
       addToContainer(g, inp);
 
       const ind = _inputs.push(inp);
       inp.onChange((v) => {
         if (cg) {
-          _enableDisableGroup(v, groupDivs[g][0], groupDivs[g][1]);
+          _enableDisableGroup(v, inp, groupDivs[g][0], groupDivs[g][1]);
         }
         _inputsDirty[ind] = inp.isDirty();
         _setDirty(_inputsDirty.filter((d) => d === true).length > 0);
@@ -374,18 +382,20 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   /**
    * Set a group and it's inputs disabled or enabled based on state change
    * @param value   - True = green/ON/enabled
+   * @param toggler - The input that triggered the state change
    * @param groupDiv
    * @param inputs
    */
   function _enableDisableGroup(
     value: boolean,
+    toggler: Input,
     groupDiv: HTMLElement,
     inputs: Input[]
   ) {
     const d = "disabled";
     value ? removeClass(groupDiv, d) : addClass(groupDiv, d);
     inputs.forEach((i) => {
-      i.setDisabled(!value);
+      if (toggler !== i) i.setDisabled(!value);
     });
   }
 

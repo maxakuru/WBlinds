@@ -23,28 +23,34 @@ namespace stdBlinds {
     const char* MT_JPG = "image/jpeg";
 }
 
-bool forceReconnect = false;
-bool needsConfig = true;
-bool doReboot = false;
-String macAddress = "";
-String ipAddress = "";
+// TODO: move these to header globals
 
-bool apActive = false;
+// AP
 char apSSID[MAX_SSID_LENGTH] = "";
 char apPass[MAX_PW_LENGTH] = "wblinds123";
 int apChannel = 1;
 bool apHide = 0;
 
-
+// Device
 char mDnsName[MAX_MDNS_NAME_LENGTH];
 char deviceName[MAX_DEVICE_NAME_LENGTH];
 
+// Wifi
 bool wifiConfigured = false;
 char wifiSSID[MAX_SSID_LENGTH] = DEFAULT_SSID;
 char wifiPass[MAX_PW_LENGTH] = "";
+String macAddress = "";
+String ipAddress = "";
 
-void setDoReboot(bool v) {
-    doReboot = v;
+// Controls
+bool forceReconnect = false;
+bool doReboot = false;
+bool doRestore = false;
+void DO_REBOOT() {
+    doReboot = true;
+}
+void DO_RESTORE() {
+    doRestore = true;
 }
 
 void uniqueTag(char* out, size_t maxLen, const char* tag) {

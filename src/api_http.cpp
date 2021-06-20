@@ -126,7 +126,6 @@ static void setCacheControlHeaders(AsyncWebServerResponse* response, String etag
       WLOG_D(TAG, "response nullptr");
       return;
    }
-   WLOG_D(TAG, "add response cache headers");
    response->addHeader(F("Cache-Control"), "no-cache");
    response->addHeader(F("ETag"), etag);
 }
@@ -143,19 +142,6 @@ static void serveIndex(AsyncWebServerRequest* request) {
 
    request->send(response);
 }
-
-static void setCORSHeaders(AsyncWebServerResponse* response) {
-   if (response == nullptr) {
-      return;
-   }
-   response->addHeader(F("Access-Control-Allow-Origin"), "*");
-}
-
-// static void handleNotFound(AsyncWebServerRequest* request) {
-//    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
-
-//    request->send(404);
-// }
 
 // void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
 //    if (handleFileRead(request, "/bg.jpg")) return;
@@ -180,7 +166,6 @@ static void getState(AsyncWebServerRequest* request) {
       }
    };
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
-   setCORSHeaders(response);
    request->send(response);
 }
 
@@ -261,7 +246,6 @@ static void getSettings(AsyncWebServerRequest* request) {
    }
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, data);
    setCacheControlHeaders(response, etag);
-   setCORSHeaders(response);
    request->send(response);
 }
 
@@ -278,11 +262,25 @@ void BlindsHTTPAPI::init() {
    ws.onEvent(onEvent);
    server.addHandler(&ws);
 
+   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+   DefaultHeaders::Instance().addHeader("Access-Control-Expose-Headers", "*");
+   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
+
    server.on("/api/state", HTTP_GET, getState);
+   server.on("/api/devices", HTTP_GET, getDevices);
+   server.on("/api/routines", HTTP_GET, getRoutines);
+
+   server.on("/api/restore", HTTP_POST,
+      [](AsyncWebServerRequest* request) {
+         DO_RESTORE();
+         return request->send(202);
+      }
+   );
 
    AsyncCallbackJsonWebHandler* stateHandler = new AsyncCallbackJsonWebHandler("/api/state", updateState);
    stateHandler->setMethod(HTTP_PUT);
    server.addHandler(stateHandler);
+   
 
    // TODO: change this to use AsyncJsonResponse
    server.on("/api/settings", HTTP_GET, getSettings);

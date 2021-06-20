@@ -48,8 +48,11 @@ export const diffDeep = (source: any, target: any): any => {
   }, {});
 };
 
-export const getQueryParam = (param: string): string | false => {
-  const query = window.location.search.substring(1);
+export const getQueryParam = (
+  param: string,
+  qpStr: string = location.search
+): string | false => {
+  const query = qpStr.substring(1);
   const vars = query.split("&");
   for (let i = 0; i < vars.length; i++) {
     const pair = vars[i].split("=");
@@ -85,25 +88,57 @@ export const pruneUndef = <T>(obj: T): T => {
   return o;
 };
 
+type QueryChangeHandler = () => void;
+const _queryChangeHandlers: QueryChangeHandler[] = [];
+export const onQueryChange = (h: QueryChangeHandler): (() => void) => {
+  const ind = _queryChangeHandlers.push(h);
+  return () => {
+    delete _queryChangeHandlers[ind];
+  };
+};
+
+const query = () => location.search;
+export const pathname = (): string => location.pathname;
+
+const _callQueryHandlers = () => {
+  _queryChangeHandlers.forEach((h: QueryChangeHandler) => {
+    h && h();
+  });
+};
+
+let _lastQp = query();
+export const emitQueryChange = (): void => {
+  const q = query();
+  debug("q === query: ", q, _lastQp, location.search);
+  if (q === _lastQp) return;
+  _lastQp = q;
+  _callQueryHandlers();
+};
+
 export const pushToHistory = (
   path?: string,
   qps: Record<string, string> = {},
-  resetQps?: boolean
+  resetQps = true
 ): void => {
-  const cPath = location.pathname;
-  const cSearch = location.search;
+  const cPath = pathname();
+  const cSearch = query();
   const params = new URLSearchParams(resetQps ? "" : cSearch);
   for (const k in qps) {
     params.set(k, qps[k]);
   }
-  const qpStr = "?" + params.toString();
+  let qpStr = params.toString();
+  if (qpStr.length > 0) qpStr = "?" + qpStr;
 
   if (path === cPath && qpStr === cSearch) {
     // no change
-    console.log("no change: ", path, cPath, qpStr, cSearch);
+    debug("no change: ", path, cPath, qpStr, cSearch);
     return;
   }
 
   const fullPath = (path || cPath) + qpStr;
+  debug("push history: ", fullPath);
   history.pushState(null, "", fullPath);
+  if (qpStr !== cSearch) {
+    _callQueryHandlers();
+  }
 };

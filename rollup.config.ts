@@ -8,6 +8,7 @@ import html from "rollup-plugin-html";
 import pkg from "./package.json";
 import postcss from "rollup-plugin-postcss";
 import path from "path";
+import serve from "rollup-plugin-serve";
 
 const { parsed: env } = require("dotenv-flow").config();
 if (process.env.CI) {
@@ -62,17 +63,24 @@ if (!dev) {
     })
   );
 } else {
-  plugins.push({
-    name: "watch-external",
-    buildStart() {
-      this.addWatchFile(path.resolve(__dirname, "web/**/*.css"));
-      this.addWatchFile(path.resolve(__dirname, "web/**/*.html"));
-      this.addWatchFile(path.resolve(__dirname, "postcss.config.js"));
-      this.addWatchFile(path.resolve(__dirname, "tsconfig.json"));
-      if (!dev) this.addWatchFile(path.resolve(__dirname, ".env"));
-      else this.addWatchFile(path.resolve(__dirname, ".env.dev"));
+  plugins.push(
+    {
+      name: "watch-external",
+      buildStart() {
+        this.addWatchFile(path.resolve(__dirname, "web/**/*.css"));
+        this.addWatchFile(path.resolve(__dirname, "web/**/*.html"));
+        this.addWatchFile(path.resolve(__dirname, "postcss.config.js"));
+        this.addWatchFile(path.resolve(__dirname, "tsconfig.json"));
+        this.addWatchFile(path.resolve(__dirname, ".env"));
+        this.addWatchFile(path.resolve(__dirname, ".env.dev"));
+      },
     },
-  });
+    serve({
+      port: 10002,
+      contentBase: "public",
+      historyApiFallback: true,
+    })
+  );
 }
 
 export default {
