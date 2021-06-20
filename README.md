@@ -20,7 +20,7 @@
 1. `git clone https://github.com/maxakuru/WBlinds.git`
 2. Build & flash
 3. Connect to access point (`WBlinds-XXXXXX`)
-4. [Configure](#configuration) SSID and password
+4. [Configure](#settings) SSID and password
 
 
 ## ⏳ TODO
