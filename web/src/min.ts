@@ -1,23 +1,27 @@
-export function addClass(elem: HTMLElement, ...tokens: string[]): void {
+export const addClass = (elem: HTMLElement, ...tokens: string[]): void => {
   elem.classList.add(...tokens);
-}
+};
 
-export function removeClass(elem: HTMLElement, ...tokens: string[]): void {
+export const removeClass = (elem: HTMLElement, ...tokens: string[]): void => {
   elem.classList.remove(...tokens);
-}
+};
 
-export function toggleClass(elem: HTMLElement, token: string): void {
+export const toggleClass = (elem: HTMLElement, token: string): void => {
   elem.classList.toggle(token);
-}
+};
 
 export const nextTick = setTimeout;
 
+export const DOCUMENT = document;
+
+export const WINDOW = window;
+
 export const createElement: <K extends keyof HTMLElementTagNameMap>(
   tagName: K
-) => HTMLElementTagNameMap[K] = document.createElement.bind(document);
+) => HTMLElementTagNameMap[K] = DOCUMENT.createElement.bind(DOCUMENT);
 
-export const createDiv: <T = HTMLElement>() => T = document.createElement.bind(
-  document,
+export const createDiv: <T = HTMLElement>() => T = DOCUMENT.createElement.bind(
+  DOCUMENT,
   "div"
 );
 
@@ -26,16 +30,16 @@ export const createDiv: <T = HTMLElement>() => T = document.createElement.bind(
  * so closure can trim a few extra characters.
  */
 export const getElement: (id: string) => HTMLElement =
-  document.getElementById.bind(document);
+  DOCUMENT.getElementById.bind(DOCUMENT);
 
 export const querySelector = <T = HTMLElement>(
   selectors: keyof HTMLElementTagNameMap,
-  elem: HTMLElement | Document = document
+  elem: HTMLElement | Document = DOCUMENT
 ): T => elem.querySelector.call(elem, selectors);
 
 export const stopPropagation = (e: Event): void => e.stopPropagation();
 
-export const displayNone = (elem: HTMLElement) => {
+export const displayNone = (elem: HTMLElement): void => {
   elem.style.display = "none";
 };
 
@@ -46,7 +50,7 @@ export const appendChild = <T extends HTMLElement>(
   return _appendChild.call(parent, child) as T;
 };
 
-const _appendChild = document.appendChild;
+const _appendChild = DOCUMENT.appendChild;
 
 export const prependChild = <T extends HTMLElement>(
   parent: HTMLElement,
@@ -55,4 +59,4 @@ export const prependChild = <T extends HTMLElement>(
   return _prependChild.call(parent, child) as T;
 };
 
-const _prependChild = document.prepend;
+const _prependChild = DOCUMENT.prepend;

@@ -56,11 +56,9 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
   let _enabled = false;
   let _reconnectAttempt = 0;
 
-  connect();
-
-  function connect() {
+  const connect = () => {
     ws = new WebSocket(
-      `ws://${process.env.WS_ENDPOINT || window.location.hostname}/ws`
+      `ws://${process.env.WS_ENDPOINT || location.hostname}/ws`
     );
     ws.onopen = (e: Event) => {
       debug("[ws] onOpen(): ", e);
@@ -94,7 +92,9 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
       _enabled = false;
       opts.onError && opts.onError(e, _reconnectAttempt);
     };
-  }
+  };
+
+  connect();
 
   const push = (
     ev: WSEventType,

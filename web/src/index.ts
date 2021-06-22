@@ -24,6 +24,7 @@ import {
   DEFAULT_ERROR,
   PENDING_STATE,
 } from "@Const";
+import { WINDOW } from "min";
 
 // Bottom nav bar buttons
 const labels = ["Home", "Routines", "Settings"];
@@ -40,8 +41,8 @@ export default (ns: WBlindsNamespace): void => {
   // Toasts
   const tc = ToastContainer({});
   appendChild(body, tc.node);
-  window.onerror = handleError;
-  window.onpopstate = (e: PopStateEvent) => {
+  WINDOW.onerror = handleError;
+  WINDOW.onpopstate = (e: PopStateEvent) => {
     // e.state
     handleRoute(pathname());
     emitQueryChange();

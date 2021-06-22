@@ -60,6 +60,7 @@ if (!dev) {
     compiler({
       language_in: "ECMASCRIPT_2019",
       language_out: "ECMASCRIPT_2019",
+      // compilation_level: "ADVANCED",
     })
   );
 } else {

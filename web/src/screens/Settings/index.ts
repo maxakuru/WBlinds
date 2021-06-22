@@ -224,9 +224,8 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
 
   this.init = (elem: HTMLElement) => {
     const selector = Selector({ items: tabs, queries: shortTabs });
-    selector.onChange(displayTab);
 
-    function displayTab(index: number) {
+    const displayTab = (index: number) => {
       // set query param
       // pushToHistory(undefined, { tab: shortTabs[index] });
 
@@ -244,9 +243,10 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       }
       div.innerHTML = "";
       appendChild(div, content);
-    }
+    };
+    selector.onChange(displayTab);
 
-    function loaded() {
+    const loaded = () => {
       debug("settings loaded: ", State._state);
       // Events that come from WS shouldn't overwrite existing data.
       // TODO: add map of key -> inputs, check state of input and allow overwriting
@@ -275,7 +275,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       mqtt = makeTab(shortTabs[2] as "mqtt");
 
       selector.setIndex(selector.index());
-    }
+    };
 
     nextTick(() => {
       State.observe(SETTINGS, ({ value, prev }) => {
@@ -307,7 +307,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       }
     };
 
-    function makeTab(key: keyof typeof SETTING_INPUT_MAP): HTMLElement {
+    const makeTab = (key: keyof typeof SETTING_INPUT_MAP): HTMLElement => {
       const container = createElement("span");
       const groupDivs: [HTMLElement, Input[]][] = [];
       const addToContainer = (groupNum: number | undefined, input: Input) => {
@@ -362,7 +362,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       }
 
       return container;
-    }
+    };
 
     return {
       destroy: () => {

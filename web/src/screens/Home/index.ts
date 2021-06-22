@@ -64,6 +64,14 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       }
     };
 
+    const handleTileClick = (type: "device" | "preset", data: any) => {
+      if (type === "device") {
+        _deviceClickHandlers.forEach((h) => h(data));
+      } else {
+        // TODO: handle preset click
+      }
+    };
+
     const updateTiles = (type: "preset" | "device", o: any) => {
       const { container, tiles } = getAllTiles(type);
       tiles.forEach((tile) => {
@@ -89,14 +97,6 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       }
       padTiles(type);
     };
-
-    function handleTileClick(type: "device" | "preset", data: any) {
-      if (type === "device") {
-        _deviceClickHandlers.forEach((h) => h(data));
-      } else {
-        // TODO: handle preset click
-      }
-    }
 
     nextTick(() => {
       State.observe(PRESETS, ({ value, prev }) => {

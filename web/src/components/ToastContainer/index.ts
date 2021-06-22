@@ -28,30 +28,30 @@ const _ToastContainer: ComponentFunction<
   let _toasts: Toast[] = [];
 
   this.init = (elem: HTMLElement) => {
-    function pushToast(
+    const pushToast = (
       message: string,
       isError?: boolean,
       isPersistent?: boolean,
       timeout?: number
-    ) {
+    ) => {
+      const remove = () => {
+        t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
+        setTimeout(() => {
+          t.node.remove();
+        }, 500);
+      };
+
       const t = Toast({ message, isError, id: _index++ });
       t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
       t.onClick(remove);
       _toasts.push(t);
       appendChild(elem, t.node);
 
-      function remove() {
-        t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
-        setTimeout(() => {
-          t.node.remove();
-        }, 500);
-      }
-
       setTimeout(() => {
         t.node.style.bottom = `0px`;
         !isPersistent && setTimeout(remove, timeout || isError ? 5000 : 2500);
       });
-    }
+    };
     return {
       destroy: () => {
         _toasts.map((t) => t.destroy());

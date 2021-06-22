@@ -17,20 +17,20 @@ const api = process.env.API_ENDPOINT;
  * @param method - HTTP method
  * @param [opts]
  */
-export function doFetch(
+export const doFetch = (
   resource: string,
   method?: HTTPMethod,
   opts?: any
-): Promise<any> {
+): Promise<any> => {
   return _doFetch(resource, method, opts);
-}
+};
 
-function _doFetch(
+const _doFetch = (
   resource: string,
   method: HTTPMethod = HTTP_GET,
   opts: any = {},
   attempt = 0
-): Promise<any> {
+): Promise<any> => {
   const body = isObject(opts.body) ? JSON.stringify(opts.body) : opts.body;
   const headers = { ...(opts.headers || {}) };
   if (body) headers["content-type"] = "application/json";
@@ -54,4 +54,4 @@ function _doFetch(
     }
     return method === HTTP_GET ? res.json() : undefined;
   });
-}
+};
