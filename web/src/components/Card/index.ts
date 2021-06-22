@@ -4,7 +4,6 @@ import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, isNullish, removeClass } from "@Util";
 import { setStyle } from "min";
-import { TOP } from "@Const";
 
 export interface CardAPI {
   temp?: any;
@@ -54,7 +53,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
         // TODO: use onDiscard from parent
         elem.ontransitionend = destroy;
       }
-      setStyle(elem, TOP, `${o}px`);
+      setStyle(elem, "top", `${o}px`);
       yOffset = yStart = 0;
     };
 
@@ -67,7 +66,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       const movedY = coords.y - lastCoords.y;
       yOffset += movedY;
       lastCoords = coords;
-      setStyle(elem, TOP, `${yOffset}px`);
+      setStyle(elem, "top", `${yOffset}px`);
     };
 
     function toggleAnimations(newState?: boolean) {
@@ -101,7 +100,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     return {
       destroy,
       show: () => {
-        setStyle(elem, TOP, "0px");
+        setStyle(elem, "top", "0px");
       },
     };
   };

@@ -1,11 +1,11 @@
 :root {
 	/* --wid: calc((100vw - 30px) / 3);  */
 	/* Always 3 columns */
-	--wid: min(calc((100vw - 60px) / 3), 110px);
+	--wid: min(calc(33.3vw - 20px),110px, 110px);
 }
 
 .tile {
-	background: #0000004D;
+	background: rgba(0,0,0,.3);
 	border-radius: 12px;
 	display: flex;
 	/* justify-content: space-around; */

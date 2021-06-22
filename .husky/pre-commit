@@ -3,4 +3,6 @@
 
 CI=true yarn build
 ./node_modules/.bin/lint-staged
-git add ./public/*
+git add ./public/index.js
+git add ./public/index.html
+

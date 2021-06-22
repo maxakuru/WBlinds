@@ -1,6 +1,6 @@
 .toast {
-	background-color: #00000070;
-    box-shadow: 1px 1px 8px #54545473;
+	background-color: rgba(0,0,0,.44);
+    box-shadow: 1px 1px 8px rgba(84, 84, 84, 0.451);
     border-radius: 10px;
 	font-size: 13px;
 	margin: 10px;

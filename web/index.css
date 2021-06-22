@@ -132,7 +132,7 @@ ul {
 li {
 	display: list-item;
 	text-align: -webkit-match-parent;
-	color: #FFFFFF66;
+	color: rgba(255, 255, 255, 0.44);
 }
 
 /* uncss:ignore */

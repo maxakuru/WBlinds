@@ -1,5 +1,5 @@
 #nav {
-	background: #00000080;
+	background: rgba(0,0,0,0.5);
 	height: 63px;
 	display: flex;
 }

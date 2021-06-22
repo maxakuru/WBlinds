@@ -2,7 +2,7 @@
   justify-content: space-between;
   height: 50px;
   align-items: center;
-  background: #0000008F;
+  background: rgba(0,0,0,.56);
   padding: 0px 0px 0px 15px;
   border-radius: 15px;
   min-width: 300px;
@@ -43,7 +43,7 @@
 .in>input:not([type=checkbox]),.in>select {
   flex-grow: 1;
   padding: 10px 27px 10px 0px;
-  background: #00000000;
+  background: rgba(0,0,0,0);
   border: none;
   color: #DB8B1D;
   -moz-text-align-last: right;
@@ -76,7 +76,7 @@
 }
 /* uncss:ignore */
 .in:focus-within {
-  box-shadow: -1px 0px #DB8B1DA0 inset;
+  box-shadow: -1px 0px rgba(219, 139, 29, 0.627) inset;
 }
 
 /* uncss:ignore */
@@ -106,7 +106,7 @@ input[type=number] {
   width: 51px;
   height: 31px;
   border-radius: 50px;
-  background-color: #94949a33 !important;
+  background-color: rgba(148, 148, 154, 0.2) !important;
 }
 
 /* uncss:ignore */

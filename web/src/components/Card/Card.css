@@ -1,9 +1,7 @@
 #card {
-	height: 100%;
     position: fixed;
-    width: 100%;
     top: 100%;
-	background: #53535378;
+	background: rgba(83, 83, 83, 0.47);
 }
 
 #card.an {

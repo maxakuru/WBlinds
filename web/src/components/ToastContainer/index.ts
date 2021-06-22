@@ -4,7 +4,6 @@ import template from "./ToastContainer.html";
 import "./ToastContainer.css";
 import { appendChild } from "@Util";
 import { setStyle } from "min";
-import { BOTTOM } from "@Const";
 
 type ClickHandler = (data: ToastContainerProps) => unknown;
 export interface ToastContainerAPI {
@@ -37,7 +36,7 @@ const _ToastContainer: ComponentFunction<
       timeout?: number
     ) => {
       const setBottomStyle = () => {
-        setStyle(t.node, BOTTOM, `-${63 + 200 * (_toasts.length + 1)}px`);
+        setStyle(t.node, "bottom", `-${63 + 200 * (_toasts.length + 1)}px`);
       };
 
       const remove = () => {
@@ -54,7 +53,7 @@ const _ToastContainer: ComponentFunction<
       appendChild(elem, t.node);
 
       setTimeout(() => {
-        setStyle(t.node, BOTTOM, "0px");
+        setStyle(t.node, "bottom", "0px");
         !isPersistent && setTimeout(remove, timeout || isError ? 5000 : 2500);
       });
     };
