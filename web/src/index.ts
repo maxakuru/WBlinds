@@ -152,8 +152,9 @@ export default (ns: WBlindsNamespace): void => {
 
   function load(
     key: keyof Omit<StateData, "pendingState">,
-    updates: (keyof StateData)[] = [key]
+    updates?: (keyof StateData)[]
   ) {
+    updates = updates || [key];
     return doFetch(key)
       .then((r) => {
         updates.map((k) => State.update(k, r));

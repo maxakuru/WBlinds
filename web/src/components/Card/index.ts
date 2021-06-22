@@ -2,7 +2,9 @@ import { ComponentFunction, Component } from "../Component";
 import { Slider } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
-import { addClass, appendChild, removeClass } from "@Util";
+import { addClass, appendChild, isNullish, removeClass } from "@Util";
+import { setStyle } from "min";
+import { TOP } from "@Const";
 
 export interface CardAPI {
   temp?: any;
@@ -52,7 +54,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
         // TODO: use onDiscard from parent
         elem.ontransitionend = destroy;
       }
-      elem.style.top = `${o}px`;
+      setStyle(elem, TOP, `${o}px`);
       yOffset = yStart = 0;
     };
 
@@ -65,10 +67,11 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       const movedY = coords.y - lastCoords.y;
       yOffset += movedY;
       lastCoords = coords;
-      elem.style.top = `${yOffset}px`;
+      setStyle(elem, TOP, `${yOffset}px`);
     };
 
-    function toggleAnimations(newState = false) {
+    function toggleAnimations(newState?: boolean) {
+      if (isNullish(newState)) newState = false;
       if (newState === animated) return;
       newState ? addClass(elem, "an") : removeClass(elem, "an");
       animated = newState;
@@ -98,7 +101,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     return {
       destroy,
       show: () => {
-        elem.style.top = "0px";
+        setStyle(elem, TOP, "0px");
       },
     };
   };

@@ -164,7 +164,7 @@ class _State {
     key: T,
     value: Partial<U>
   ) {
-    this._observers[key] ??= [];
+    this._observers[key] = this._observers[key] || [];
     const prev = this._state[key];
     this._state[key] = mergeDeep({}, prev, pruneUndef(value));
     this._loadedKeys[key] = true;
@@ -180,7 +180,7 @@ class _State {
     key: T,
     handler: StateHandler<U>
   ) {
-    this._observers[key] ??= [];
+    this._observers[key] = this._observers[key] || [];
     this._observers[key].push(handler);
     if (this._loadedKeys[key]) {
       handler({

@@ -2,6 +2,7 @@ import { ComponentFunction, Component } from "../Component";
 import template from "./Slider.html";
 import "./Slider.css";
 import { querySelector, stopPropagation } from "@Util";
+import { setStyle } from "min";
 
 export interface SliderAPI {
   destroy(): void;
@@ -31,7 +32,11 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
         ((parseInt(slider.value) - parseInt(slider.min)) /
           (parseInt(slider.max) - parseInt(slider.min))) *
         100;
-      slider.style.background = `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${value}%, #606060 ${value}%, #606060 100%`;
+      setStyle(
+        slider,
+        "background",
+        `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${value}%, #606060 ${value}%, #606060 100%`
+      );
     };
     slider.value = value;
 

@@ -4,6 +4,10 @@ export const isObject = (o: unknown): o is Record<string, unknown> => {
   return o && typeof o === "object" && !Array.isArray(o);
 };
 
+export function isNullish(o: any): o is void {
+  return o == null;
+}
+
 export const mergeDeep = (target: unknown, ...sources: unknown[]): any => {
   if (!sources.length) return target;
   const source = sources.shift();
@@ -50,8 +54,9 @@ export const diffDeep = (source: any, target: any): any => {
 
 export const getQueryParam = (
   param: string,
-  qpStr: string = location.search
+  qpStr?: string
 ): string | false => {
+  qpStr = qpStr || location.search;
   const query = qpStr.substring(1);
   const vars = query.split("&");
   for (let i = 0; i < vars.length; i++) {
@@ -117,9 +122,11 @@ export const emitQueryChange = (): void => {
 
 export const pushToHistory = (
   path?: string,
-  qps: Record<string, string> = {},
-  resetQps = true
+  qps?: Record<string, string>,
+  resetQps?: boolean
 ): void => {
+  qps = qps || {};
+  if (isNullish(resetQps)) resetQps = true;
   const cPath = pathname();
   const cSearch = query();
   const params = new URLSearchParams(resetQps ? "" : cSearch);

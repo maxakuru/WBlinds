@@ -1,10 +1,10 @@
-export const addClass = (elem: HTMLElement, ...tokens: string[]): void => {
+export function addClass(elem: HTMLElement, ...tokens: string[]): void {
   elem.classList.add(...tokens);
-};
+}
 
-export const removeClass = (elem: HTMLElement, ...tokens: string[]): void => {
+export function removeClass(elem: HTMLElement, ...tokens: string[]): void {
   elem.classList.remove(...tokens);
-};
+}
 
 export const toggleClass = (elem: HTMLElement, token: string): void => {
   elem.classList.toggle(token);
@@ -39,9 +39,17 @@ export const querySelector = <T = HTMLElement>(
 
 export const stopPropagation = (e: Event): void => e.stopPropagation();
 
-export const displayNone = (elem: HTMLElement): void => {
-  elem.style.display = "none";
-};
+export function setStyle(
+  elem: HTMLElement,
+  key: keyof CSSStyleDeclaration,
+  value: string
+): void {
+  elem.style[key as any] = value;
+}
+
+export function displayNone(elem: HTMLElement): void {
+  setStyle(elem, "display", "none");
+}
 
 export const appendChild = <T extends HTMLElement>(
   parent: HTMLElement,

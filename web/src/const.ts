@@ -5,3 +5,7 @@ export const DEVICES = "devices";
 export const PRESETS = "presets";
 export const DEFAULT_ERROR = "Error encountered, check console";
 export const NULL: any = null;
+export const BOTTOM = "bottom";
+
+// eslint-disable-next-line @typescript-eslint/prefer-as-const, prefer-const
+export let TOP: "top" = "top";

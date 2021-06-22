@@ -6,6 +6,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+public/index.js.map
 
 # deps
 node_modules

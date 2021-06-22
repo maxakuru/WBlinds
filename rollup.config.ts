@@ -51,7 +51,6 @@ plugins.push(
       collapseWhitespace: true,
     },
   }),
-  commonjs({ include: "node_modules/**" }),
   postcss({ minimize: !dev, config: true })
 );
 
@@ -61,6 +60,7 @@ if (!dev) {
       language_in: "ECMASCRIPT_2019",
       language_out: "ECMASCRIPT_2019",
       // compilation_level: "ADVANCED",
+      assume_function_wrapper: true,
     })
   );
 } else {

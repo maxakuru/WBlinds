@@ -27,10 +27,13 @@ export const doFetch = (
 
 const _doFetch = (
   resource: string,
-  method: HTTPMethod = HTTP_GET,
-  opts: any = {},
-  attempt = 0
+  method?: HTTPMethod,
+  opts?: any,
+  attempt?: number
 ): Promise<any> => {
+  attempt = attempt || 0;
+  opts = opts || {};
+  method = method || HTTP_GET;
   const body = isObject(opts.body) ? JSON.stringify(opts.body) : opts.body;
   const headers = { ...(opts.headers || {}) };
   if (body) headers["content-type"] = "application/json";

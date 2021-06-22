@@ -3,6 +3,8 @@ import { Toast } from "../Toast";
 import template from "./ToastContainer.html";
 import "./ToastContainer.css";
 import { appendChild } from "@Util";
+import { setStyle } from "min";
+import { BOTTOM } from "@Const";
 
 type ClickHandler = (data: ToastContainerProps) => unknown;
 export interface ToastContainerAPI {
@@ -34,21 +36,25 @@ const _ToastContainer: ComponentFunction<
       isPersistent?: boolean,
       timeout?: number
     ) => {
+      const setBottomStyle = () => {
+        setStyle(t.node, BOTTOM, `-${63 + 200 * (_toasts.length + 1)}px`);
+      };
+
       const remove = () => {
-        t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
+        setBottomStyle();
         setTimeout(() => {
           t.node.remove();
         }, 500);
       };
 
       const t = Toast({ message, isError, id: _index++ });
-      t.node.style.bottom = `-${63 + 200 * (_toasts.length + 1)}px`;
+      setBottomStyle();
       t.onClick(remove);
       _toasts.push(t);
       appendChild(elem, t.node);
 
       setTimeout(() => {
-        t.node.style.bottom = `0px`;
+        setStyle(t.node, BOTTOM, "0px");
         !isPersistent && setTimeout(remove, timeout || isError ? 5000 : 2500);
       });
     };
