@@ -3,7 +3,7 @@ import { debug } from "./util";
 
 export interface WSController {
   ws: WebSocket;
-  push(event: WSEventType.UpdateSettings, data: WSUpdateSettingsEvent): void;
+  // push(event: WSEventType.UpdateSettings, data: WSUpdateSettingsEvent): void;
   push(event: WSEventType.UpdateState, data: WSUpdateStateEvent): void;
 }
 
@@ -17,7 +17,10 @@ export interface WSUpdateSettingsEvent {
 }
 
 export interface WSUpdateStateEvent {
-  test?: boolean;
+  tPos: number;
+  pos: number;
+  speed: number;
+  accel: number;
 }
 
 export interface WSIncomingStateEvent {
@@ -96,19 +99,33 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
 
   connect();
 
-  const push = (
-    ev: WSEventType,
-    data: WSUpdateSettingsEvent | WSUpdateStateEvent
-  ) => {
+  const push = (ev: WSEventType, data: WSUpdateStateEvent) => {
     debug("[ws] push(): ", ev, data);
     if (_enabled) {
-      ws.send(packMessage(ev, data));
+      const s = packMessage(ev, data);
+      debug("[ws] push() str: ", s);
+      ws.send(s);
     }
   };
 
-  function packMessage(ev: any, data: any): string {
-    // TODO: create ArrayBuffer from data
-    return "";
+  function packMessage(ev: WSEventType, data: WSUpdateStateEvent): string {
+    // TODO: mac
+    let f = 0b000;
+    let s = "";
+    let i = 0;
+    for (const k in data) {
+      const d = data[k as keyof WSUpdateStateEvent];
+      if (d != null) {
+        console.log("f: ", f);
+        console.log("1<<i: ", 1 << i);
+        console.log("f&1<<i: ", f & (1 << i));
+
+        s += `${d}/`;
+        f = f | (1 << i);
+      }
+      i++;
+    }
+    return `mac/${f}/${s}`;
   }
 
   function unpackMessages(data: string): WSIncomingEvent[] {

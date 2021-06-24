@@ -10,9 +10,9 @@ import {
 } from "@Util";
 import { ComponentFunction, Component, Tile } from "@Components";
 import template from "./Home.html";
-import { State } from "@State";
+import { DeviceRecord, State } from "@State";
 import "./Home.css";
-import { DEVICES, PRESETS } from "@Const";
+import { DEVICES, PRESETS, STATE } from "@Const";
 
 type DeviceClickHandler = (device: any) => void;
 export interface HomeAPI {
@@ -72,15 +72,19 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       }
     };
 
-    const updateTiles = (type: "preset" | "device", o: any) => {
+    const updateTiles = (
+      type: "preset" | "device",
+      o: Record<string, DeviceRecord>
+    ) => {
       const { container, tiles } = getAllTiles(type);
       tiles.forEach((tile) => {
-        if (!(tile.id in o)) {
-          // Existing, but doesn't exist in state
-          // TODO: Remove component
+        const { id } = tile;
+        if (id !== "tile-c" && !(id in o)) {
+          // Existing, but doesn't exist in devices
+          tile.remove();
         } else {
           // Exists, remove from list so it isn't added again
-          o[tile.id] = undefined;
+          o[id] = undefined;
         }
       });
 
@@ -103,7 +107,17 @@ const _Home: ComponentFunction<HomeAPI> = function () {
         debug("presets updated: ", value, prev);
         loaded();
 
-        updateTiles(PRESET_TILE, value);
+        // TODO: define PresetRecord
+        updateTiles(PRESET_TILE, value as any);
+      });
+
+      State.observe(STATE, ({ value, prev }) => {
+        debug("state updated: ", value, prev);
+        loaded();
+
+        // TODO: add mac address, etc. to window before sending from ESP
+        // for now just use 'c' to identify the current device
+        updateTiles(DEVICE_TILE, { c: { ...value } });
       });
 
       State.observe(DEVICES, ({ value, prev }) => {

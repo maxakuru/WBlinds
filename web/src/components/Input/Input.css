@@ -40,6 +40,39 @@
 }
 
 /* uncss:ignore */
+.in-r {
+	background: linear-gradient(to right, #DB8B1D 0%, #DB8B1D 50%, #606060 50%, #606060 100%);
+	border-radius: 8px;
+	height: 7px;
+	width: 75%;
+	outline: none;
+	-webkit-appearance: none;
+}
+
+/* uncss:ignore */
+.in-r {
+	border-radius: 15px;
+	height: 6px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 100%;
+	outline: none;
+}
+
+/* uncss:ignore */
+.in-r::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px;
+	height: 16px;
+	background: white;
+	box-shadow: black;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+/* uncss:ignore */
 .in>input:not([type=checkbox]),.in>select {
   flex-grow: 1;
   padding: 10px 27px 10px 0px;

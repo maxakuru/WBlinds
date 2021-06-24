@@ -147,6 +147,9 @@ export default (ns: WBlindsNamespace): void => {
     // Show device card
     const card = Card({});
     appendChild(body, card.node);
+    card.onChange((e) => {
+      wsc.push(WSEventType.UpdateState, e);
+    });
     setTimeout(card.show);
   }
 

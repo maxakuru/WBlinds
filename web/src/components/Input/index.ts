@@ -23,7 +23,9 @@ export const InputType_String = 1;
 export const InputType_Boolean = 2;
 export const InputType_Enum = 3;
 export const InputType_Password = 4;
-export type InputType = 0 | 1 | 2 | 3 | 4;
+export const InputType_Range = 5;
+
+export type InputType = 0 | 1 | 2 | 3 | 4 | 5;
 
 const InputTypeMap: Record<InputType, string> = {
   [InputType_String]: "text",
@@ -31,6 +33,7 @@ const InputTypeMap: Record<InputType, string> = {
   [InputType_Number]: "number",
   [InputType_Enum]: "select",
   [InputType_Password]: "password",
+  [InputType_Range]: "range",
 };
 
 interface EnumOption {
@@ -40,7 +43,14 @@ interface EnumOption {
   v: any;
 }
 
-type InputProps = { min?: number; max?: number; unit?: string } & (
+type InputProps = {
+  min?: number;
+  max?: number;
+  unit?: string;
+  // Embed label and input in a single line
+  embed?: boolean;
+  prevDefault?: boolean;
+} & (
   | {
       label: string;
       type: typeof InputType_Enum;
@@ -64,6 +74,8 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   placeholder,
   value,
   unit,
+  embed = true,
+  prevDefault = false,
 }: InputProps) {
   const _valid = true;
   let _currentValue = value;
@@ -74,6 +86,9 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
 
   const setup = (elem: HTMLElement) => {
     elem.innerHTML = "";
+    if (embed) {
+      addClass(elem, "in");
+    }
     const l = createElement("label");
     l.innerText = label;
     appendChild(elem, l);
@@ -88,27 +103,37 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
         opt.innerText = o.l;
         appendChild(_input, opt);
       });
-      _input.onchange = () =>
+      _input.onchange = (e) => {
+        if (prevDefault) e.preventDefault();
         _onChange(
           enumOpts[(_input as HTMLSelectElement).options.selectedIndex].v
         );
+      };
     } else {
       // all others are input type
       _input = createElement("input");
       _input.type = InputTypeMap[type];
       _input.placeholder = placeholder || "xxxxx";
 
+      if (type === InputType_Range) {
+        addClass(_input, "in-r");
+      }
+
       if (type === InputType_Boolean) {
         // checkbox/select inputs, use checked for bool, value for enum
         (_input as HTMLInputElement).checked = value;
         value && addClass(_input, "on");
-        _input.onchange = () => {
+        _input.onchange = (e) => {
+          if (prevDefault) e.preventDefault();
           toggleClass(_input, "on");
           _onChange((_input as HTMLInputElement).checked);
         };
       } else {
         // text/number inputs
-        _input.oninput = () => _onChange(_input.value);
+        _input.oninput = (e) => {
+          if (prevDefault) e.preventDefault();
+          _onChange(_input.value);
+        };
       }
     }
     // set initial value

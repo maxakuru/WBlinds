@@ -2,8 +2,13 @@
     position: fixed;
     top: 100%;
 	background: rgba(83, 83, 83, 0.47);
+    text-align: left;
 }
 
 #card.an {
     transition: 0.2s top ease-in-out;
+}
+
+.in {
+    text-align: left;
 }

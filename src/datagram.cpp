@@ -12,47 +12,6 @@ namespace Datagram {
     //     byte dg[SizeMap[type_t::UpdateState]];
     // }
 
-    String packString(const StateEvent& event) {
-        auto state = State::getInstance();
-        String s = "";
-        s += macAddress;
-
-        s += delimiter;
-        s += event.flags_.mask_;
-        s += delimiter;
-
-        if (event.flags_.pos_) {
-            s += state->getPosition();
-            s += delimiter;
-        }
-        if (event.flags_.targetPos_) {
-            s += state->getTargetPosition();
-            s += delimiter;
-        }
-        if (event.flags_.speed_) {
-            s += state->getSpeed();
-            s += delimiter;
-        }
-        if (event.flags_.accel_) {
-            s += state->getAccel();
-            s += delimiter;
-        }
-        if (event.flags_.deviceName_) {
-            s += state->getDeviceName();
-            s += delimiter;
-        }
-        if (event.flags_.mDnsName_) {
-            s += state->getmDnsName();
-            s += delimiter;
-        }
-        WLOG_I(TAG, "DG string: %s", s);
-        return s;
-        // if (event.flags_.mqttEnabled_) {
-        //     s += state->getMqttEnabled();
-        //     s += delimiter;
-        // }
-    }
-
     /**
      * @brief Pack byte array.
      *
@@ -69,7 +28,7 @@ namespace Datagram {
      //     }
      // }
 
-    std::map<type_t, const uint8_t> SizeMap = {
+    std::map<type_t, size_t> SizeMap = {
     {type_t::Hello, 128},
     {type_t::Acknowledge, 128},
     {type_t::JoinGroup, 128},

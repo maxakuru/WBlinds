@@ -3,10 +3,12 @@ import { Slider } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, isNullish, removeClass } from "@Util";
-import { setStyle } from "min";
+import { querySelector, setStyle } from "min";
+import { Input, InputType_Range } from "components/Input";
 
+export type OnChangeHandler = (data: any) => void;
 export interface CardAPI {
-  temp?: any;
+  onChange: (h: OnChangeHandler) => void;
   destroy(): void;
   show(): void;
 }
@@ -23,6 +25,7 @@ interface Coords {
 const _Card: ComponentFunction<CardAPI, CardProps> = function ({
   temp,
 }: CardProps) {
+  let _onChangeHandlers: OnChangeHandler[] = [];
   let draggingCard = false;
   let yOffset = 0;
   let yStart = 0;
@@ -32,8 +35,31 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
   this.init = (elem: HTMLElement) => {
     toggleAnimations(true);
 
-    const slider = Slider({ id: "position", label: "Position", value: "50" });
-    appendChild(elem, slider.node);
+    const notify = (d: any) => {
+      _onChangeHandlers.forEach((h) => h(d));
+    };
+
+    const posRange = Input({
+      type: InputType_Range,
+      label: "Position",
+      value: 50,
+      embed: false,
+    });
+    const node: HTMLInputElement = posRange.node as HTMLInputElement;
+    const inp = querySelector("input", node);
+    removeClass(posRange.node, "fR");
+    posRange.onChange((tPos) => {
+      console.log("onchange: ", node);
+      setStyle(
+        inp,
+        "background",
+        `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${tPos}%, #606060 ${tPos}%, #606060 100%`
+      );
+      let pos, accel, speed;
+      notify({ pos, tPos, accel, speed });
+    });
+    // const slider = Slider({ id: "position", label: "Position", value: "50" });
+    appendChild(elem, posRange.node);
 
     const onPress = (coords: Coords) => {
       lastCoords = coords;
@@ -76,7 +102,8 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       animated = newState;
     }
 
-    const destroy = (ev?: any) => {
+    const destroy = () => {
+      _onChangeHandlers = [];
       elem.remove();
     };
 
@@ -99,6 +126,9 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       onMove(firstTouchXY(e));
     return {
       destroy,
+      onChange: (h) => {
+        _onChangeHandlers.push(h);
+      },
       show: () => {
         setStyle(elem, "top", "0px");
       },

@@ -4,10 +4,10 @@
 #include "defines.h"
 #include "state.h"
 
+
 namespace Datagram {
     byte* pack(const StateEvent& event);
-    String packString(const StateEvent& event);
-
+    // todo unpackString(byte* message);
 
     enum class type_t {
         Hello = 0,
@@ -18,8 +18,7 @@ namespace Datagram {
         Ping = 5,
         Pong = 6
     };
-    extern std::map<type_t, const uint8_t> SizeMap;
-
+    extern std::map<type_t, size_t> SizeMap;
 }
 
 #endif // DATAGRAM_H_

@@ -40,10 +40,13 @@ export interface SettingsData {
     pass: string;
   };
 }
-// TODO
-interface DeviceRecord {
-  [key: string]: any;
+
+export interface DeviceRecord {
+  name?: string;
+  tPos: number;
+  pos: number;
 }
+
 // TODO
 interface PresetRecord {
   [key: string]: any;
