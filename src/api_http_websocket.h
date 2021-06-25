@@ -8,7 +8,7 @@
 const char delimiter = '/';
 
 struct WSMessage {
-    char* macAddress;
+    char macAddress[10];
     EventFlags flags;
     int32_t pos;
     int32_t targetPos;
@@ -46,33 +46,39 @@ static String packWSMessage(const StateEvent& event) {
 }
 
 static void unpackWSMessage(WSMessage& msg, char* message, size_t len) {
-    WLOG_I(TAG, "(char*)message: %s (%i)", (char*)message, len);
+    WLOG_I(TAG, "message: %s (len %i)", message, len);
     char d[24];
     for (int i = 0, j = 0, k = 0;i < len;i++) {
-        WLOG_I(TAG, "i: %i, j: %i, k: %i", i, j, k);
         if (message[i] == delimiter) {
-            d[j + 1] = 0;
+            d[j] = '\0';
             switch (k) {
-            case 0: // mac address
-                msg.macAddress = d;
+            case 0:
+                strcpy(msg.macAddress, d);
+                memset(d, 0, sizeof(d));
                 break;
-            case 1: // flags
+            case 1:
                 msg.flags.mask_ = atoi(d);
-                WLOG_I(TAG, "flags.mask %i", msg.flags.mask_);
-                WLOG_I(TAG, "flags.pos %i", msg.flags.pos_);
-                WLOG_I(TAG, "flags.targetPos %i", msg.flags.targetPos_);
-                WLOG_I(TAG, "flags.speed %i", msg.flags.speed_);
-                WLOG_I(TAG, "flags.accel %i", msg.flags.accel_);
                 break;
-            case 2: // pos, if exists
+            case 2:
                 msg.pos = atoi(d);
+                break;
+            case 3:
+                msg.targetPos = atoi(d);
+                break;
+            case 4:
+                msg.speed = atoi(d);
+                break;
+            case 5:
+                msg.accel = atoi(d);
                 break;
             }
             j = 0;
-            k++;
+            if (k < 1) k++;
+            else k = k | msg.flags.mask_;
             continue;
         }
         d[j] = message[i];
+        j++;
     }
 }
 
@@ -83,7 +89,22 @@ static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
         data[len] = 0;
         WSMessage msg;
         unpackWSMessage(msg, (char*)data, len);
-
+        if (msg.flags.mask_ == 0) return;
+        auto state = State::getInstance();
+        JsonObject obj;
+        if (msg.flags.pos_) {
+            obj["pos"] = msg.pos;
+        }
+        if (msg.flags.targetPos_) {
+            obj["tPos"] = msg.targetPos;
+        }
+        if (msg.flags.speed_) {
+            obj["speed"] = msg.speed;
+        }
+        if (msg.flags.accel_) {
+            obj["accel"] = msg.accel;
+        }
+        state->loadFromObject(nullptr, obj);
     }
 }
 
