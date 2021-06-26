@@ -1,8 +1,10 @@
 #card {
     position: fixed;
     top: 100%;
-	background: rgba(83, 83, 83, 0.47);
+	background: rgb(9 9 9 / 68%);
     text-align: left;
+    justify-content: center;
+    font-size: 12px;
 }
 
 #card.an {
@@ -11,4 +13,15 @@
 
 .in {
     text-align: left;
+}
+
+.ca-con {
+    width: 80%;
+    max-width: 300px;
+    padding-top: 50px;
+}
+
+/* uncss:ignore */
+.cR {
+    margin-bottom: 50px;
 }

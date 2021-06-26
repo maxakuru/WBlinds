@@ -21,13 +21,14 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
 }: SliderProps) {
   this.init = (elem: HTMLElement) => {
     elem.id = id;
-    querySelector("h4", elem).innerText = label;
+    // querySelector("h4", elem).innerText = label;
 
     const slider = querySelector<HTMLInputElement>("input", elem);
-    slider.onmousedown = stopPropagation;
-    slider.ontouchstart = stopPropagation;
+    slider.onmousedown = (slider.ontouchstart = stopPropagation) as any;
+    // slider.ontouchstart = stopPropagation;
+    // slider.ontouchmove = stopPropagation;
 
-    slider.oninput = () => {
+    slider.oninput = (e) => {
       const value =
         ((parseInt(slider.value) - parseInt(slider.min)) /
           (parseInt(slider.max) - parseInt(slider.min))) *

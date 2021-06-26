@@ -3,7 +3,7 @@ import { Slider } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, isNullish, removeClass } from "@Util";
-import { querySelector, setStyle } from "min";
+import { getElement, querySelector, setStyle } from "min";
 import { Input, InputType_Range } from "components/Input";
 
 export type OnChangeHandler = (data: any) => void;
@@ -31,35 +31,49 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
   let yStart = 0;
   let animated = false;
   let lastCoords: Coords = {} as Coords;
+  let _inputs: Input[] = [];
 
   this.init = (elem: HTMLElement) => {
+    const container = querySelector(".ca-con" as any, elem);
     toggleAnimations(true);
 
     const notify = (d: any) => {
       _onChangeHandlers.forEach((h) => h(d));
     };
 
-    const posRange = Input({
-      type: InputType_Range,
-      label: "Position",
-      value: 50,
-      embed: false,
-    });
-    const node: HTMLInputElement = posRange.node as HTMLInputElement;
-    const inp = querySelector("input", node);
-    removeClass(posRange.node, "fR");
-    posRange.onChange((tPos) => {
-      console.log("onchange: ", node);
-      setStyle(
-        inp,
-        "background",
-        `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${tPos}%, #606060 ${tPos}%, #606060 100%`
-      );
-      let pos, accel, speed;
-      notify({ pos, tPos, accel, speed });
-    });
-    // const slider = Slider({ id: "position", label: "Position", value: "50" });
-    appendChild(elem, posRange.node);
+    const makeRangeInput = (label: "Speed" | "Acceleration") => {
+      const range = Input({
+        type: InputType_Range,
+        label: label,
+        value: 50,
+        embed: false,
+      });
+      const node: HTMLInputElement = range.node as HTMLInputElement;
+      const inp = querySelector("input", node);
+      removeClass(range.node, "fR");
+      addClass(range.node, "cR");
+      range.onChange((val) => {
+        setStyle(
+          inp,
+          "background",
+          `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${val}%, #606060 ${val}%, #606060 100%`
+        );
+        let pos, accel, speed, tPos;
+        if (label === "Speed") {
+          speed = val;
+        } else {
+          accel = val;
+        }
+        notify({ pos, tPos, accel, speed });
+      });
+      appendChild(container, range.node);
+      _inputs.push(range);
+    };
+    makeRangeInput("Speed");
+    makeRangeInput("Acceleration");
+
+    const slider = Slider({ id: "position", label: "Position", value: "50" });
+    appendChild(container, slider.node);
 
     const onPress = (coords: Coords) => {
       lastCoords = coords;
@@ -104,6 +118,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
     const destroy = () => {
       _onChangeHandlers = [];
+      _inputs = [];
       elem.remove();
     };
 
