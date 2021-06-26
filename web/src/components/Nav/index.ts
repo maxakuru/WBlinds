@@ -12,8 +12,19 @@ interface NavAPI {
   destroy(): void;
 }
 
+interface NavLabel {
+  /**
+   * Title
+   */
+  t: string;
+  /**
+   * Icon
+   */
+  i: string;
+}
+
 interface NavProps {
-  labels: string[];
+  labels: NavLabel[];
 }
 
 const _Nav: ComponentFunction<NavAPI, NavProps> = function ({ labels }) {
@@ -33,10 +44,23 @@ const _Nav: ComponentFunction<NavAPI, NavProps> = function ({ labels }) {
 
     labels.map((label, i) => {
       const l = createElement("li");
+      addClass(l, "fC");
+
       if (i === _i) {
         addClass(l, "sel");
       }
-      l.innerText = label;
+
+      // Add icon
+      const ic = createElement("i");
+      ic.innerHTML = label.i;
+      appendChild(l, ic);
+
+      // Add label
+      const p = createElement("p");
+      addClass(p, "l");
+      p.innerText = label.t;
+      appendChild(l, p);
+
       _lis.push(l);
       appendChild(elem, l);
       l.onclick = () => setIndex(i);

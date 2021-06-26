@@ -8,6 +8,9 @@ export interface SliderAPI {
   destroy(): void;
 }
 
+export const OPEN_COLOR = "#1d95db";
+export const CLOSED_COLOR = "#606060";
+
 interface SliderProps {
   label: string;
   value: string;
@@ -36,7 +39,7 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
       setStyle(
         slider,
         "background",
-        `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${value}%, #606060 ${value}%, #606060 100%`
+        `linear-gradient(to right, ${CLOSED_COLOR} 0%, ${CLOSED_COLOR} ${value}%, ${OPEN_COLOR} ${value}%, ${OPEN_COLOR} 100%`
       );
     };
     slider.value = value;

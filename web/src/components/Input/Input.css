@@ -1,3 +1,7 @@
+:root {
+	--c: #1d95db;
+}
+
 /* uncss:ignore */
 .in {
   justify-content: space-between;
@@ -42,7 +46,7 @@
 
 /* uncss:ignore */
 .in-r {
-	background: linear-gradient(to right, #DB8B1D 0%, #DB8B1D 50%, #606060 50%, #606060 100%);
+	background: linear-gradient(to right, var(--c) 0%, var(--c) 50%, #606060 50%, #606060 100%);
 	border-radius: 8px;
 	height: 7px;
 	width: 75%;

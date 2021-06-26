@@ -25,9 +25,14 @@ import {
   PENDING_STATE,
 } from "@Const";
 import { WINDOW } from "min";
+import { home, cog, clock } from "./assets";
 
 // Bottom nav bar buttons
-const labels = ["Home", "Routines", "Settings"];
+const labels = [
+  { t: "Home", i: home },
+  { t: "Routines", i: clock },
+  { t: "Settings", i: cog },
+];
 
 export default (ns: WBlindsNamespace): void => {
   debug("onLoad(): ", ns);
@@ -53,7 +58,7 @@ export default (ns: WBlindsNamespace): void => {
   appendChild(getElement("nav"), nav.node);
   nav.onClick(handleTabChange);
   const handleRoute = (path: string): void => {
-    let i = labels.map((l) => l.toLowerCase()).indexOf(path.substr(1));
+    let i = labels.map((l) => l.t.toLowerCase()).indexOf(path.substr(1));
     if (i < 0) i = 0;
     nav.setIndex(i);
   };
@@ -61,7 +66,7 @@ export default (ns: WBlindsNamespace): void => {
 
   function handleTabChange(nextIndex: number) {
     if (currentIndex === nextIndex) return;
-    const newPath = `/${labels[nextIndex].toLowerCase()}`;
+    const newPath = `/${labels[nextIndex].t.toLowerCase()}`;
     currentIndex = nextIndex;
     currentTab?.destroy?.();
     currentTab?.node.remove();

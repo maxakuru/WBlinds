@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import compiler from "@ampproject/rollup-plugin-closure-compiler";
-import commonjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import replace from "@rollup/plugin-replace";
@@ -9,6 +8,7 @@ import pkg from "./package.json";
 import postcss from "rollup-plugin-postcss";
 import path from "path";
 import serve from "rollup-plugin-serve";
+import svg from "rollup-plugin-svg";
 
 const { parsed: env } = require("dotenv-flow").config();
 if (process.env.CI) {
@@ -51,7 +51,8 @@ plugins.push(
       collapseWhitespace: true,
     },
   }),
-  postcss({ minimize: !dev, config: true })
+  postcss({ minimize: !dev, config: true }),
+  svg()
 );
 
 if (!dev) {

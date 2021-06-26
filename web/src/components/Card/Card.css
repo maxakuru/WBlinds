@@ -1,13 +1,23 @@
 #card {
     position: fixed;
     top: 100%;
-	background: rgb(9 9 9 / 68%);
+	background: rgb(9 9 9 / 88%);
+    border-radius: 30px 30px 0 0;
     text-align: left;
     justify-content: center;
     font-size: 12px;
 }
 
-#card.an {
+/* uncss:ignore */
+#card::after {
+    content: "-";
+    transform: scale(20, 1) translate(0.5px);
+    position: fixed;
+    color: var(--cc);
+}
+
+/* uncss:ignore */
+#card.an, #card>*.an {
     transition: 0.2s top ease-in-out;
 }
 
@@ -24,4 +34,14 @@
 /* uncss:ignore */
 .cR {
     margin-bottom: 50px;
+}
+
+/* uncss:ignore */
+#card .act {
+    position: fixed;
+    right: 18px;
+    top: 100%;
+    font-size: 20px;
+    font-weight: 100;
+    transform: scaleX(1.3);
 }

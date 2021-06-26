@@ -4,20 +4,14 @@ html {
 
 body {
 	margin: 0;
-	background-color: #111;
-	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;;
-	font-size: 17px;
-	font-weight: 400;
+	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
 	color: #fff;
 	text-align: center;
 	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
 	user-select: none;
 	-webkit-tap-highlight-color: transparent;
 	scrollbar-width: 6px;
-	scrollbar-color: var(--c-sb) transparent;
+	scrollbar-color: transparent;
 }
 
 html, body {
@@ -28,11 +22,27 @@ html, body {
 }
 
 *:focus {
-    outline: none;
+	outline: none;
 }
 
 h1, h4 {
 	font-weight: 400;
+}
+
+/* uncss:ignore */
+.ic-w {
+	width: 22px;
+}
+
+/* uncss:ignore */
+.ic {
+	height: 16px;
+	width: 16px;
+}
+
+/* uncss:ignore */
+.ic-home {
+	background: url(home.svg);
 }
 
 h1 {
@@ -40,7 +50,8 @@ h1 {
 }
 
 h4 {
-	margin-block-end: 0.3em;
+	margin-block-end: 0.1em;
+	margin-block-start: 0.5em;
 	font-size: 14px;
 	padding-left: 5px;
 }
@@ -185,14 +196,14 @@ li.s {
 	background-size: cover;
 	opacity: 1;
 	transition: opacity 2s;
-    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),linear-gradient(40deg,#1d0143 0,#293b7c, #300a52);
+	background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);
 }
 
 #app {
 	display: flex;
 	flex-direction: column;
 	padding: 23px 23px 0 23px;
-	height: calc(100% - (63px + 23px));
+	height: calc(100% - (50px + 23px));
 	overflow-y: scroll;
 }
 

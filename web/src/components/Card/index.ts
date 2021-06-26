@@ -1,5 +1,5 @@
 import { ComponentFunction, Component } from "../Component";
-import { Slider } from "../Slider";
+import { Slider, CLOSED_COLOR, OPEN_COLOR } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, isNullish, removeClass } from "@Util";
@@ -22,6 +22,9 @@ interface Coords {
   y: number;
 }
 
+const MIN_TOP = 8;
+const ACT_Y_OFFSET = 8;
+
 const _Card: ComponentFunction<CardAPI, CardProps> = function ({
   temp,
 }: CardProps) {
@@ -35,6 +38,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
   this.init = (elem: HTMLElement) => {
     const container = querySelector(".ca-con" as any, elem);
+    const act = querySelector(".act" as any, elem);
     toggleAnimations(true);
 
     const notify = (d: any) => {
@@ -56,7 +60,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
         setStyle(
           inp,
           "background",
-          `linear-gradient(to right, #DB8B1D 0%, #DB8B1D ${val}%, #606060 ${val}%, #606060 100%`
+          `linear-gradient(to right, ${OPEN_COLOR} 0%, ${OPEN_COLOR} ${val}%, ${CLOSED_COLOR} ${val}%, ${CLOSED_COLOR} 100%`
         );
         let pos, accel, speed, tPos;
         if (label === "Speed") {
@@ -82,24 +86,31 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       toggleAnimations(false);
     };
 
+    const closeAndDestroy = () => {
+      toggleAnimations(true);
+      elem.ontransitionend = destroy;
+      const o = elem.clientHeight;
+      setStyle(elem, "top", `${o}px`);
+      setStyle(act, "top", `${o + ACT_Y_OFFSET}px`);
+    };
+
+    act.onclick = closeAndDestroy;
+
     const onRelease = () => {
       if (!draggingCard) return;
       draggingCard = false;
       toggleAnimations(true);
-      // TODO: decide if it should be discarded
-      let o = 0;
       if (yOffset > elem.clientHeight / 2) {
-        o = elem.clientHeight;
-        // TODO: use onDiscard from parent
-        elem.ontransitionend = destroy;
+        return closeAndDestroy();
       }
-      setStyle(elem, "top", `${o}px`);
-      yOffset = yStart = 0;
+      setStyle(elem, "top", `${MIN_TOP}px`);
+      setStyle(act, "top", `${MIN_TOP + ACT_Y_OFFSET}px`);
+      yOffset = yStart = MIN_TOP;
     };
 
     const onMove = (coords: Coords) => {
       if (!draggingCard) return;
-      if (coords.y - yStart < 0) {
+      if (coords.y - yStart < MIN_TOP) {
         lastCoords = coords;
         return;
       }
@@ -107,12 +118,15 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       yOffset += movedY;
       lastCoords = coords;
       setStyle(elem, "top", `${yOffset}px`);
+      setStyle(act, "top", `${yOffset + ACT_Y_OFFSET}px`);
     };
 
     function toggleAnimations(newState?: boolean) {
       if (isNullish(newState)) newState = false;
       if (newState === animated) return;
       newState ? addClass(elem, "an") : removeClass(elem, "an");
+      newState ? addClass(act, "an") : removeClass(act, "an");
+
       animated = newState;
     }
 
@@ -145,7 +159,8 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
         _onChangeHandlers.push(h);
       },
       show: () => {
-        setStyle(elem, "top", "0px");
+        setStyle(elem, "top", `${MIN_TOP}px`);
+        setStyle(act, "top", `${MIN_TOP + ACT_Y_OFFSET}px`);
       },
     };
   };

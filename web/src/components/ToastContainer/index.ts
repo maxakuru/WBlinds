@@ -36,7 +36,7 @@ const _ToastContainer: ComponentFunction<
       timeout?: number
     ) => {
       const setBottomStyle = () => {
-        setStyle(t.node, "bottom", `-${63 + 200 * (_toasts.length + 1)}px`);
+        setStyle(t.node, "bottom", `-${50 + 200 * (_toasts.length + 1)}px`);
       };
 
       const remove = () => {
