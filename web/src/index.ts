@@ -44,11 +44,10 @@ export default (ns: WBlindsNamespace): void => {
   ns.state = State;
 
   // Toasts
-  const tc = ToastContainer({});
+  const tc = ToastContainer();
   appendChild(body, tc.node);
   WINDOW.onerror = handleError;
   WINDOW.onpopstate = (e: PopStateEvent) => {
-    // e.state
     handleRoute(pathname());
     emitQueryChange();
   };

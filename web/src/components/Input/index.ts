@@ -83,7 +83,6 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   const _valid = true;
   let _currentValue = value;
   const _firstValue = value;
-  let _id: string;
   let _input: HTMLInputElement | HTMLSelectElement;
   let _onChangeHandlers: ChangeHandler[] = [];
 
@@ -144,7 +143,7 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
     // set initial value
     if (value != null) _input.value = value;
 
-    _id = _input.id = l.htmlFor = `in-${label.split(" ").join("-")}`;
+    _input.id = l.htmlFor = `in-${label.split(" ").join("-")}`;
     const _showError = (err: string) => {
       // TODO:
     };

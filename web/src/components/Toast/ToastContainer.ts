@@ -5,7 +5,6 @@ import "./ToastContainer.css";
 import { appendChild } from "@Util";
 import { setStyle } from "min";
 
-type ClickHandler = (data: ToastContainerProps) => unknown;
 export interface ToastContainerAPI {
   pushToast: (
     message: string,
@@ -16,15 +15,7 @@ export interface ToastContainerAPI {
   destroy(): void;
 }
 
-interface ToastContainerProps {
-  name?: string;
-  id?: string;
-}
-
-const _ToastContainer: ComponentFunction<
-  ToastContainerAPI,
-  ToastContainerProps
-> = function ({ name, id }: ToastContainerProps) {
+const _ToastContainer: ComponentFunction<ToastContainerAPI> = function () {
   let _index = 0;
   let _toasts: Toast[] = [];
 

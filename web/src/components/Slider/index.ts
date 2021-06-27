@@ -36,8 +36,7 @@ interface SliderProps {
 
 const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
   value,
-}: // id,
-SliderProps) {
+}: SliderProps) {
   let _onChangeHandlers: OnChangeHandler[] = [];
   this.init = (elem: HTMLElement) => {
     const slider = querySelector<HTMLInputElement>("input", elem);

@@ -35,8 +35,8 @@ const INPUT_ACCEL = 1;
 type INPUT = typeof INPUT_SPEED | typeof INPUT_ACCEL;
 const INPUT_LABEL_MAP = ["Speed", "Acceleration"];
 const INPUT_LIMIT_MAP = [
-  [1, 1000],
-  [1, 4294967295],
+  [1, 5000],
+  [1, 4294967294],
 ];
 
 const _Card: ComponentFunction<CardAPI, CardProps> = function ({
@@ -95,9 +95,8 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
           notify({ speed: val });
         } else if (input === INPUT_ACCEL) {
           // accel = val;
-          notify({ accel: val, pos: 90 });
+          notify({ accel: val });
         }
-        console.log("val: ", val);
       };
       range.onChange(_handleChange);
 
@@ -110,7 +109,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
     const slider = Slider({ value: pos });
     slider.onChange((tPos) => {
-      notify({ tPos, speed: 1337 });
+      notify({ tPos });
     });
 
     appendChild(container, slider.node);
