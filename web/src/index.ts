@@ -148,9 +148,10 @@ export default (ns: WBlindsNamespace): void => {
     State.update(PENDING_STATE, State._state.settings);
   }
 
-  function handleDeviceClick(device: any) {
+  function handleDeviceClick(data: any) {
     // Show device card
-    const card = Card({});
+    console.log("handle device click: ", data);
+    const card = Card(data);
     appendChild(body, card.node);
     card.onChange((e) => {
       wsc.push(WSEventType.UpdateState, e);

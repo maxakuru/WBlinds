@@ -98,7 +98,13 @@ const _queryChangeHandlers: QueryChangeHandler[] = [];
 export const onQueryChange = (h: QueryChangeHandler): (() => void) => {
   const ind = _queryChangeHandlers.push(h);
   return () => {
-    delete _queryChangeHandlers[ind];
+    console.log(
+      "delete: ",
+      _queryChangeHandlers,
+      ind,
+      _queryChangeHandlers[ind - 1]
+    );
+    delete _queryChangeHandlers[ind - 1];
   };
 };
 

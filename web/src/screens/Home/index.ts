@@ -10,11 +10,11 @@ import {
 } from "@Util";
 import { ComponentFunction, Component, Tile } from "@Components";
 import template from "./Home.html";
-import { DeviceRecord, State } from "@State";
+import { DeviceRecord, SettingsData, State, StateData } from "@State";
 import "./Home.css";
 import { DEVICES, PRESETS, STATE } from "@Const";
 
-type DeviceClickHandler = (device: any) => void;
+type DeviceClickHandler = (index: number) => void;
 export interface HomeAPI {
   onDeviceClick: (handler: DeviceClickHandler) => void;
   destroy(): void;
@@ -79,7 +79,10 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       const { container, tiles } = getAllTiles(type);
       tiles.forEach((tile) => {
         const { id } = tile;
-        if (id !== "tile-c" && !(id in o)) {
+        if (
+          !id.endsWith(State.get("settings.gen.deviceName") as string) &&
+          !(id in o)
+        ) {
           // Existing, but doesn't exist in devices
           tile.remove();
         } else {
@@ -117,7 +120,16 @@ const _Home: ComponentFunction<HomeAPI> = function () {
 
         // TODO: add mac address, etc. to window before sending from ESP
         // for now just use 'c' to identify the current device
-        updateTiles(DEVICE_TILE, { c: { ...value } });
+        const gen = State.get("settings.gen") as SettingsData["gen"];
+        const state = State.get("state") as StateData["state"];
+        console.log("set tile: ", gen.deviceName, {
+          ...gen,
+          ...value,
+          ...state,
+        });
+        updateTiles(DEVICE_TILE, {
+          [gen.deviceName]: { ...gen, ...value, ...state },
+        });
       });
 
       State.observe(DEVICES, ({ value, prev }) => {

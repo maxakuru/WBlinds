@@ -5,6 +5,7 @@ import {
   addClass,
   appendChild,
   createElement,
+  isNullish,
   querySelector,
   toggleClass,
 } from "@Util";
@@ -76,6 +77,8 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   unit,
   embed = true,
   prevDefault = false,
+  min,
+  max,
 }: InputProps) {
   const _valid = true;
   let _currentValue = value;
@@ -114,6 +117,8 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
       _input = createElement("input");
       _input.type = InputTypeMap[type];
       _input.placeholder = placeholder || "xxxxx";
+      if (!isNullish(min)) _input.min = `${min}`;
+      if (!isNullish(max)) _input.max = `${max}`;
 
       if (type === InputType_Range) {
         addClass(_input, "in-r");
@@ -130,7 +135,7 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
         };
       } else {
         // text/number inputs
-        _input.oninput = (e) => {
+        _input.onchange = (e) => {
           if (prevDefault) e.preventDefault();
           _onChange(_input.value);
         };

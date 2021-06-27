@@ -3,50 +3,70 @@ import template from "./Slider.html";
 import "./Slider.css";
 import { querySelector, stopPropagation } from "@Util";
 import { setStyle } from "min";
-
-export interface SliderAPI {
-  destroy(): void;
-}
+import { OnChangeHandler } from "components/Card";
 
 export const OPEN_COLOR = "#1d95db";
 export const CLOSED_COLOR = "#606060";
 
+export const setGradientStyle = (
+  input: HTMLElement,
+  val: number,
+  min: number,
+  max: number,
+  activeColor: string,
+  inactiveColor: string
+): void => {
+  const pVal = ((val - min) / (max - min)) * 100;
+  setStyle(
+    input,
+    "background",
+    `linear-gradient(to right, ${activeColor} 0%, ${activeColor} ${pVal}%, ${inactiveColor} ${pVal}%, ${inactiveColor} 100%`
+  );
+};
+
+type ChangeHandler = (newVal: any) => unknown;
+export interface SliderAPI {
+  onChange: (handler: ChangeHandler) => void;
+  destroy(): void;
+}
+
 interface SliderProps {
-  label: string;
-  value: string;
-  id: string;
+  value: number;
 }
 
 const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
-  label,
   value,
-  id,
-}: SliderProps) {
+}: // id,
+SliderProps) {
+  let _onChangeHandlers: OnChangeHandler[] = [];
   this.init = (elem: HTMLElement) => {
-    elem.id = id;
-    // querySelector("h4", elem).innerText = label;
-
     const slider = querySelector<HTMLInputElement>("input", elem);
     slider.onmousedown = (slider.ontouchstart = stopPropagation) as any;
-    // slider.ontouchstart = stopPropagation;
-    // slider.ontouchmove = stopPropagation;
 
-    slider.oninput = (e) => {
-      const value =
-        ((parseInt(slider.value) - parseInt(slider.min)) /
-          (parseInt(slider.max) - parseInt(slider.min))) *
-        100;
-      setStyle(
-        slider,
-        "background",
-        `linear-gradient(to right, ${CLOSED_COLOR} 0%, ${CLOSED_COLOR} ${value}%, ${OPEN_COLOR} ${value}%, ${OPEN_COLOR} 100%`
-      );
+    const parse = parseInt;
+    const min = parse(slider.min);
+    const max = parse(slider.max);
+
+    slider.oninput = () => {
+      const val = parse(slider.value);
+      setGradientStyle(slider, val, min, max, CLOSED_COLOR, OPEN_COLOR);
+      // _onChangeHandlers.forEach((h) => h(val));
     };
-    slider.value = value;
+    slider.onchange = () => {
+      const val = parse(slider.value);
+      _onChangeHandlers.forEach((h) => h(val));
+    };
+    slider.value = `${value}`;
+    // initial gradient
+    setGradientStyle(slider, value, min, max, CLOSED_COLOR, OPEN_COLOR);
 
     return {
       destroy: () => {
+        _onChangeHandlers = [];
         // todo
+      },
+      onChange: (h) => {
+        _onChangeHandlers.push(h);
       },
     };
   };

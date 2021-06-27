@@ -3,6 +3,7 @@ import template from "./Nav.html";
 import "./Nav.css";
 import { addClass, removeClass } from "@Util";
 import { appendChild, createDiv, createElement } from "min";
+import { SVGDef } from "assets/type";
 
 type ClickHandler = (index: number) => unknown;
 interface NavAPI {
@@ -20,7 +21,7 @@ interface NavLabel {
   /**
    * Icon
    */
-  i: string;
+  i: HTMLOrSVGImageElement;
 }
 
 interface NavProps {
@@ -52,7 +53,8 @@ const _Nav: ComponentFunction<NavAPI, NavProps> = function ({ labels }) {
 
       // Add icon
       const ic = createElement("i");
-      ic.innerHTML = label.i;
+      appendChild(ic, label.i as HTMLElement);
+      // ic.innerHTML = label.i;
       appendChild(l, ic);
 
       // Add label

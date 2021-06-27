@@ -6,8 +6,11 @@
 
 // Errors
 const char* errPrefix = "{\"error\":\"";
-const char* errSuffix = "\"}";
+const char* valPrefix = "{\"val\":\"";
+const char* jsonSuffix = "\"}";
 char errStr[50] = "";
+char valStr[50] = "";
+
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -20,6 +23,7 @@ BlindsHTTPAPI::~BlindsHTTPAPI() {
    State::getInstance()->Detach(this);
    ws.cleanupClients();
 };
+
 
 bool isIp(String str) {
    for (size_t i = 0; i < str.length(); i++) {
@@ -73,8 +77,15 @@ void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
 static char* errorJson(const char* msg) {
    strcpy(errStr, errPrefix);
    strcat(errStr, msg);
-   strcat(errStr, errSuffix);
+   strcat(errStr, jsonSuffix);
    return errStr;
+};
+
+static char* valJson(char* msg) {
+   strcpy(valStr, valPrefix);
+   strcat(valStr, msg);
+   strcat(valStr, jsonSuffix);
+   return valStr;
 };
 
 static String getContentType(AsyncWebServerRequest* request, String filename) {
@@ -281,6 +292,9 @@ void BlindsHTTPAPI::init() {
    DefaultHeaders::Instance().addHeader("Access-Control-Expose-Headers", "*");
    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
 
+   /**
+    * /api endpoints
+    */
    server.on("/api/state", HTTP_GET, getState);
    server.on("/api/devices", HTTP_GET, getDevices);
    server.on("/api/routines", HTTP_GET, getRoutines);
@@ -289,6 +303,22 @@ void BlindsHTTPAPI::init() {
       [](AsyncWebServerRequest* request) {
          DO_RESTORE();
          return request->send(202);
+      }
+   );
+
+   server.on("/api/restore", HTTP_POST,
+      [](AsyncWebServerRequest* request) {
+         DO_RESTORE();
+         return request->send(202);
+      }
+   );
+
+   /**
+    * Utility endpoints
+    */
+   server.on("/api/freeheap", HTTP_GET,
+      [](AsyncWebServerRequest* request) {
+         request->send(200, "text/plain", valJson((char*)ESP.getFreeHeap()));
       }
    );
 
@@ -303,6 +333,9 @@ void BlindsHTTPAPI::init() {
    settingsHandler->setMethod(HTTP_PUT);
    server.addHandler(settingsHandler);
 
+   /**
+    * Index serving endpoints (routes)
+    */
    auto handler = [](AsyncWebServerRequest* request) {
       WLOG_D(TAG, "handle /, /settings, /routines: %s", request->url());
       if (captivePortal(request)) return;

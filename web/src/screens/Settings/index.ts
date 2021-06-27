@@ -367,6 +367,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     return {
       destroy: () => {
         // removeQh();
+        selector.destroy();
         _inputs.forEach((t) => t.destroy());
         _inputs = [];
         _saveHandlers = [];

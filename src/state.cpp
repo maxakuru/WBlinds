@@ -144,6 +144,17 @@ void State::load_() {
         }
     }
 
+    File devicesFile = LITTLEFS.open("/devices.json", "r");
+    if (!configFile)  {
+        // create devices.json
+        DynamicJsonDocument toSave(512);
+        devicesFile = LITTLEFS.open("/devices.json", "w");
+        auto thisObj = toSave.createNestedObject(macAddress);
+        thisObj["name"] = getDeviceName();
+        serializeJson(toSave, devicesFile);
+    }
+    devicesFile.close();
+
     File stateFile = LITTLEFS.open("/state.json", "r");
     if (!stateFile) {
         return save();
@@ -155,6 +166,7 @@ void State::load_() {
     }
 
     DeserializationError stateError = deserializeJson(doc, stateFile.readString());
+    stateFile.close();
     if (stateError) {
         // TODO: fix broken save state
     }
@@ -165,6 +177,7 @@ void State::load_() {
     }
 
     DeserializationError settingsError = deserializeJson(doc, settingsFile.readString());
+    settingsFile.close();
     if (settingsError) {
         // TODO: fix broken save state
     }

@@ -99,33 +99,40 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
 
   connect();
 
+  /**
+   * Order matters for events, this is the expected data.
+   * If undefined, it becomes a 0 in the event flags mask.
+   * @param data
+   * @returns
+   */
+  const sortData = <T extends WSUpdateStateEvent>(data: T): number[] => {
+    return [data.pos, data.tPos, data.speed, data.accel];
+  };
+
   const push = (ev: WSEventType, data: WSUpdateStateEvent) => {
     debug("[ws] push(): ", ev, data);
     if (_enabled) {
-      const s = packMessage(ev, data);
+      const s = packMessage(ev, sortData(data));
       debug("[ws] push() str: ", s);
       ws.send(s);
     }
   };
 
-  function packMessage(ev: WSEventType, data: WSUpdateStateEvent): string {
+  function packMessage(ev: WSEventType, data: number[]): string {
     // TODO: mac
-    let f = 0b000;
+    const f: (0 | 1)[] = [];
     let s = "";
-    let i = 0;
     for (const k in data) {
-      const d = data[k as keyof WSUpdateStateEvent];
+      const d = data[k];
       if (d != null) {
-        console.log("f: ", f);
-        console.log("1<<i: ", 1 << i);
-        console.log("f&1<<i: ", f & (1 << i));
-
         s += `${d}/`;
-        f = f | (1 << i);
+        f.push(1);
+      } else {
+        f.push(0);
       }
-      i++;
     }
-    return `mac/${f}/${s}`;
+    debug("[packMessage] f: ", f);
+    return `mac/${parseInt(f.join(""), 2)}/${s}`;
   }
 
   function unpackMessages(data: string): WSIncomingEvent[] {

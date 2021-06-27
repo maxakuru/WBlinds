@@ -17,13 +17,14 @@ interface TileProps {
 const _Tile: ComponentFunction<TileAPI, TileProps> = function ({
   name,
   id,
+  ...data
 }: TileProps) {
   let _clickHandlers: ClickHandler[] = [];
 
   this.init = (elem: HTMLElement) => {
     elem.id = id;
-    elem.onclick = (e) => {
-      _clickHandlers.forEach((h) => h({ id, name }));
+    elem.onclick = () => {
+      _clickHandlers.forEach((h) => h({ id, name, ...data }));
     };
     querySelector("p", elem).innerText = name;
     return {

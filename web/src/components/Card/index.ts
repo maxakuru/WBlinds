@@ -1,5 +1,5 @@
 import { ComponentFunction, Component } from "../Component";
-import { Slider, CLOSED_COLOR, OPEN_COLOR } from "../Slider";
+import { Slider, CLOSED_COLOR, OPEN_COLOR, setGradientStyle } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
 import { addClass, appendChild, isNullish, removeClass } from "@Util";
@@ -14,7 +14,12 @@ export interface CardAPI {
 }
 
 interface CardProps {
-  temp?: any;
+  tPos?: number;
+  pos?: number;
+  accel?: number;
+  speed?: number;
+  ip?: string;
+  name: string;
 }
 
 interface Coords {
@@ -25,8 +30,22 @@ interface Coords {
 const MIN_TOP = 8;
 const ACT_Y_OFFSET = 8;
 
+const INPUT_SPEED = 0;
+const INPUT_ACCEL = 1;
+type INPUT = typeof INPUT_SPEED | typeof INPUT_ACCEL;
+const INPUT_LABEL_MAP = ["Speed", "Acceleration"];
+const INPUT_LIMIT_MAP = [
+  [1, 1000],
+  [1, 4294967295],
+];
+
 const _Card: ComponentFunction<CardAPI, CardProps> = function ({
-  temp,
+  tPos,
+  pos,
+  accel,
+  speed,
+  ip,
+  name,
 }: CardProps) {
   let _onChangeHandlers: OnChangeHandler[] = [];
   let draggingCard = false;
@@ -41,42 +60,59 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     const act = querySelector(".act" as any, elem);
     toggleAnimations(true);
 
+    console.log("card data: ", tPos, pos, accel, speed, ip, name);
+
     const notify = (d: any) => {
       _onChangeHandlers.forEach((h) => h(d));
     };
 
-    const makeRangeInput = (label: "Speed" | "Acceleration") => {
+    const makeRangeInput = (input: INPUT) => {
+      const value = input === INPUT_SPEED ? speed : accel;
       const range = Input({
         type: InputType_Range,
-        label: label,
-        value: 50,
+        label: INPUT_LABEL_MAP[input],
+        value,
         embed: false,
+        min: INPUT_LIMIT_MAP[input][0],
+        max: INPUT_LIMIT_MAP[input][1],
       });
       const node: HTMLInputElement = range.node as HTMLInputElement;
-      const inp = querySelector("input", node);
+      const inp = querySelector<HTMLInputElement>("input", node);
       removeClass(range.node, "fR");
       addClass(range.node, "cR");
-      range.onChange((val) => {
-        setStyle(
-          inp,
-          "background",
-          `linear-gradient(to right, ${OPEN_COLOR} 0%, ${OPEN_COLOR} ${val}%, ${CLOSED_COLOR} ${val}%, ${CLOSED_COLOR} 100%`
-        );
-        let pos, accel, speed, tPos;
-        if (label === "Speed") {
-          speed = val;
-        } else {
-          accel = val;
+      const parse = parseInt;
+      const min = parse(inp.min);
+      const max = parse(inp.max);
+
+      inp.oninput = () => {
+        const val = parse(inp.value);
+        setGradientStyle(inp, val, min, max, OPEN_COLOR, CLOSED_COLOR);
+      };
+
+      const _handleChange = (val: number) => {
+        // let accel, speed;
+        if (input === INPUT_SPEED) {
+          notify({ speed: val });
+        } else if (input === INPUT_ACCEL) {
+          // accel = val;
+          notify({ accel: val, pos: 90 });
         }
-        notify({ pos, tPos, accel, speed });
-      });
+        console.log("val: ", val);
+      };
+      range.onChange(_handleChange);
+
       appendChild(container, range.node);
+      setGradientStyle(inp, value, min, max, OPEN_COLOR, CLOSED_COLOR);
       _inputs.push(range);
     };
-    makeRangeInput("Speed");
-    makeRangeInput("Acceleration");
+    makeRangeInput(INPUT_SPEED);
+    makeRangeInput(INPUT_ACCEL);
 
-    const slider = Slider({ id: "position", label: "Position", value: "50" });
+    const slider = Slider({ value: pos });
+    slider.onChange((tPos) => {
+      notify({ tPos, speed: 1337 });
+    });
+
     appendChild(container, slider.node);
 
     const onPress = (coords: Coords) => {
@@ -132,6 +168,8 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
     const destroy = () => {
       _onChangeHandlers = [];
+      slider.destroy();
+      _inputs.forEach((inp) => inp.destroy());
       _inputs = [];
       elem.remove();
     };
