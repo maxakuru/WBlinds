@@ -32,6 +32,12 @@ export const createDiv: <T = HTMLElement>() => T = DOCUMENT.createElement.bind(
 export const getElement: (id: string) => HTMLElement =
   DOCUMENT.getElementById.bind(DOCUMENT);
 
+export const getElementsByTagName = <K extends keyof HTMLElementTagNameMap>(
+  tags: K,
+  elem: HTMLElement | Document = DOCUMENT
+): HTMLCollectionOf<HTMLElementTagNameMap[K]> =>
+  elem.getElementsByTagName.call(elem, tags);
+
 export const querySelector = <T = HTMLElement>(
   selectors: keyof HTMLElementTagNameMap,
   elem: HTMLElement | Document = DOCUMENT

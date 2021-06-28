@@ -1,0 +1,27 @@
+.calib-btn {
+    margin-top: 40px;
+}
+
+#calib-c, #calib-x {
+    position: fixed;
+    left: 100%;
+    transition: 0.4s left ease-in-out;
+    top: 0;
+}
+
+#calib-c {
+    background: linear-gradient( 76deg, #230435, #913e4f);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* uncss:ignore */
+#calib-c>div {
+    width: 100vw;
+    height: 100vh;
+}
+
+#calib-x {
+    margin: 20px;
+}

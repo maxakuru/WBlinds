@@ -126,6 +126,16 @@ export const emitQueryChange = (): void => {
   _callQueryHandlers();
 };
 
+const qpToRecord = (str: string): Record<string, string> => {
+  if (str.startsWith("?")) str = str.substr(1);
+  const spl = str.split("&").filter((e) => !!e);
+  return spl.reduce((prev, curr) => {
+    const kv = curr.split("=");
+    prev[kv[0]] = kv[1];
+    return prev;
+  }, {} as Record<string, string>);
+};
+
 export const pushToHistory = (
   path?: string,
   qps?: Record<string, string>,
@@ -136,9 +146,11 @@ export const pushToHistory = (
   const cPath = pathname();
   const cSearch = query();
   const params = new URLSearchParams(resetQps ? "" : cSearch);
+
   for (const k in qps) {
     params.set(k, qps[k]);
   }
+
   let qpStr = params.toString();
   if (qpStr.length > 0) qpStr = "?" + qpStr;
 

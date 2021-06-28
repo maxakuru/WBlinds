@@ -5,7 +5,7 @@
 #include "state.h"
 #include <ESPAsyncWebServer.h>
 
-#define DELIMITER = '/';
+#define DELIMITER '/'
 
 struct WSMessage {
     char macAddress[10];
@@ -15,8 +15,6 @@ struct WSMessage {
     uint32_t speed;
     uint32_t accel;
 };
-
-#define WS_EVENT_CASE(x) (int)pow(2, x-1)
 
 static String packWSMessage(const StateEvent& event) {
     auto state = State::getInstance();
@@ -69,21 +67,20 @@ static void unpackWSMessage(WSMessage& msg, char* message, size_t len) {
                     continue;
                 }
             }
-
             int lastSetBit = k ^ (k & (k - 1));
             switch (lastSetBit) {
             case 0:
                 break;
-            case WS_EVENT_CASE(1):
+            case 1:
                 msg.pos = atoi(d);
                 break;
-            case WS_EVENT_CASE(2):
+            case 2:
                 msg.targetPos = atoi(d);
                 break;
-            case WS_EVENT_CASE(3):
+            case 4:
                 msg.speed = atoi(d);
                 break;
-            case WS_EVENT_CASE(4):
+            case 8:
                 msg.accel = atoi(d);
                 break;
             }
@@ -95,11 +92,10 @@ static void unpackWSMessage(WSMessage& msg, char* message, size_t len) {
     }
 }
 
-
 static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     AwsFrameInfo* info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-        data[len] = 0;
+        data[len] = '\0';
         WSMessage msg;
         unpackWSMessage(msg, (char*)data, len);
         if (msg.flags.mask_ == 0) return;
@@ -111,17 +107,14 @@ static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
         }
         if (msg.flags.targetPos_) {
             WLOG_D(TAG, "NEW TPOS: %i", msg.targetPos);
-
             obj["tPos"] = msg.targetPos;
         }
         if (msg.flags.speed_) {
             WLOG_D(TAG, "NEW SPEED: %i", msg.speed);
-
             obj["speed"] = msg.speed;
         }
         if (msg.flags.accel_) {
             WLOG_D(TAG, "NEW ACCEL: %i", msg.accel);
-
             obj["accel"] = msg.accel;
         }
         state->loadFromObject(nullptr, obj);

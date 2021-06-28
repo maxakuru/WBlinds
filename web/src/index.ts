@@ -97,7 +97,7 @@ export default (ns: WBlindsNamespace): void => {
       // Settings
       case 2: {
         const t = Settings();
-        pushToHistory(newPath);
+        pushToHistory(newPath, undefined, false);
 
         t.onSave(saveSettings);
         t.onCancel(cancelSettings);

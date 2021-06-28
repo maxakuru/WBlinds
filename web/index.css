@@ -2,9 +2,12 @@ html {
 	touch-action: manipulation;
 }
 
+html > * {
+	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
+}
+
 body {
 	margin: 0;
-	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
 	color: #fff;
 	text-align: center;
 	-webkit-touch-callout: none;
@@ -222,4 +225,38 @@ li.s {
 	opacity: 0.95;
 	transition: 0.7s;
 	pointer-events: none;
+}
+
+/* uncss:ignore */
+.btn-s {
+    background: #007AFF;
+}
+
+/* uncss:ignore */
+.btn-c {
+    background: tomato;
+}
+
+/* uncss:ignore */
+button {
+	box-shadow: 0px 8px 15px rgb(0 0 0 / 10%);
+    border-radius: 25px;
+    width: 120px;
+    height: 41px;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    appearance: none;
+	margin: 20px auto;
+    border: none;
+    font-size: 11px;
+    background: #ad6b11;
+    font: unset;
+	color: #FFF;
+}
+
+/* uncss:ignore */
+button:disabled {
+	opacity: 50%;
 }

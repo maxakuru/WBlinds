@@ -183,7 +183,6 @@ static void getState(AsyncWebServerRequest* request) {
 static void getDevices(AsyncWebServerRequest* request) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
    if (handleFileRead(request, "/devices.json")) return;
-   // TODO: builds devices.json on UDP notifications
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, "{}");
    request->send(response);
 }
@@ -197,7 +196,6 @@ static void getRoutines(AsyncWebServerRequest* request) {
 
 static void updateState(AsyncWebServerRequest* request, JsonVariant& json) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
-
    JsonObject obj = json.as<JsonObject>();
    auto errCode = State::getInstance()->loadFromObject(nullptr, obj);
    if (errCode == stdBlinds::error_code_t::NoError) {

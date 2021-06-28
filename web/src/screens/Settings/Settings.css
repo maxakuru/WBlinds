@@ -26,25 +26,7 @@
 /* uncss:ignore */
 #slc-act {
     position: fixed;
-    bottom: 75px;
+    bottom: 55px;
     justify-content: space-evenly;
     left: 0%;
-}
-
-#slc-act>* {
-    border-radius: 25px;
-    width: 120px;
-    height: 41px;
-    text-align: center;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-#s-save {
-    background: #007AFF;
-}
-
-#s-can {
-    background: tomato;
 }

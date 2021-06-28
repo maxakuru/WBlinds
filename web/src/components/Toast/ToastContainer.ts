@@ -1,5 +1,5 @@
 import { ComponentFunction, Component } from "../Component";
-import { Toast } from "../Toast";
+import { Toast } from "./Toast";
 import template from "./ToastContainer.html";
 import "./ToastContainer.css";
 import { appendChild } from "@Util";

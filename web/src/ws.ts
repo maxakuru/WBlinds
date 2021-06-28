@@ -132,7 +132,7 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
       }
     }
     debug("[packMessage] f: ", f);
-    return `mac/${parseInt(f.join(""), 2)}/${s}`;
+    return `mac/${parseInt(f.reverse().join(""), 2)}/${s}`;
   }
 
   function unpackMessages(data: string): WSIncomingEvent[] {
