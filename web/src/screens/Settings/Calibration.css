@@ -10,16 +10,21 @@
 }
 
 #calib-c {
-    background: linear-gradient( 76deg, #230435, #913e4f);
+    background: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true), #000;
+    background-position: center;
+    background-size: cover;
     overflow: hidden;
-    width: 100vw;
-    height: 100vh;
 }
 
 /* uncss:ignore */
 #calib-c>div {
     width: 100vw;
     height: 100vh;
+}
+
+/* uncss:ignore */
+#calib-c>div>h2 {
+    margin: 80px 40px;
 }
 
 #calib-x {

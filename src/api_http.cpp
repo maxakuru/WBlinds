@@ -289,11 +289,11 @@ void BlindsHTTPAPI::init() {
    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
    DefaultHeaders::Instance().addHeader("Access-Control-Expose-Headers", "*");
    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
+   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
 
    /**
     * /api endpoints
     */
-   server.on("/api/state", HTTP_GET, getState);
    server.on("/api/devices", HTTP_GET, getDevices);
    server.on("/api/routines", HTTP_GET, getRoutines);
 
@@ -320,6 +320,7 @@ void BlindsHTTPAPI::init() {
       }
    );
 
+   server.on("/api/state", HTTP_GET, getState);
    AsyncCallbackJsonWebHandler* stateHandler = new AsyncCallbackJsonWebHandler("/api/state", updateState);
    stateHandler->setMethod(HTTP_PUT);
    server.addHandler(stateHandler);
@@ -327,6 +328,12 @@ void BlindsHTTPAPI::init() {
 
    // TODO: change this to use AsyncJsonResponse
    server.on("/api/settings", HTTP_GET, getSettings);
+   server.on("/api/settings", HTTP_OPTIONS,
+      [](AsyncWebServerRequest* request) {
+         request->send(200);
+      }
+   );
+
    AsyncCallbackJsonWebHandler* settingsHandler = new AsyncCallbackJsonWebHandler("/api/settings", updateSettings);
    settingsHandler->setMethod(HTTP_PUT);
    server.addHandler(settingsHandler);

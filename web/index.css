@@ -1,8 +1,12 @@
+:root {
+	--bg-img: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true)
+}
+
 html {
 	touch-action: manipulation;
 }
 
-html > * {
+html>* {
 	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
 }
 
@@ -33,17 +37,20 @@ h1, h4 {
 }
 
 /* uncss:ignore */
+
 .ic-w {
 	width: 22px;
 }
 
 /* uncss:ignore */
+
 .ic {
 	height: 16px;
 	width: 16px;
 }
 
 /* uncss:ignore */
+
 .ic-home {
 	background: url(home.svg);
 }
@@ -60,11 +67,13 @@ h4 {
 }
 
 /* uncss:ignore */
+
 .hide {
 	display: none !important;
 }
 
 /* uncss:ignore */
+
 .loader, .loader:before, .loader:after {
 	border-radius: 50%;
 	width: 2.5em;
@@ -76,6 +85,7 @@ h4 {
 }
 
 /* uncss:ignore */
+
 .loader {
 	margin: auto;
 	color: #ffffff;
@@ -90,6 +100,7 @@ h4 {
 }
 
 /* uncss:ignore */
+
 .loader:before, .loader:after {
 	content: '';
 	position: absolute;
@@ -97,6 +108,7 @@ h4 {
 }
 
 /* uncss:ignore */
+
 .loader:before {
 	left: -3.5em;
 	-webkit-animation-delay: -0.32s;
@@ -104,11 +116,13 @@ h4 {
 }
 
 /* uncss:ignore */
+
 .loader:after {
 	left: 3.5em;
 }
 
 /* uncss:ignore */
+
 @-webkit-keyframes load7 {
 	0%, 80%, 100% {
 		box-shadow: 0 2.5em 0 -1.3em;
@@ -119,6 +133,7 @@ h4 {
 }
 
 /* uncss:ignore */
+
 @keyframes load7 {
 	0%, 80%, 100% {
 		box-shadow: 0 2.5em 0 -1.3em;
@@ -129,11 +144,13 @@ h4 {
 }
 
 /* uncss:ignore */
+
 .em {
 	opacity: 0;
 }
 
 /* uncss:ignore */
+
 ul {
 	display: flex;
 	list-style-type: none;
@@ -143,6 +160,7 @@ ul {
 }
 
 /* uncss:ignore */
+
 li {
 	display: list-item;
 	text-align: -webkit-match-parent;
@@ -150,6 +168,7 @@ li {
 }
 
 /* uncss:ignore */
+
 li.s {
 	color: #DB8B1D;
 }
@@ -199,7 +218,7 @@ li.s {
 	background-size: cover;
 	opacity: 1;
 	transition: opacity 2s;
-	background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);
+	background-image: var(--bg-img), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);
 }
 
 #app {
@@ -227,33 +246,55 @@ li.s {
 	pointer-events: none;
 }
 
-/* uncss:ignore */
-.btn-s {
-    background: #007AFF;
-}
-
-/* uncss:ignore */
-.btn-c {
-    background: tomato;
-}
-
-/* uncss:ignore */
+/* 
 button {
 	box-shadow: 0px 8px 15px rgb(0 0 0 / 10%);
     border-radius: 25px;
-    width: 120px;
-    height: 41px;
-    text-align: center;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    width: 100px;
+    height: 40px;
     appearance: none;
-	margin: 20px auto;
+    margin: 20px auto;
     border: none;
     font-size: 11px;
     background: #ad6b11;
     font: unset;
-	color: #FFF;
+    color: #FFF;
+} */
+
+button {
+	width: 110px;
+    height: 45px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    margin: 20px auto;
+    font-weight: 500;
+    color: aliceblue;
+    background: #f0f8ff38;
+    border: 1px solid #cadae833;
+    border-radius: 45px;
+    box-shadow: 0px 8px 15px rgb(0 0 0 / 10%);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+}
+
+button:hover:not(:disabled) {
+	background-color: #2a637a;
+	box-shadow: 0px 15px 20px #2a637a71;
+	color: #fff;
+	transform: translateY(-7px);
+}
+
+/* uncss:ignore */
+button:hover.btn-s {
+	background-color: #2EE59D;
+	box-shadow: 0px 15px 20px #2ee59c71;
+}
+
+button:hover.btn-c {
+	background: #ff5656;
+	box-shadow: 0px 15px 20px #ff565666;
 }
 
 /* uncss:ignore */

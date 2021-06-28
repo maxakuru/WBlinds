@@ -191,6 +191,7 @@ void WBlinds::loop() {
   handleWiFi_();
 
   if ((millis() - TICK_INTERVAL) > _lastTick) {
+    // WLOG_I(TAG, "hall read: %i", hallRead());
     _lastTick = millis();
     state->Notify(nullptr, tickEv);
   }

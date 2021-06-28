@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "ui_index.h"
-#include <Credentials.h>
 #include <LITTLEFS.h>
 // #include "ui_fixtures.h"
 

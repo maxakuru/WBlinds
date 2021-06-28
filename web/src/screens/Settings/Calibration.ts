@@ -9,6 +9,7 @@ import {
   querySelector,
   removeClass,
   setStyle,
+  WINDOW,
 } from "min";
 import template from "./Calibration.html";
 import "./Calibration.css";
@@ -20,15 +21,29 @@ export interface CalibrationAPI {
   onSave(h: SaveHandler): void;
 }
 
-// speed to clear steps on cancel
-const FLOW_SPEED = 0.4;
-const WIPE_SPEED = FLOW_SPEED / 2;
-
 interface StepContext {
   div: HTMLElement;
   preNext?: () => void | Promise<void>;
   preBack?: () => void | Promise<void>;
 }
+
+interface CalibrationStep {
+  /**
+   * Title
+   */
+  t: string;
+}
+
+// speed to clear steps on cancel
+const FLOW_SPEED = 0.4;
+const WIPE_SPEED = FLOW_SPEED / 2;
+
+const VWIDTH = WINDOW.innerWidth;
+
+const CALIBRATION_STEPS: CalibrationStep[] = [
+  { t: "Set speed" },
+  { t: "Find home position" },
+];
 
 const _Calibration: ComponentFunction<CalibrationAPI> = function () {
   let _cancelBtn: HTMLButtonElement;
@@ -38,9 +53,13 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
   let _container: HTMLElement;
   let _stepIndex = 0;
 
-  const makeStep = (): StepContext => {
+  const makeStep = (data: CalibrationStep, index: number): StepContext => {
     const div = createElement("div");
     addClass(div, "fC");
+
+    const title = createElement("h2");
+    title.innerText = `${index}. ${data.t}`;
+    appendChild(div, title);
 
     const content = createElement("div");
     setStyle(content, "height", "90%");
@@ -51,9 +70,9 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
     appendChild(div, acts);
 
     const nextBtn = createElement("button");
-    nextBtn.innerText = "Next >";
+    nextBtn.innerText = "Next";
     const backBtn = createElement("button");
-    backBtn.innerText = "< Back";
+    backBtn.innerText = "Back";
 
     appendChild(acts, backBtn);
     appendChild(acts, nextBtn);
@@ -72,8 +91,8 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
         }
 
         _stepIndex += isNext ? 1 : -1;
-        console.log("step index: ", _stepIndex);
-        setStyle(_container, "left", `calc( 100vw * -${_stepIndex} )`);
+        console.log("step index: ", _stepIndex, WINDOW.screenX, VWIDTH);
+        setStyle(_container, "left", `-${VWIDTH * _stepIndex}px`);
       };
     };
     nextBtn.onclick = goFwdOrBack(true);
@@ -86,15 +105,15 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
     console.log("calibFlow");
     const stepCount = 5;
 
-    for (let i = 0; i < stepCount; i++) {
-      const s = makeStep();
+    CALIBRATION_STEPS.forEach((d, i) => {
+      const s = makeStep(d, i);
       appendChild(_container, s.div);
-    }
+    });
 
-    setStyle(_container, "left", "0%");
-    setStyle(_container, "width", `calc( 100vw * ${stepCount} )`);
+    setStyle(_container, "left", "0");
+    setStyle(_container, "width", `${VWIDTH * stepCount}px`);
 
-    setStyle(_cancelBtn, "left", "0%");
+    setStyle(_cancelBtn, "left", "0");
   };
 
   this.init = (elem) => {
@@ -116,11 +135,17 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
       // speed up animations
       const wipeDuration = (_stepIndex + 1) * WIPE_SPEED;
       setStyle(_container, "transitionDuration", `${wipeDuration}s`);
-      setStyle(_cancelBtn, "transitionDelay", `${_stepIndex * WIPE_SPEED}s`);
+      // some fudge here for the delay to make
+      // the button move with the last step
+      setStyle(
+        _cancelBtn,
+        "transitionDelay",
+        `${(_stepIndex - 0.5) * WIPE_SPEED}s`
+      );
       setStyle(_cancelBtn, "transitionDuration", `${WIPE_SPEED}s`);
 
-      setStyle(_container, "left", "100%");
-      setStyle(_cancelBtn, "left", "100%");
+      setStyle(_container, "left", `${VWIDTH}px`);
+      setStyle(_cancelBtn, "left", `${VWIDTH}px`);
 
       setTimeout(() => {
         _stepIndex = 0;
