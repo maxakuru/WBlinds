@@ -158,7 +158,8 @@ input[type=number] {
   background-color: white;
   top: 12%;
   left: 3%;
-  transition: 0.2s left ease-in-out;
+  /* transition: all 0.3s ease 0s; */
+  transition: 0.2s all ease-in-out;
 }
 
 /* uncss:ignore */

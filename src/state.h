@@ -55,6 +55,16 @@ public:
     };
 };
 
+// WS
+struct WSMessage {
+    char macAddress[10];
+    EventFlags flags;
+    int32_t pos;
+    int32_t targetPos;
+    uint32_t speed;
+    uint32_t accel;
+};
+
 enum class setting_t {
     kAll = 0,
     kGeneral = 1,
@@ -154,6 +164,8 @@ public:
     String serializeSettings(setting_t settingType);
     stdBlinds::error_code_t loadFromJSONString(StateObserver* that, String jsonStr);
     stdBlinds::error_code_t loadFromObject(StateObserver* that, JsonObject& jsonObj, boolean isSettings = false);
+    stdBlinds::error_code_t loadFromMessage(StateObserver* that, WSMessage& msg, boolean isSettings = false);
+
 
     // Observer
     void Attach(StateObserver* observer, EventFlags const& flags) override;

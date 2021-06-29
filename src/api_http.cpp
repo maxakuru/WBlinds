@@ -64,10 +64,6 @@ bool configRedirect(AsyncWebServerRequest* request) {
 }
 
 void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
-   // TODO: send data over websocket to connected web clients
-   WLOG_I(TAG, "event mask: %i", event.flags_.mask_);
-
-   // auto b = datagramToWSMessage()
    String m = packWSMessage(event);
    WLOG_I(TAG, "DG message: %s", m.c_str());
 

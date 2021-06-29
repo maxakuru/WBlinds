@@ -28,7 +28,7 @@ interface Coords {
 }
 
 const MIN_TOP = 8;
-const ACT_Y_OFFSET = 8;
+const ACT_Y_OFFSET = 12;
 
 const INPUT_SPEED = 0;
 const INPUT_ACCEL = 1;
@@ -60,7 +60,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     const act = querySelector(".act" as any, elem);
     toggleAnimations(true);
 
-    console.log("card data: ", tPos, pos, accel, speed, ip, name);
+    debug("card data: ", tPos, pos, accel, speed, ip, name);
 
     const notify = (d: any) => {
       _onChangeHandlers.forEach((h) => h(d));

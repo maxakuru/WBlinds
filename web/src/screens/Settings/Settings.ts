@@ -232,10 +232,8 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       // set query param
       // pushToHistory(undefined, { tab: shortTabs[index] });
 
-      console.log("index: ", index);
       const div = getElement(id);
       if (!div) {
-        console.log("index2: ", index);
         _afterLoad = () => displayTab(index);
         return;
       }
@@ -287,7 +285,6 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       mqtt = makeTab(shortTabs[2] as "mqtt");
 
       if (!_afterLoad) return selector.setIndex(selector.index());
-      console.log("calling aftet load:");
       _afterLoad();
 
       _afterLoad = undefined;

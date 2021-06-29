@@ -269,8 +269,8 @@ button {
     letter-spacing: 2.5px;
     margin: 20px auto;
     font-weight: 500;
-    color: aliceblue;
-    background: #f0f8ff38;
+	color: black;
+    background: #f0f8ffcc;
     border: 1px solid #cadae833;
     border-radius: 45px;
     box-shadow: 0px 8px 15px rgb(0 0 0 / 10%);

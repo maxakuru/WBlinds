@@ -7,14 +7,6 @@
 
 #define DELIMITER '/'
 
-struct WSMessage {
-    char macAddress[10];
-    EventFlags flags;
-    int32_t pos;
-    int32_t targetPos;
-    uint32_t speed;
-    uint32_t accel;
-};
 
 static String packWSMessage(const StateEvent& event) {
     auto state = State::getInstance();
@@ -96,28 +88,13 @@ static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     AwsFrameInfo* info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
         data[len] = '\0';
+        // TODO: parse first chunk of message to see 
+        // if it's bound for a different device.
         WSMessage msg;
         unpackWSMessage(msg, (char*)data, len);
         if (msg.flags.mask_ == 0) return;
         auto state = State::getInstance();
-        JsonObject obj;
-        if (msg.flags.pos_) {
-            WLOG_D(TAG, "NEW POS: %i", msg.pos);
-            obj["pos"] = msg.pos;
-        }
-        if (msg.flags.targetPos_) {
-            WLOG_D(TAG, "NEW TPOS: %i", msg.targetPos);
-            obj["tPos"] = msg.targetPos;
-        }
-        if (msg.flags.speed_) {
-            WLOG_D(TAG, "NEW SPEED: %i", msg.speed);
-            obj["speed"] = msg.speed;
-        }
-        if (msg.flags.accel_) {
-            WLOG_D(TAG, "NEW ACCEL: %i", msg.accel);
-            obj["accel"] = msg.accel;
-        }
-        state->loadFromObject(nullptr, obj);
+        state->loadFromMessage(nullptr, msg);
     }
 }
 

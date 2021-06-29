@@ -124,15 +124,19 @@ String State::serializeSettings(setting_t settingType) {
 
 void State::load_() {
     WLOG_I(TAG, "LOAD STATE/SETTINGS");
-    DynamicJsonDocument doc(512);
+    DynamicJsonDocument doc(1024);
 
     init_();
 
+    DeserializationError err;
     // load config, password isn't stored in state
-    File configFile = LITTLEFS.open("/config.json", "r");
-    if (configFile) {
-        DeserializationError err = deserializeJson(doc, configFile.readString());
-        if (!err) {
+    File file = LITTLEFS.open("/config.json", "r");
+    if (file) {
+        err = deserializeJson(doc, file.readString());
+        if (err) {
+            WLOG_E(TAG, "error deserializing config file %s", err.c_str());
+        }
+        else {
             JsonVariant v = doc["ssid"];
             if (!v.isNull()) {
                 strcpy_P(wifiSSID, v.as<const char*>());
@@ -143,54 +147,112 @@ void State::load_() {
             }
         }
     }
+    file.close();
 
-    File devicesFile = LITTLEFS.open("/devices.json", "r");
-    if (!configFile)  {
-        // create devices.json
-        DynamicJsonDocument toSave(512);
-        devicesFile = LITTLEFS.open("/devices.json", "w");
-        auto thisObj = toSave.createNestedObject(macAddress);
-        thisObj["name"] = getDeviceName();
-        serializeJson(toSave, devicesFile);
+    //  file = LITTLEFS.open("/devices.json", "r");
+    // if (!file) {
+    //     // create devices.json
+    //     DynamicJsonDocument toSave(512);
+    //     file = LITTLEFS.open("/devices.json", "w");
+    //     auto thisObj = toSave.createNestedObject(macAddress);
+    //     thisObj["name"] = getDeviceName();
+    //     serializeJson(toSave, file);
+    // }
+    // file.close();
+
+    file = LITTLEFS.open("/state.json", "r");
+    if (!file) {
+        save();
     }
-    devicesFile.close();
-
-    File stateFile = LITTLEFS.open("/state.json", "r");
-    if (!stateFile) {
-        return save();
+    else {
+        err = deserializeJson(doc, file.readString());
+        if (err) {
+            WLOG_E(TAG, "error deserializing state file %s", err.c_str());
+            // TODO: fix broken save state
+        }
+        else {
+            JsonObject obj = doc.as<JsonObject>();
+            setFieldsFromJSON_(nullptr, obj, false);
+            data_.targetPos = data_.pos;
+        }
     }
+    file.close();
 
-    File settingsFile = LITTLEFS.open("/settings.json", "r");
-    if (!settingsFile) {
+    file = LITTLEFS.open("/settings.json", "r");
+    if (!file) {
         return saveSettings();
     }
-
-    DeserializationError stateError = deserializeJson(doc, stateFile.readString());
-    stateFile.close();
-    if (stateError) {
-        // TODO: fix broken save state
-    }
     else {
-        JsonObject obj = doc.as<JsonObject>();
-        setFieldsFromJSON_(nullptr, obj, false);
-        data_.targetPos = data_.pos;
+        err = deserializeJson(doc, file.readString());
+        if (err) {
+            WLOG_E(TAG, "error deserializing settings file %s", err.c_str());
+            // TODO: fix broken save state
+        }
+        else {
+            JsonObject obj = doc.as<JsonObject>();
+            setSettingsFromJSON_(nullptr, obj, false);
+        }
     }
-
-    DeserializationError settingsError = deserializeJson(doc, settingsFile.readString());
-    settingsFile.close();
-    if (settingsError) {
-        // TODO: fix broken save state
-    }
-    else {
-        JsonObject obj = doc.as<JsonObject>();
-        setSettingsFromJSON_(nullptr, obj, false);
-    }
+    file.close();
 }
 
 void State::restore() {
     LITTLEFS.remove("/settings.json");
     LITTLEFS.remove("/config.json");
     LITTLEFS.remove("/state.json");
+}
+
+stdBlinds::error_code_t State::loadFromMessage(StateObserver* that, WSMessage& msg, boolean isSettings) {
+    stdBlinds::error_code_t err = stdBlinds::error_code_t::NoError;
+
+    bool makesDirty = false;
+    if (msg.flags.accel_) {
+        uint32_t v = msg.accel;
+        WLOG_I(TAG, "loaded accel: %i", v);
+        if (msg.accel != v) {
+            makesDirty = true;
+            data_.accel = v;
+        }
+    }
+    if (msg.flags.speed_) {
+        int32_t v = msg.speed;
+        WLOG_I(TAG, "loaded speed: %i", v);
+        if (data_.speed != v) {
+            makesDirty = true;
+            data_.speed = v;
+        }
+    }
+    if (msg.flags.targetPos_) {
+        int32_t v = msg.targetPos;
+        WLOG_I(TAG, "loaded tPos: %i", v);
+        if (data_.targetPos != v) {
+            makesDirty = true;
+            data_.targetPos = v;
+        }
+    }
+    if (msg.flags.pos_) {
+        int32_t v = msg.pos;
+        WLOG_I(TAG, "loaded pos: %i", v);
+        if (data_.pos != v) {
+            makesDirty = true;
+            data_.pos = v;
+        }
+    }
+
+    EventFlags toNotify;
+    toNotify.pos_ = true;
+    toNotify.targetPos_ = true;
+    toNotify.speed_ = true;
+    toNotify.accel_ = true;
+
+    WLOG_I(TAG, "Should notify? (flags.mask_ & toNotify.mask_): %i", (msg.flags.mask_ & toNotify.mask_));
+
+    if (makesDirty && 0 != (msg.flags.mask_ & toNotify.mask_)) {
+        updateDirty_(true);
+        Notify(that, msg.flags);
+    }
+
+    return err;
 }
 
 stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj, bool& shouldSave) {
@@ -410,6 +472,7 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
             updateMqttDirty_(settingsMQTT_.etag == prevEtag && 0 != strcmp(settingsMQTT_.user, s));
             strlcpy(settingsMQTT_.user, s, len + 1);
             settingsMQTT_.user[len + 1] = 0;
+            WLOG_I(TAG, "set user: %s", settingsMQTT_.user);
         }
     }
     v = obj["pass"];
@@ -423,6 +486,8 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
             updateMqttDirty_(settingsMQTT_.etag == prevEtag && 0 != strcmp(settingsMQTT_.password, s));
             strlcpy(settingsMQTT_.password, s, len + 1);
             settingsMQTT_.password[len + 1] = 0;
+            WLOG_I(TAG, "set password: %s", settingsMQTT_.password);
+
         }
     }
 
@@ -478,6 +543,8 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
 
 stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObject& obj, bool makesDirty) {
     stdBlinds::error_code_t err = stdBlinds::error_code_t::NoError;
+    WLOG_D(TAG, "obj in: %i", obj.containsKey("speed"));
+    WLOG_D(TAG, "obj.speed: %i", obj["speed"]);
 
     EventFlags flags;
     if (obj.containsKey("accel")) {

@@ -32,6 +32,10 @@ interface CalibrationStep {
    * Title
    */
   t: string;
+  /**
+   * Description
+   */
+  d?: string;
 }
 
 // speed to clear steps on cancel
@@ -41,8 +45,15 @@ const WIPE_SPEED = FLOW_SPEED / 2;
 const VWIDTH = WINDOW.innerWidth;
 
 const CALIBRATION_STEPS: CalibrationStep[] = [
-  { t: "Set speed" },
-  { t: "Find home position" },
+  {
+    t: "Find home position",
+    d: "Move to the fully open position. \nBe careful not to wind the cord too tight.",
+  },
+  { t: "Find closed position", d: "Move to the fully closed position." },
+  {
+    t: "Repeat",
+    d: "Alternate between open and closed, clicking the corresponding button in between. \n I’m Repeat this as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed.",
+  },
 ];
 
 const _Calibration: ComponentFunction<CalibrationAPI> = function () {
@@ -87,11 +98,11 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
         try {
           if (ctx[preFn]) await ctx[preFn]();
         } catch (e) {
+          // TODO: show toast
           console.error("[Calib] Error in pre: ", e);
         }
 
         _stepIndex += isNext ? 1 : -1;
-        console.log("step index: ", _stepIndex, WINDOW.screenX, VWIDTH);
         setStyle(_container, "left", `-${VWIDTH * _stepIndex}px`);
       };
     };
@@ -102,7 +113,6 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
   };
 
   const beginCalibFlow = () => {
-    console.log("calibFlow");
     const stepCount = 5;
 
     CALIBRATION_STEPS.forEach((d, i) => {
@@ -113,7 +123,7 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
     setStyle(_container, "left", "0");
     setStyle(_container, "width", `${VWIDTH * stepCount}px`);
 
-    setStyle(_cancelBtn, "left", "0");
+    setStyle(_cancelBtn, "left", `${VWIDTH - 200}px`);
   };
 
   this.init = (elem) => {

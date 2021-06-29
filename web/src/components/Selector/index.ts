@@ -5,6 +5,7 @@ import {
   addClass,
   appendChild,
   createDiv,
+  debug,
   getQueryParam,
   onQueryChange,
   pushToHistory,
@@ -42,7 +43,7 @@ const _Selector: ComponentFunction<SelectorAPI, SelectorProps> = function ({
       let tab = getQueryParam("tab");
       tab = tab && tab.toLowerCase();
       let ind = queries.indexOf(tab);
-      console.log("handleQueryChange: ", ind);
+      debug("handleQueryChange: ", ind);
       if (ind < 0) ind = 0;
       if (_index !== ind) _onChange(ind);
     };

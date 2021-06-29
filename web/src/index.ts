@@ -149,7 +149,6 @@ export default (ns: WBlindsNamespace): void => {
 
   function handleDeviceClick(data: any) {
     // Show device card
-    console.log("handle device click: ", data);
     const card = Card(data);
     appendChild(body, card.node);
     card.onChange((e) => {

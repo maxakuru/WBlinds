@@ -122,7 +122,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
         // for now just use 'c' to identify the current device
         const gen = State.get("settings.gen") as SettingsData["gen"];
         const state = State.get("state") as StateData["state"];
-        console.log("set tile: ", gen.deviceName, {
+        debug("set tile: ", gen.deviceName, {
           ...gen,
           ...value,
           ...state,
