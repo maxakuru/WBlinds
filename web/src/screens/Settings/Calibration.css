@@ -24,9 +24,18 @@
 
 /* uncss:ignore */
 #calib-c>div>h2 {
-    margin: 80px 40px;
+    margin: 80px 30px 10px 30px;
+}
+
+/* uncss:ignore */
+#calib-c>div>p {
+    font-size: 13px;
+    margin: 5px 30px 10px 30px;
 }
 
 #calib-x {
-    margin: 20px;
+    margin: 10px;
+    width: 90px;
+    transition-delay: 0s;
+    transition-duration: 0.4s;
 }

@@ -5,6 +5,7 @@ import {
   createElement,
   getElement,
   getElementsByTagName,
+  innerWidth,
   nextTick,
   querySelector,
   removeClass,
@@ -22,9 +23,26 @@ export interface CalibrationAPI {
 }
 
 interface StepContext {
+  /**
+   * Entire step element
+   */
   div: HTMLElement;
+  /**
+   * Content container element
+   */
+  c: HTMLElement;
+  /**
+   * Fn to call before going next
+   */
   preNext?: () => void | Promise<void>;
+  /**
+   * Fn to call before going back
+   */
   preBack?: () => void | Promise<void>;
+  /**
+   * Unhide next button
+   */
+  showNext: (loading?: boolean) => void;
 }
 
 interface CalibrationStep {
@@ -32,17 +50,20 @@ interface CalibrationStep {
    * Title
    */
   t: string;
+
   /**
    * Description
    */
   d?: string;
+  /**
+   * Optional step
+   */
+  o?: boolean;
 }
 
 // speed to clear steps on cancel
 const FLOW_SPEED = 0.4;
 const WIPE_SPEED = FLOW_SPEED / 2;
-
-const VWIDTH = WINDOW.innerWidth;
 
 const CALIBRATION_STEPS: CalibrationStep[] = [
   {
@@ -51,8 +72,9 @@ const CALIBRATION_STEPS: CalibrationStep[] = [
   },
   { t: "Find closed position", d: "Move to the fully closed position." },
   {
+    o: true,
     t: "Repeat",
-    d: "Alternate between open and closed, clicking the corresponding button in between. \n I’m Repeat this as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed.",
+    d: "Alternate between open and closed, clicking the corresponding button in between. Repeat as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed.",
   },
 ];
 
@@ -64,13 +86,21 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
   let _container: HTMLElement;
   let _stepIndex = 0;
 
-  const makeStep = (data: CalibrationStep, index: number): StepContext => {
+  const makeStep = (
+    data: CalibrationStep,
+    index: number,
+    totalStepCount: number
+  ): StepContext => {
     const div = createElement("div");
     addClass(div, "fC");
 
     const title = createElement("h2");
-    title.innerText = `${index}. ${data.t}`;
+    title.innerText = `${index + 1}. ${data.t}`;
     appendChild(div, title);
+
+    const desc = createElement("p");
+    desc.innerText = `${data.d}`;
+    appendChild(div, desc);
 
     const content = createElement("div");
     setStyle(content, "height", "90%");
@@ -80,17 +110,10 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
     addClass(acts, "fR");
     appendChild(div, acts);
 
-    const nextBtn = createElement("button");
-    nextBtn.innerText = "Next";
-    const backBtn = createElement("button");
-    backBtn.innerText = "Back";
-
-    appendChild(acts, backBtn);
-    appendChild(acts, nextBtn);
-
     const ctx: StepContext = {
       div,
-    };
+      c: content,
+    } as unknown as StepContext;
 
     const goFwdOrBack = (isNext: boolean) => {
       return async () => {
@@ -103,27 +126,82 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
         }
 
         _stepIndex += isNext ? 1 : -1;
-        setStyle(_container, "left", `-${VWIDTH * _stepIndex}px`);
+        setStyle(_container, "left", `-${innerWidth() * _stepIndex}px`);
       };
     };
+
+    if (index > 0) {
+      const backBtn = createElement("button");
+      backBtn.innerText = "Back";
+      appendChild(acts, backBtn);
+      backBtn.onclick = goFwdOrBack(false);
+    }
+
+    const nextBtn = createElement("button");
+    const lastStep = index === totalStepCount - 1;
+    const nextText = lastStep ? "Done" : "Next";
+
+    if (!data.o) nextBtn.disabled = true;
+    ctx.showNext = (loading?: boolean) => {
+      if (loading) {
+        nextBtn.innerText = "";
+        const loader = createElement("div");
+        addClass(loader, "loader");
+        appendChild(nextBtn, loader);
+      } else {
+        // remove loading div and add back text
+        nextBtn.innerText = nextText;
+        nextBtn.disabled = false;
+      }
+    };
+
+    nextBtn.innerText = nextText;
     nextBtn.onclick = goFwdOrBack(true);
-    backBtn.onclick = goFwdOrBack(false);
+    appendChild(acts, nextBtn);
 
     return ctx;
   };
 
-  const beginCalibFlow = () => {
-    const stepCount = 5;
+  const makeControls = () => {
+    const div = createElement("div");
+    ["up", "down", "speed up", "speed down"].forEach((l) => {
+      const btn = createElement("button");
+      btn.innerText = l;
+      appendChild(div, btn);
+    });
+    return div;
+  };
 
+  const beginCalibFlow = () => {
     CALIBRATION_STEPS.forEach((d, i) => {
-      const s = makeStep(d, i);
+      const s = makeStep(d, i, CALIBRATION_STEPS.length);
+      // add step specific content
+      // right now, each step has the same controls
+      // but different actions on commit
+      const controls = makeControls();
+      appendChild(s.c, controls);
+
+      const btn = createElement("button");
+      btn.innerText = "Done";
+      appendChild(s.c, btn);
+      btn.onclick = async () => {
+        s.showNext(true);
+        // TODO: call API
+        setTimeout(() => {
+          s.showNext();
+        }, 4000);
+      };
+
       appendChild(_container, s.div);
     });
 
+    setStyle(
+      _container,
+      "width",
+      `${innerWidth() * CALIBRATION_STEPS.length}px`
+    );
     setStyle(_container, "left", "0");
-    setStyle(_container, "width", `${VWIDTH * stepCount}px`);
-
-    setStyle(_cancelBtn, "left", `${VWIDTH - 200}px`);
+    setStyle(_cancelBtn, "left", "0");
   };
 
   this.init = (elem) => {
@@ -141,37 +219,33 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
       nextTick(beginCalibFlow);
     };
 
+    const TRANSITION_DUR = "transitionDuration";
+    const TRANSITION_DELAY = "transitionDelay";
     _cancelBtn.onclick = () => {
       // speed up animations
       const wipeDuration = (_stepIndex + 1) * WIPE_SPEED;
-      setStyle(_container, "transitionDuration", `${wipeDuration}s`);
+      setStyle(_container, TRANSITION_DUR, `${wipeDuration}s`);
       // some fudge here for the delay to make
       // the button move with the last step
       setStyle(
         _cancelBtn,
-        "transitionDelay",
+        TRANSITION_DELAY,
         `${(_stepIndex - 0.5) * WIPE_SPEED}s`
       );
-      setStyle(_cancelBtn, "transitionDuration", `${WIPE_SPEED}s`);
-
-      setStyle(_container, "left", `${VWIDTH}px`);
-      setStyle(_cancelBtn, "left", `${VWIDTH}px`);
+      setStyle(_cancelBtn, TRANSITION_DUR, `${WIPE_SPEED}s`);
+      setStyle(_container, "left", `${innerWidth()}px`);
+      setStyle(_cancelBtn, "left", `${innerWidth()}px`);
 
       setTimeout(() => {
         _stepIndex = 0;
-
         // reset styles
-        setStyle(_container, "transitionDuration", `${FLOW_SPEED}s`);
-        setStyle(_cancelBtn, "transitionDuration", `${FLOW_SPEED}s`);
-
-        setStyle(_cancelBtn, "transitionDelay", "0s");
-
+        setStyle(_container, TRANSITION_DUR, `${FLOW_SPEED}s`);
+        setStyle(_cancelBtn, TRANSITION_DUR, `${FLOW_SPEED}s`);
+        setStyle(_cancelBtn, TRANSITION_DELAY, "0s");
         // clear the container
         _container.innerHTML = "";
-
         // hide
         addClass(_container, "hide");
-
         _active = false;
       }, wipeDuration * 1000);
     };

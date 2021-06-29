@@ -279,25 +279,59 @@ button {
     outline: none;
 }
 
-button:hover:not(:disabled) {
-	background-color: #2a637a;
-	box-shadow: 0px 15px 20px #2a637a71;
-	color: #fff;
-	transform: translateY(-7px);
+button.btn-t {
+	border: none;
+    background: none;
+    color: white;
 }
 
 /* uncss:ignore */
-button:hover.btn-s {
+button:active:not(:disabled,.btn-t){
+	background-color: #2a637a;
+	box-shadow: 0px 15px 20px #2a637a71;
+	color: #fff;
+}
+
+/* uncss:ignore */
+button:active.btn-s {
 	background-color: #2EE59D;
 	box-shadow: 0px 15px 20px #2ee59c71;
 }
 
-button:hover.btn-c {
+/* uncss:ignore */
+button:active.btn-c {
 	background: #ff5656;
 	box-shadow: 0px 15px 20px #ff565666;
 }
 
+@media (hover: hover) and (pointer: fine) {
+	button:hover:not(:disabled,.btn-t){
+		transform: translateY(-7px);
+		background-color: #2a637a;
+		box-shadow: 0px 15px 20px #2a637a71;
+		color: #fff;
+	}
+
+	/* uncss:ignore */
+	button:hover.btn-s {
+		background-color: #2EE59D;
+		box-shadow: 0px 15px 20px #2ee59c71;
+	}
+
+	button:hover.btn-c {
+		background: #ff5656;
+		box-shadow: 0px 15px 20px #ff565666;
+	}
+}
+
+
 /* uncss:ignore */
 button:disabled {
 	opacity: 50%;
+}
+
+/* uncss:ignore */
+button>div.loader {
+	transform: translate3d(0, -17px, 0);
+    font-size: 7px;
 }

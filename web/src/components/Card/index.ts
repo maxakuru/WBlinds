@@ -2,7 +2,7 @@ import { ComponentFunction, Component } from "../Component";
 import { Slider, CLOSED_COLOR, OPEN_COLOR, setGradientStyle } from "../Slider";
 import template from "./Card.html";
 import "./Card.css";
-import { addClass, appendChild, isNullish, removeClass } from "@Util";
+import { addClass, appendChild, debug, isNullish, removeClass } from "@Util";
 import { getElement, querySelector, setStyle } from "min";
 import { Input, InputType_Range } from "components/Input";
 

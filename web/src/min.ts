@@ -25,6 +25,10 @@ export const createDiv: <T = HTMLElement>() => T = DOCUMENT.createElement.bind(
   "div"
 );
 
+export const innerWidth = (): number => {
+  return WINDOW.innerWidth;
+};
+
 /**
  * Alias to document.getElementById,
  * so closure can trim a few extra characters.

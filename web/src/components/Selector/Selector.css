@@ -7,8 +7,11 @@
 #pas {
 	border-radius: 7px;
     justify-content: center;
-	border: rgba(0,0,0,0);
+	margin-bottom: 20px;
+    max-width: 400px;
+    border: rgba(0,0,0,0);
     background: rgba(118, 118, 128, 0.24);
+    margin: auto;
 }
 
 /* uncss:ignore */
