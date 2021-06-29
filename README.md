@@ -1,7 +1,7 @@
-![Logo](./etc/logo.png)
+<img src="./etc/logo.png" alt="logo" width="400">
 
 ![License](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
-![Releasde](https://img.shields.io/static/v1?label=Release&message=WIP&color=blue&style=flat-square)
+![Release](https://img.shields.io/static/v1?label=Release&message=WIP&color=blue&style=flat-square)
 
 
 #### ESP32 controller for smart blinds!
