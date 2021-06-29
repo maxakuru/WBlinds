@@ -30,8 +30,8 @@
 - [x] Web UI - Settings
 - [x] AP & captive portal wifi setup
 - [x] WS support for web clients
-- [ ] Solidify API definitions
-- [ ] Web calibration wizard
+- [ ] Solidify API definitions - WIP
+- [ ] Web calibration wizard - WIP
 - [ ] Add schematic, PCB
 - [ ] Add STLs for 3D printing axis, brake, enclosure - initial
 - [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
@@ -103,7 +103,7 @@ GET <host:port>/api/state
 ```js
 POST <host:port> 
 { 
-    "op": "run_forward" | "run_backward" | "stop" | "sleep"
+    "op": "up" | "down" | "stop" | "sleep"
 }
 ```
 
@@ -157,10 +157,10 @@ For example, a topic name `blinds/living_room` will subscribe to `blinds/living_
 
 The topic defines a number of actions without any payload, for example:
 ```sh
-topic="blinds/living_room/forward"
+topic="blinds/living_room/up"
 ```
 ```sh
-topic="blinds/living_room/backward"
+topic="blinds/living_room/down"
 ```
 ```sh
 topic="blinds/living_room/stop"
@@ -186,7 +186,7 @@ There are 2 main projects that make up this repo: the C++ ESP controller and a T
 ### Scripts
 Build web UI in development/watch mode (outputs to `public/`):
 ```sh
-yarn build:dev
+yarn dev
 ```
 
 Build web UI minified (outputs to `public/`):
