@@ -277,6 +277,7 @@ button {
     transition: all 0.3s ease 0s;
     cursor: pointer;
     outline: none;
+	position: relative;
 }
 
 button.btn-t {
@@ -303,6 +304,28 @@ button:active.btn-c {
 	background: #ff5656;
 	box-shadow: 0px 15px 20px #ff565666;
 }
+
+/* uncss:ignore */
+/* .btn-up::before, .btn-down::after {
+    position: absolute;
+    top: 5px;
+	left: 50%;
+	font-family: monospace;
+} */
+
+/* uncss:ignore */
+/* .btn-down::after {
+	content: 'ˇ';
+    font-size: 25px;
+    transform: scale(2, 1.5);
+} */
+
+/* uncss:ignore */
+/* .btn-up::before {
+	font-size: 25px;
+    content: '^';
+    transform: scale(2, 1);
+} */
 
 @media (hover: hover) and (pointer: fine) {
 	button:hover:not(:disabled,.btn-t){

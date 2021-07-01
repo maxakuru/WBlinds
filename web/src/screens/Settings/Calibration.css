@@ -39,3 +39,12 @@
     transition-delay: 0s;
     transition-duration: 0.4s;
 }
+
+/* uncss:ignore */
+.cal-conc {
+    /* margin: auto; */
+    margin: 20px auto;
+    max-width: 300px;
+    display: flex;
+    flex-wrap: wrap;
+}

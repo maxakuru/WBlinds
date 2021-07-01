@@ -68,13 +68,16 @@ const WIPE_SPEED = FLOW_SPEED / 2;
 const CALIBRATION_STEPS: CalibrationStep[] = [
   {
     t: "Find home position",
-    d: "Move to the fully open position. \nBe careful not to wind the cord too tight.",
+    d: "Move to the fully open position then tap 'Done'. \nBe careful not to wind the cord too tight.",
   },
-  { t: "Find closed position", d: "Move to the fully closed position." },
+  {
+    t: "Find closed position",
+    d: "Move to the fully closed position then tap 'Done'",
+  },
   {
     o: true,
     t: "Repeat",
-    d: "Alternate between open and closed, clicking the corresponding button in between. Repeat as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed.",
+    d: "Alternate between open and closed, tap the corresponding button in between. Repeat as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed.",
   },
 ];
 
@@ -104,6 +107,7 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
 
     const content = createElement("div");
     setStyle(content, "height", "90%");
+    addClass(content, "fC");
     appendChild(div, content);
 
     const acts = createElement("div");
@@ -164,9 +168,12 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
 
   const makeControls = () => {
     const div = createElement("div");
-    ["up", "down", "speed up", "speed down"].forEach((l) => {
+    addClass(div, "cal-conc");
+    ["speed ▲", "move ▲", "speed ▼", "move ▼"].forEach((l) => {
       const btn = createElement("button");
       btn.innerText = l;
+      if (l.indexOf("up") > -1) addClass(btn, "btn-up");
+      else addClass(btn, "btn-down");
       appendChild(div, btn);
     });
     return div;
