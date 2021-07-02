@@ -45,6 +45,9 @@
 
 ## 💻 Web UI
 
+### Home
+<img src="./etc/home-1.png" width="250"> <img src="./etc/home-2.png" width="250">
+
 ### Settings
 <img src="./etc/settings-1.png" width="250"> <img src="./etc/settings-2.png" width="250"> <img src="./etc/settings-3.png" width="250">
 
