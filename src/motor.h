@@ -11,6 +11,9 @@ public:
     virtual void setResolution(const stdBlinds::resolution_t resolution) = 0;
     virtual void setSleep(const bool shouldSleep) = 0;
     virtual void setEnabled(const bool isEnabled) = 0;
+    virtual void setSpeed(const uint32_t speed) = 0;
+    virtual void setAccel(const int32_t accel) = 0;
+
     virtual void init() = 0;
     virtual bool isRunning() = 0;
     virtual bool isEnabled() = 0;

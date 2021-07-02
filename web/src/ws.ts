@@ -17,10 +17,11 @@ export interface WSUpdateSettingsEvent {
 }
 
 export interface WSUpdateStateEvent {
-  tPos: number;
-  pos: number;
-  speed: number;
-  accel: number;
+  mac: string;
+  tPos?: number;
+  pos?: number;
+  speed?: number;
+  accel?: number;
 }
 
 export interface WSIncomingStateEvent {
@@ -112,27 +113,34 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
   const push = (ev: WSEventType, data: WSUpdateStateEvent) => {
     debug("[ws] push(): ", ev, data);
     if (_enabled) {
-      const s = packMessage(ev, sortData(data));
+      const s = packMessage(ev, data.mac, sortData(data));
       debug("[ws] push() str: ", s);
       ws.send(s);
     }
   };
 
-  function packMessage(ev: WSEventType, data: number[]): string {
+  function packMessage(ev: WSEventType, mac: string, data: number[]): string {
     // TODO: mac
-    const f: (0 | 1)[] = [];
-    let s = "";
-    for (const k in data) {
-      const d = data[k];
-      if (d != null) {
-        s += `${d}/`;
-        f.push(1);
-      } else {
-        f.push(0);
+    switch (ev) {
+      case WSEventType.UpdateState: {
+        const f: (0 | 1)[] = [];
+        let s = "";
+        for (const k in data) {
+          const d = data[k];
+          if (d != null) {
+            s += `${d}/`;
+            f.push(1);
+          } else {
+            f.push(0);
+          }
+        }
+        debug("[packMessage] f: ", f);
+        // TODO: add other event type prefix
+        return `${mac}/${parseInt(f.reverse().join(""), 2)}/${s}`;
       }
+      default:
+        opts.onError && opts.onError("Unexpected event type", 0);
     }
-    debug("[packMessage] f: ", f);
-    return `mac/${parseInt(f.reverse().join(""), 2)}/${s}`;
   }
 
   function unpackMessages(data: string): WSIncomingEvent[] {

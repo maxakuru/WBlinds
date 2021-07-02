@@ -40,9 +40,11 @@ export const diffDeep = (source: any, target: any): any => {
     if (source[key] === target[key] || target[key] == null) return diff;
     if (isObject(source[key]) && isObject(target[key])) {
       // both keys are objects, diff recursively
+      const oDiff = diffDeep(source[key], target[key]);
+      if (Object.keys(oDiff).length === 0) return diff;
       return {
         ...diff,
-        [key]: diffDeep(source[key], target[key]),
+        [key]: oDiff,
       };
     }
     return {

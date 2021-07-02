@@ -39,15 +39,40 @@ void MotorA4988::handleEvent(const StateEvent& event) {
     auto cPos = state->getPosition();
     auto pct = this->getCurrentPercent();
     if (cPos != pct) {
-      WLOG_I(TAG, "set current pos: %i", pct);
+      WLOG_D(TAG, "set current pos: %i", pct);
       state->setPosition(this, pct);
     }
     return;
   }
-  if (event.flags_.targetPos_) {
+  if (event.flags_.resolution_) {
+    auto resolution = state->getResolution();
+    if (this->stepper_->isMotorRunning()) {
+      this->stepper_->stopMove();
+    }
+
+    WLOG_D(TAG, "new resolution: %i", resolution);
+    this->setResolution(resolution);
+  }
+
+  bool stoppedMotor = false;
+  if (event.flags_.speed_ || event.flags_.accel_) {
+    auto speed = state->getSpeed();
+    auto accel = state->getAccel();
+
+    if (this->stepper_->isMotorRunning()) {
+      stepper_->setDelayToDisable(UINT16_MAX);
+      stoppedMotor = true; // restart after
+      this->stepper_->stopMove();
+    }
+    WLOG_D(TAG, "new speed: %i", speed);
+    this->setSpeed(speed);
+    WLOG_D(TAG, "new accel: %i", accel);
+    this->setAccel(accel);
+  }
+  if (event.flags_.targetPos_ || stoppedMotor) {
     auto tPos = state->getTargetPosition();
 
-    WLOG_I(TAG, "move to target pos: %i", tPos);
+    WLOG_D(TAG, "move to target pos: %i", tPos);
     this->moveToPercent(tPos);
   }
 }
@@ -82,6 +107,7 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
   EventFlags flags;
   flags.pos_ = true;
   flags.speed_ = true;
+  flags.resolution_ = true;
   flags.accel_ = true;
   flags.targetPos_ = true;
   flags.moveDown_ = true;
@@ -131,6 +157,7 @@ bool MotorA4988::isEnabled() {
  * @param resolution
  */
 void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
+  WLOG_I(TAG, "setResolution %i", resolution);
   auto state = State::getInstance();
 
   int ms1 = state->getMs1Pin();
@@ -141,15 +168,56 @@ void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
   digitalWrite(ms2, LOW);
   digitalWrite(ms3, LOW);
   if (resolution > stdBlinds::resolution_t::kFull && resolution != stdBlinds::resolution_t::kQuarter) {
+    WLOG_D(TAG, "setResolution 1");
     digitalWrite(ms1, HIGH);
   }
   if (resolution > stdBlinds::resolution_t::kHalf) {
+    WLOG_D(TAG, "setResolution 2");
     digitalWrite(ms2, HIGH);
   }
   if (resolution == stdBlinds::resolution_t::kSixteenth) {
+    WLOG_D(TAG, "setResolution 3");
     digitalWrite(ms3, HIGH);
   }
   setMaximumPosition_(resolution);
+
+  if(stepper_ == nullptr) return; // on init
+
+  // stop motor if moving
+  bool wasMoving = stepper_->isMotorRunning();
+  if (wasMoving) {
+    stepper_->stopMove();
+  }
+
+  // adjust current position to the new resolution
+  auto pct = getCurrentPercent();
+  auto steps = percentToSteps(pct, stepsPerRev_, maxPosition_);
+  this->stepper_->setPositionAfterCommandsCompleted(steps);
+
+  // TODO?: change speed according to resolution
+
+  // restart motor if needed
+  if (wasMoving) {
+    this->moveToPercent(state->getTargetPosition());
+  }
+}
+
+/**
+ * @brief Set speed in Hz
+ *
+ * @param speed
+ */
+void MotorA4988::setSpeed(const uint32_t speed) {
+  this->stepper_->setSpeedInHz(speed);
+}
+
+/**
+ * @brief Set acceleration in steps/s/s
+ *
+ * @param accel
+ */
+void MotorA4988::setAccel(const int32_t accel) {
+  this->stepper_->setAcceleration(accel);
 }
 
 /**
@@ -166,11 +234,11 @@ void MotorA4988::setSleep(const bool shouldSleep) {
     if (this->stepper_) {
       this->stepper_->stopMove();
     }
-    WLOG_I(TAG, "SLEEPING");
+    WLOG_D(TAG, "SLEEPING");
     digitalWrite(slp, LOW);
   }
   else {
-    WLOG_I(TAG, "WAKING");
+    WLOG_D(TAG, "WAKING");
     digitalWrite(slp, HIGH);
     int steps = percentToSteps(state->getPosition(), stepsPerPct_, maxPosition_);
     stepper_->setCurrentPosition(steps);
@@ -229,7 +297,7 @@ void MotorA4988::stop(bool immediate = true) {
     return stepper_->stopMove();
   }
 
-  WLOG_I(TAG, "immediate");
+  WLOG_D(TAG, "immediate");
   stepper_->forceStopAndNewPosition(stepper_->getCurrentPosition());
 }
 
@@ -250,7 +318,7 @@ int8_t MotorA4988::moveToPercent(uint8_t pct) {
 
   int32_t pos = percentToSteps(pct, stepsPerPct_, maxPosition_);
 
-  WLOG_I(TAG, "steps: %i", pos);
+  WLOG_D(TAG, "steps: %i", pos);
   return moveTo(pos);
 }
 
@@ -264,7 +332,7 @@ int8_t MotorA4988::moveTo(int32_t pos) {
     return -1;
   }
 
-  WLOG_I(TAG, "moveTo: %i", pos);
+  WLOG_D(TAG, "moveTo: %i", pos);
   // move, event handler will update actual position on tick
   return stepper_->moveTo(pos);
 }
@@ -300,5 +368,6 @@ void MotorA4988::setMaximumPosition(uint32_t pos) {
  */
 void MotorA4988::setMaximumPosition_(stdBlinds::resolution_t res) {
   uint32_t nSteps = maxTurns_ * stepsPerRev_ * (uint8_t)res;
+  WLOG_D(TAG, "new max pos: %i", nSteps);
   setMaximumPosition(nSteps);
 }

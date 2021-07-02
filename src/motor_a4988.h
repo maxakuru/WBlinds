@@ -24,6 +24,10 @@ public:
   void setResolution(const stdBlinds::resolution_t resolution) override;
   void setSleep(const bool shouldSleep) override;
   void setEnabled(const bool isEnabled) override;
+  void setSpeed(const uint32_t speed) override;
+  void setAccel(const int32_t accel) override;
+
+
   void init() override;
   void init(FastAccelStepperEngine& engine);
   int8_t runUp() override;

@@ -44,6 +44,8 @@ public:
             unsigned int mqttHost_ : 1;
             unsigned int mqttPort_ : 1;
             unsigned int mqttTopic_ : 1;
+            unsigned int mqttUser_ : 1;
+            unsigned int mqttPass_ : 1;
 
             unsigned int moveUp_ : 1;
             unsigned int moveDown_ : 1;
@@ -260,9 +262,9 @@ private:
 
     stdBlinds::error_code_t setFieldsFromJSON_(StateObserver* that, JsonObject& obj, bool makesDirty);
     stdBlinds::error_code_t setSettingsFromJSON_(StateObserver* that, JsonObject& obj, bool shouldSave);
-    stdBlinds::error_code_t setGeneralSettingsFromJSON_(const JsonObject& obj, bool& shouldSave);
-    stdBlinds::error_code_t setHardwareSettingsFromJSON_(const JsonObject& obj, bool& shouldSave);
-    stdBlinds::error_code_t setMQTTSettingsFromJSON_(const JsonObject& obj, bool& shouldSave);
+    stdBlinds::error_code_t setGeneralSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave);
+    stdBlinds::error_code_t setHardwareSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave);
+    stdBlinds::error_code_t setMQTTSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave);
 
     // observers
     typedef std::vector<ObserverItem> Observers;

@@ -5,22 +5,16 @@ import "./Card.css";
 import { addClass, appendChild, debug, isNullish, removeClass } from "@Util";
 import { getElement, querySelector, setStyle } from "min";
 import { Input, InputType_Range } from "components/Input";
+import { DeviceRecord } from "@State";
 
-export type OnChangeHandler = (data: any) => void;
+export type OnChangeHandler = (data: DeviceRecord) => void;
 export interface CardAPI {
   onChange: (h: OnChangeHandler) => void;
   destroy(): void;
   show(): void;
 }
 
-interface CardProps {
-  tPos?: number;
-  pos?: number;
-  accel?: number;
-  speed?: number;
-  ip?: string;
-  name: string;
-}
+type CardProps = DeviceRecord;
 
 interface Coords {
   x: number;
@@ -40,12 +34,10 @@ const INPUT_LIMIT_MAP = [
 ];
 
 const _Card: ComponentFunction<CardAPI, CardProps> = function ({
-  tPos,
   pos,
   accel,
   speed,
-  ip,
-  name,
+  ...data
 }: CardProps) {
   let _onChangeHandlers: OnChangeHandler[] = [];
   let draggingCard = false;
@@ -60,7 +52,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     const act = querySelector(".act" as any, elem);
     toggleAnimations(true);
 
-    debug("card data: ", tPos, pos, accel, speed, ip, name);
+    debug("card data: ", data);
 
     const notify = (d: any) => {
       _onChangeHandlers.forEach((h) => h(d));
@@ -92,10 +84,10 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       const _handleChange = (val: number) => {
         // let accel, speed;
         if (input === INPUT_SPEED) {
-          notify({ speed: val });
+          notify({ speed: val, ...data });
         } else if (input === INPUT_ACCEL) {
           // accel = val;
-          notify({ accel: val });
+          notify({ accel: val, ...data });
         }
       };
       range.onChange(_handleChange);
@@ -109,7 +101,7 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
     const slider = Slider({ value: pos });
     slider.onChange((tPos) => {
-      notify({ tPos });
+      notify({ tPos, ...data });
     });
 
     appendChild(container, slider.node);

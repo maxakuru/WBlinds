@@ -14,7 +14,7 @@ import {
 } from "@Util";
 import { mock } from "../tools/mock";
 import { doFetch, HTTP_PUT } from "@Api";
-import { SettingsData, State, StateData } from "@State";
+import { DeviceRecord, SettingsData, State, StateData } from "@State";
 import { makeWebsocket, WSEventType, WSIncomingEvent } from "./ws";
 import {
   SETTINGS,
@@ -78,9 +78,11 @@ export default (ns: WBlindsNamespace): void => {
         pushToHistory(newPath, undefined, true);
         t.onDeviceClick(handleDeviceClick);
         if (!State.isLoaded(STATE)) {
-          load(STATE);
-          load(PRESETS);
-          load(DEVICES);
+          load("settings?type=gen", [], ["settings.gen"]).then(() => {
+            load(STATE);
+            load(PRESETS);
+            load(DEVICES);
+          });
         }
         currentTab = t;
         break;
@@ -129,7 +131,11 @@ export default (ns: WBlindsNamespace): void => {
   function saveSettings() {
     debug("saveSettings: ", State._state);
     State.setSaving(SETTINGS, true);
-    const body = diffDeep(State._state.state, State._state.pendingState);
+    debug("State._state.settings: ", State._state.settings);
+    debug("State._state.pendingState: ", State._state.pendingState);
+
+    const body = diffDeep(State._state.settings, State._state.pendingState);
+    debug("diffed: ", body);
     doFetch(SETTINGS, HTTP_PUT, { body })
       .then(() => {
         State.setSaving(SETTINGS, false);
@@ -147,7 +153,7 @@ export default (ns: WBlindsNamespace): void => {
     State.update(PENDING_STATE, State._state.settings);
   }
 
-  function handleDeviceClick(data: any) {
+  function handleDeviceClick(data: DeviceRecord) {
     // Show device card
     const card = Card(data);
     appendChild(body, card.node);
@@ -158,13 +164,16 @@ export default (ns: WBlindsNamespace): void => {
   }
 
   function load(
-    key: keyof Omit<StateData, "pendingState">,
-    updates?: (keyof StateData)[]
+    key: keyof Omit<StateData, "pendingState"> | "settings?type=gen",
+    updates?: (keyof StateData)[],
+    sets: string[] = []
   ) {
-    updates = updates || [key];
+    updates = updates || ([key] as any[]);
+
     return doFetch(key)
       .then((r) => {
-        updates.map((k) => State.update(k, r));
+        updates.forEach((k) => State.update(k, r));
+        sets.forEach((k) => State.set(k, r));
         return r;
       })
       .catch(handleError);

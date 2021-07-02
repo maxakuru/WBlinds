@@ -74,6 +74,7 @@ String State::serializeSettings(setting_t settingType) {
     auto genObj = doc.createNestedObject("gen");
     if (settingType == setting_t::kAll || settingType == setting_t::kGeneral) {
         genObj["ssid"] = wifiSSID;
+        genObj["mac"] = macAddress;
         genObj["deviceName"] = settingsGeneral_.deviceName;
         genObj["mdnsName"] = settingsGeneral_.mDnsName;
         genObj["emitSync"] = settingsGeneral_.emitSyncData;
@@ -255,7 +256,7 @@ stdBlinds::error_code_t State::loadFromMessage(StateObserver* that, WSMessage& m
     return err;
 }
 
-stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj, bool& shouldSave) {
+stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave) {
     WLOG_I(TAG);
     JsonVariant v = obj["ssid"];
     if (!v.isNull()) {
@@ -265,11 +266,14 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            if (!isConfigDirty_ && 0 != strcmp(wifiSSID, s)) {
-                isConfigDirty_ = true;
+            if (0 != strcmp(wifiSSID, s)) {
+                // TODO: add to event flags or set reset flag here
+                if (!isConfigDirty_) {
+                    isConfigDirty_ = true;
+                }
+                strlcpy(wifiSSID, s, len + 1);
+                wifiSSID[len + 1] = 0;
             }
-            strlcpy(wifiSSID, s, len + 1);
-            wifiSSID[len + 1] = 0;
         }
     }
     v = obj["pass"];
@@ -280,11 +284,14 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            if (!isConfigDirty_ && 0 != strcmp(wifiPass, s)) {
-                isConfigDirty_ = true;
+            if (0 != strcmp(wifiPass, s)) {
+                // TODO: add to event flags or set reset flag here
+                if (!isConfigDirty_) {
+                    isConfigDirty_ = true;
+                }
+                strlcpy(wifiPass, s, len + 1);
+                wifiPass[len + 1] = 0;
             }
-            strlcpy(wifiPass, s, len + 1);
-            wifiPass[len + 1] = 0;
         }
     }
 
@@ -297,9 +304,12 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateGeneralDirty_(settingsGeneral_.etag == prevEtag && 0 != strcmp(settingsGeneral_.deviceName, s));
-            strlcpy(settingsGeneral_.deviceName, s, len + 1);
-            settingsGeneral_.deviceName[len + 1] = 0;
+            if (0 != strcmp(settingsGeneral_.deviceName, s)) {
+                flags.deviceName_ = true;
+                updateGeneralDirty_(settingsGeneral_.etag == prevEtag);
+                strlcpy(settingsGeneral_.deviceName, s, len + 1);
+                settingsGeneral_.deviceName[len + 1] = 0;
+            }
         }
     }
     v = obj["mdnsName"];
@@ -310,99 +320,144 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateGeneralDirty_(settingsGeneral_.etag == prevEtag && 0 != strcmp(settingsGeneral_.mDnsName, s));
-            strlcpy(settingsGeneral_.mDnsName, s, len + 1);
-            settingsGeneral_.mDnsName[len + 1] = 0;
+            if (0 != strcmp(settingsGeneral_.mDnsName, s)) {
+                flags.mDnsName_ = true;
+                updateGeneralDirty_(settingsGeneral_.etag == prevEtag);
+                strlcpy(settingsGeneral_.mDnsName, s, len + 1);
+                settingsGeneral_.mDnsName[len + 1] = 0;
+            }
         }
     }
     v = obj["emitSync"];
     if (!v.isNull()) {
         bool b = v.as<boolean>();
-        updateGeneralDirty_(settingsGeneral_.etag == prevEtag && settingsGeneral_.emitSyncData != b);
-        settingsGeneral_.emitSyncData = b;
+        if (settingsGeneral_.emitSyncData != b) {
+            flags.emitSyncData_ = true;
+            updateGeneralDirty_(settingsGeneral_.etag == prevEtag);
+            settingsGeneral_.emitSyncData = b;
+        }
     }
     return stdBlinds::error_code_t::NoError;
 }
 
-stdBlinds::error_code_t State::setHardwareSettingsFromJSON_(const JsonObject& obj, bool& shouldSave) {
+stdBlinds::error_code_t State::setHardwareSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave) {
     int prevEtag = settingsHardware_.etag;
     JsonVariant v = obj["pStep"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinStep != i);
-        settingsHardware_.pinStep = i;
+        if (settingsHardware_.pinStep != i) {
+            flags.pinStep_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinStep = i;
+        }
     }
     v = obj["pDir"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinDir != i);
-        settingsHardware_.pinDir = i;
+        if (settingsHardware_.pinDir != i) {
+            flags.pinDir_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinDir = i;
+        }
     }
     v = obj["pEn"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinEn != i);
-        settingsHardware_.pinEn = i;
+        if (settingsHardware_.pinEn != i) {
+            flags.pinEn_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinEn = i;
+        }
     }
     v = obj["pSleep"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinSleep != i);
-        settingsHardware_.pinSleep = i;
+        if (settingsHardware_.pinSleep != i) {
+            flags.pinSleep_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinSleep = i;
+        }
     }
     v = obj["pReset"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinReset != i);
-        settingsHardware_.pinReset = i;
+        if (settingsHardware_.pinReset != i) {
+            flags.pinReset_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinReset = i;
+        }
     }
     v = obj["pMs1"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinMs1 != i);
-        settingsHardware_.pinMs1 = i;
+        if (settingsHardware_.pinMs1 != i) {
+            flags.pinMs1_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinMs1 = i;
+        }
     }
     v = obj["pMs2"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinMs2 != i);
-        settingsHardware_.pinMs2 = i;
+        if (settingsHardware_.pinMs2 != i) {
+            flags.pinMs2_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinMs2 = i;
+        }
     }
     v = obj["pMs3"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinMs3 != i);
-        settingsHardware_.pinMs3 = i;
+        if (settingsHardware_.pinMs3 != i) {
+            flags.pinMs3_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinMs3 = i;
+        }
     }
     v = obj["pHome"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.pinHomeSw != i);
-        settingsHardware_.pinHomeSw = i;
+        if (settingsHardware_.pinHomeSw != i) {
+            flags.pinHomeSw_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.pinHomeSw = i;
+        }
     }
     v = obj["cLen"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.cordLength != i);
-        settingsHardware_.cordLength = i;
+        if (settingsHardware_.cordLength != i) {
+            flags.cordLength_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.cordLength = i;
+        }
     }
     v = obj["cDia"];
     if (!v.isNull()) {
         double d = v.as<double>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.cordDiameter != d);
-        settingsHardware_.cordDiameter = d;
+        if (settingsHardware_.cordDiameter != d) {
+            flags.cordDiameter_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.cordDiameter = d;
+        }
     }
     v = obj["axDia"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.axisDiameter != i);
-        settingsHardware_.axisDiameter = i;
+        if (settingsHardware_.axisDiameter != i) {
+            flags.axisDiameter_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.axisDiameter = i;
+        }
     }
     v = obj["stepsPerRev"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && settingsHardware_.stepsPerRev != i);
-        settingsHardware_.stepsPerRev = i;
+        if (settingsHardware_.stepsPerRev != i) {
+            flags.stepsPerRev_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.stepsPerRev = i;
+        }
     }
     v = obj["res"];
     if (!v.isNull()) {
@@ -414,19 +469,26 @@ stdBlinds::error_code_t State::setHardwareSettingsFromJSON_(const JsonObject& ob
             i != (int)stdBlinds::resolution_t::kSixteenth) {
             return stdBlinds::error_code_t::InvalidJson;
         }
-        updateHardwareDirty_(settingsHardware_.etag == prevEtag && (int)settingsHardware_.resolution != i);
-        settingsHardware_.resolution = (stdBlinds::resolution_t)i;
+        if ((int)settingsHardware_.resolution != i) {
+            WLOG_I(TAG, "new resolution: %i", i);
+            flags.resolution_ = true;
+            updateHardwareDirty_(settingsHardware_.etag == prevEtag);
+            settingsHardware_.resolution = (stdBlinds::resolution_t)i;
+        }
     }
     return stdBlinds::error_code_t::NoError;
 }
 
-stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, bool& shouldSave) {
+stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave) {
     int prevEtag = settingsMQTT_.etag;
     JsonVariant v = obj["enabled"];
     if (!v.isNull()) {
         bool b = v.as<boolean>();
-        updateMqttDirty_(settingsMQTT_.etag == prevEtag && settingsMQTT_.enabled != b);
-        settingsMQTT_.enabled = b;
+        if (settingsMQTT_.enabled != b) {
+            flags.mqttEnabled_ = true;
+            updateMqttDirty_(settingsMQTT_.etag == prevEtag);
+            settingsMQTT_.enabled = b;
+        }
     }
     v = obj["host"];
     if (!v.isNull()) {
@@ -436,17 +498,23 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateMqttDirty_(settingsMQTT_.etag == prevEtag && 0 != strcmp(settingsMQTT_.host, s));
-            strlcpy(settingsMQTT_.host, s, len + 1);
-            settingsMQTT_.host[len + 1] = 0;
+            if (0 != strcmp(settingsMQTT_.host, s)) {
+                flags.mqttHost_ = true;
+                updateMqttDirty_(settingsMQTT_.etag == prevEtag);
+                strlcpy(settingsMQTT_.host, s, len + 1);
+                settingsMQTT_.host[len + 1] = 0;
+            }
         }
     }
     v = obj["port"];
     if (!v.isNull()) {
         u_int i = v.as<unsigned int>();
         // TODO: validate port is in range
-        updateMqttDirty_(settingsMQTT_.etag == prevEtag && settingsMQTT_.port != i);
-        settingsMQTT_.port = i;
+        if (settingsMQTT_.port != i) {
+            flags.mqttPort_ = true;
+            updateMqttDirty_(settingsMQTT_.etag == prevEtag);
+            settingsMQTT_.port = i;
+        }
     }
     v = obj["topic"];
     if (!v.isNull()) {
@@ -456,9 +524,12 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateMqttDirty_(settingsMQTT_.etag == prevEtag && 0 != strcmp(settingsMQTT_.topic, s));
-            strlcpy(settingsMQTT_.topic, s, len + 1);
-            settingsMQTT_.topic[len + 1] = 0;
+            if (0 != strcmp(settingsMQTT_.topic, s)) {
+                flags.mqttTopic_ = true;
+                updateMqttDirty_(settingsMQTT_.etag == prevEtag);
+                strlcpy(settingsMQTT_.topic, s, len + 1);
+                settingsMQTT_.topic[len + 1] = 0;
+            }
         }
     }
     v = obj["user"];
@@ -469,10 +540,13 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateMqttDirty_(settingsMQTT_.etag == prevEtag && 0 != strcmp(settingsMQTT_.user, s));
-            strlcpy(settingsMQTT_.user, s, len + 1);
-            settingsMQTT_.user[len + 1] = 0;
-            WLOG_I(TAG, "set user: %s", settingsMQTT_.user);
+            if (0 != strcmp(settingsMQTT_.user, s)) {
+                flags.mqttUser_ = true;
+                updateMqttDirty_(settingsMQTT_.etag == prevEtag);
+                strlcpy(settingsMQTT_.user, s, len + 1);
+                settingsMQTT_.user[len + 1] = 0;
+                WLOG_I(TAG, "set user: %s", settingsMQTT_.user);
+            }
         }
     }
     v = obj["pass"];
@@ -483,11 +557,13 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
             return stdBlinds::error_code_t::InvalidJson;
         }
         else {
-            updateMqttDirty_(settingsMQTT_.etag == prevEtag && 0 != strcmp(settingsMQTT_.password, s));
-            strlcpy(settingsMQTT_.password, s, len + 1);
-            settingsMQTT_.password[len + 1] = 0;
-            WLOG_I(TAG, "set password: %s", settingsMQTT_.password);
-
+            if (0 != strcmp(settingsMQTT_.password, s)) {
+                flags.mqttPass_ = true;
+                updateMqttDirty_(settingsMQTT_.etag == prevEtag);
+                strlcpy(settingsMQTT_.password, s, len + 1);
+                settingsMQTT_.password[len + 1] = 0;
+                WLOG_I(TAG, "set password: %s", settingsMQTT_.password);
+            }
         }
     }
 
@@ -497,10 +573,12 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, b
 stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObject& obj, bool shouldSave) {
     auto err = stdBlinds::error_code_t::NoError;
 
+    EventFlags flags;
+
     JsonVariant v = obj["gen"];
     if (!v.isNull()) {
         auto prev = settingsGeneral_;
-        err = setGeneralSettingsFromJSON_(v.as<JsonObject>(), shouldSave);
+        err = setGeneralSettingsFromJSON_(v.as<JsonObject>(), flags, shouldSave);
         if (err != stdBlinds::error_code_t::NoError) {
             settingsGeneral_ = prev;
             return err;
@@ -510,7 +588,7 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
     v = obj["hw"];
     if (!v.isNull()) {
         auto prev = settingsHardware_;
-        err = setHardwareSettingsFromJSON_(v.as<JsonObject>(), shouldSave);
+        err = setHardwareSettingsFromJSON_(v.as<JsonObject>(), flags, shouldSave);
         if (err != stdBlinds::error_code_t::NoError) {
             settingsHardware_ = prev;
             return err;
@@ -520,11 +598,22 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
     v = obj["mqtt"];
     if (!v.isNull()) {
         auto prev = settingsMQTT_;
-        err = setMQTTSettingsFromJSON_(v.as<JsonObject>(), shouldSave);
+        err = setMQTTSettingsFromJSON_(v.as<JsonObject>(), flags, shouldSave);
         if (err != stdBlinds::error_code_t::NoError) {
             settingsMQTT_ = prev;
             return err;
         }
+    }
+
+    EventFlags toNotify;
+    toNotify.resolution_ = true;
+
+    WLOG_I(TAG, "toNotify: %i", toNotify.mask_);
+    WLOG_I(TAG, "flags: %i", flags.mask_);
+    WLOG_I(TAG, "(flags.mask_ & toNotify.mask_): %i", (flags.mask_ & toNotify.mask_));
+    if (0 != (flags.mask_ & toNotify.mask_)) {
+        WLOG_I(TAG, "notifying...");
+        Notify(that, flags);
     }
 
     WLOG_D(TAG, "AFTER SETTINGS LOAD");
@@ -534,7 +623,6 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
     }
     if (isConfigDirty_) {
         WLOG_D(TAG, "SAVE CONFIG");
-
         saveConfig();
     }
 

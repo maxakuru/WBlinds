@@ -229,13 +229,6 @@ static void getSettings(AsyncWebServerRequest* request) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
    auto state = State::getInstance();
 
-   bool fromFile = request->hasParam("f");
-   if (fromFile) {
-      if (!handleFileRead(request, "/settings.json")) {
-         return request->send(404);
-      }
-   };
-
    String data;
    String etag;
    if (request->hasArg("type")) {

@@ -14,7 +14,7 @@ import { DeviceRecord, SettingsData, State, StateData } from "@State";
 import "./Home.css";
 import { DEVICES, PRESETS, STATE } from "@Const";
 
-type DeviceClickHandler = (index: number) => void;
+type DeviceClickHandler = (data: DeviceRecord) => void;
 export interface HomeAPI {
   onDeviceClick: (handler: DeviceClickHandler) => void;
   destroy(): void;
@@ -27,6 +27,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
   let _loading = true;
   let _tiles: Tile[] = [];
   let _deviceClickHandlers: DeviceClickHandler[] = [];
+  let _currentDeviceName: string;
 
   this.init = (elem: HTMLElement) => {
     // initially spinner is showing,
@@ -79,10 +80,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       const { container, tiles } = getAllTiles(type);
       tiles.forEach((tile) => {
         const { id } = tile;
-        if (
-          !id.endsWith(State.get("settings.gen.deviceName") as string) &&
-          !(id in o)
-        ) {
+        if (!id.endsWith(_currentDeviceName) && !(id in o)) {
           // Existing, but doesn't exist in devices
           tile.remove();
         } else {
@@ -116,6 +114,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
 
       State.observe(STATE, ({ value, prev }) => {
         debug("state updated: ", value, prev);
+        _currentDeviceName = State.get("settings.gen.deviceName");
         loaded();
 
         // TODO: add mac address, etc. to window before sending from ESP

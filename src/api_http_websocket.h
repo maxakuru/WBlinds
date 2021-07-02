@@ -49,6 +49,8 @@ static void unpackWSMessage(WSMessage& msg, char* message, size_t len) {
             if (!gotPreData) {
                 if (k == 0) {
                     strcpy(msg.macAddress, d);
+                    // if it's bound for another device, stop early
+                    if (0 != strncmp(msg.macAddress, macAddress.c_str(), 12)) return;
                     memset(d, 0, sizeof(d));
                     k++;
                     continue;
@@ -88,11 +90,14 @@ static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     AwsFrameInfo* info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
         data[len] = '\0';
-        // TODO: parse first chunk of message to see 
-        // if it's bound for a different device.
         WSMessage msg;
         unpackWSMessage(msg, (char*)data, len);
         if (msg.flags.mask_ == 0) return;
+        // if it's bound for a different device, 
+        // only the mac, flags, and type will have been parsed
+        // TODO: forward to the other device via UDP
+        if (0 != strncmp(msg.macAddress, macAddress.c_str(), 12)) return;
+        // otherwise, handle the event on current device
         auto state = State::getInstance();
         state->loadFromMessage(nullptr, msg);
     }

@@ -3,7 +3,6 @@ import template from "./Slider.html";
 import "./Slider.css";
 import { querySelector, stopPropagation } from "@Util";
 import { setStyle } from "min";
-import { OnChangeHandler } from "components/Card";
 
 export const OPEN_COLOR = "#1d95db";
 export const CLOSED_COLOR = "#606060";
@@ -24,9 +23,9 @@ export const setGradientStyle = (
   );
 };
 
-type ChangeHandler = (newVal: any) => unknown;
+type OnChangeHandler = (newVal: number) => unknown;
 export interface SliderAPI {
-  onChange: (handler: ChangeHandler) => void;
+  onChange: (handler: OnChangeHandler) => void;
   destroy(): void;
 }
 

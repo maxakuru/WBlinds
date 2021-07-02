@@ -75,7 +75,7 @@ interface SettingsInputEntry {
 
 const SETTING_INPUT_MAP: Record<
   "gen",
-  Record<keyof SettingsData["gen"], SettingsInputEntry>
+  Record<keyof Omit<SettingsData["gen"], "mac" | "ip">, SettingsInputEntry>
 > &
   Record<"hw", Record<keyof SettingsData["hw"], SettingsInputEntry>> &
   Record<"mqtt", Record<keyof SettingsData["mqtt"], SettingsInputEntry>> = {

@@ -12,6 +12,8 @@ export interface SettingsData {
     ssid: string;
     pass: string;
     deviceName: string;
+    mac: string;
+    ip: string;
     mdnsName: string;
     emitSync: boolean;
   };
@@ -43,8 +45,12 @@ export interface SettingsData {
 
 export interface DeviceRecord {
   name?: string;
+  mac: string;
+  ip: string;
   tPos: number;
   pos: number;
+  accel?: number;
+  speed?: number;
 }
 
 // TODO
