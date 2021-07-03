@@ -13,36 +13,35 @@ Build Wifi-connected smart blinds using ESP32 and off-the-shelf components for <
 * Halts on home detection
 * [Web UI](#web-ui) for controlling/configuring
 
-<br/>
 
 ## Table of Contents
 <!--ts-->
-* [Setup](#setup)
-    * [Hardware](#hardware)
-    * [Circuit](#circuit)
-    * [Software](#software)
-* [APIs](#apis)
-* [Web UI](#web-ui)
-* [Configuration](#configuration)
-* [TODO](#todo)
-* [Development](#development)
-    * [Custom Integrations](#custom-integrations)
-* [Appendix](#appendix)
-    * [Other Files](#other-files)
-    * [Choosing a Motor](#choosing-a-motor)
+   * [Setup](#setup)
+      * [Hardware](#hardware)
+      * [Circuit](#circuit)
+      * [Software](#software)
+   * [APIs](#apis)
+   * [Web UI](#web-ui)
+   * [Configuration](#configuration)
+   * [TODO](#todo)
+   * [Development](#development)
+      * [Custom Integrations](#custom-integrations)
+   * [Appendix](#appendix)
+      * [Other Files](#other-files)
+      * [Choosing a Motor](#choosing-a-motor)
 <!--te-->
 
+<h2 id="setup">✏️ Setup</h2>
 
-## ✏️ Setup
 ### Hardware
 These are some suggestions for hardware to use. The first link in each row is the product I used for the prototype. All links are non-affiliate and can be found elsewhere if you look around. Prices are estimates including shipping at the time I purchased and may have changed since then; I suggest searching around if so.
 
 <table>
   <tbody>
     <tr>
-      <th>Part</th>
-      <th>Purchase Links</th>
-      <th>Notes</th>
+      <th>Part ~~~~~~~~</th>
+      <th>Purchase Links ~~~~~~~~~~~~~~~~~~~~~~~~~~~~</th>
+      <th>Notes <br> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~</th>
     </tr>
     <tr>
       <td>ESP32</td>
@@ -78,7 +77,7 @@ These are some suggestions for hardware to use. The first link in each row is th
         • <a href=https://www.pololu.com/category/209/d24v5fx-step-down-voltage-regulators>D24V5Fx (Polulu, $5)</a><br>
         • <a href=https://www.amazon.com/Anmbest-AMS1117-3-3-4-75V-12V-Voltage-Regulator/dp/B07CP4P5XJ>10x 5-12V to 3.3v (Amazon, $9)</a>
       </td>
-      <td>Circuit below is using the one from AliExpress. Others may have different number of pins or pin orders, so check the pinout before wiring.</td>
+      <td>Circuit below is using the one from AliExpress.  Others may have different number of pins or pin orders, so check the pinout before wiring.</td>
     </tr>
     <tr>
       <td>Power supply</td>
@@ -87,7 +86,7 @@ These are some suggestions for hardware to use. The first link in each row is th
         • <a href=https://www.pololu.com/product/1468>12V 5A (Polulu, $19)</a><br>
         • <a href=https://www.amazon.com/Converter-100-220V-Transformer-5-5x2-1mm-Accessories/dp/B08C594VNP>12V 5A (Amazon, $10)</a>
       </td>
-      <td>You can (and probably want to) use a voltage over the motor's rating. That's fine, you just need to stay below it's rated current. <br> <br> The current needed depends on motor rating and how many blinds you'll be moving simultaneously with the same power supply.</td>
+      <td>You can (and probably want to) use a voltage over the motor's rating.  That's fine, you just need to stay below it's rated current. <br> <br>  The current needed depends on motor rating and how many blinds you'll be moving simultaneously with the same power supply.</td>
     </tr>
     <tr>
       <td>Microswitch</td>
@@ -96,7 +95,7 @@ These are some suggestions for hardware to use. The first link in each row is th
         • <a href=https://www.pololu.com/product/1402>1x (Polulu, $1)</a><br>
         • <a href=https://www.amazon.com/Antrader-KW4-3Z-3-Micro-Switch-Switches/dp/B07GDD9PJL>6x (Amazon, $6)</a>
       </td>
-      <td>Optional, used as a limit switch for the "fully open" position. Any switch could work here.</td>
+      <td>Optional, used as a limit switch for the "fully open" position.  Any switch could work here.</td>
     </tr>
     <tr>
       <td>Blinds</td>
@@ -104,7 +103,7 @@ These are some suggestions for hardware to use. The first link in each row is th
         • <a href="https://www.ikea.com/us/en/p/hoppvals-room-darkening-cellular-blind-gray-20386440">HOPPVALS (IKEA, $20-45)</a><br>
         • <a href="https://www.ikea.com/us/en/p/trippevals-black-out-cellular-blind-light-gray-00445006/">TRIPPEVALS (IKEA, $40-60)</a>
       </td>
-      <td>My builds use cellular shades from IKEA, modified to wrap the cord around a 3D printed axis, instead of the retail spring mechanism. <br><br> Any blinds that can be moved by wrapping a cord around an axis could easily be adapted. Most cordless blinds could be used with some modifications. Roller blinds would be the easiest in most cases.</td>
+      <td>My builds use cellular shades from IKEA, modified to wrap the cord around a 3D printed axis, instead of the retail spring mechanism. <br><br>  Any blinds that can be moved by wrapping a cord around an axis could easily be adapted.  Most cordless blinds could be used with some modifications. Roller blinds would be the easiest in most cases.</td>
     </tr>
   </tbody>
 </table>
@@ -134,7 +133,8 @@ I've created PCBs that fit the components, but am still tweaking it -- the desig
 9. You will be disconnected from the AP. Find the IP address of the device on your network and enter it in your browser.
 > Steps 3-5 assume you have PlatformIO, Node.js, Yarn installed. You can also flash without Node/Yarn by using the [PlatformIO VSCode Plugin](#tools).
 
-# 🔌 APIs
+<h2 id="apis">🔌 APIs</h2>
+
 These APIs are in flux!
 
 ### HTTP
@@ -263,7 +263,7 @@ Where `pos` is %, `speed` is Hz, and `accel` is steps/s^2.
 ### Homekit
 Native Homekit integration allows the ESP32 to be detected as a device without a bridge/emulator. This mode requires percentage-based position values, so it's important to calibrate the settings first.
 
-## 💻 Web UI
+<h2 id="web-ui">💻 Web UI</h2>
 
 ### Home
 <img src="./etc/home-1.png" width="250"> <img src="./etc/home-2.png" width="250">
@@ -271,8 +271,8 @@ Native Homekit integration allows the ESP32 to be detected as a device without a
 ### Settings
 <img src="./etc/settings-1.png" width="250"> <img src="./etc/settings-2.png" width="250"> <img src="./etc/settings-3.png" width="250">
 
+<h2 id="configuration">🔧 Configuration</h2>
 
-## 🔧 Configuration
 There are a few ways to configure WBlinds. Eventually the goal is to provide a way to easily calibrate top and bottom ranges of the blinds, but for now the distances are either manually set or (by default) calculated from configuration values.
 
 ### Parameters
@@ -296,7 +296,7 @@ There are a few ways to configure WBlinds. Eventually the goal is to provide a w
 | `17` | pMs3 | Microstep resolution pin 3 (optional)
 | `4` | pHomeSw | Home trigger switch, recommended as a way to hard stop when the blinds reach the fully contracted position to avoid damaging hardware when steps are skipped or malfunctions. (optional)
 
-## ⏳ TODO
+<h2 id="todo">⏳ TODO</h2>
 
 List of tasks, roughly in priority and implementation order. If you think a feature should be added, open an issue!
 
@@ -329,7 +329,8 @@ List of tasks, roughly in priority and implementation order. If you think a feat
 - [ ] Servo brake & relay for minimizing power consumption
 - [ ] State approximation with Hall effect sensor (built-in or external)
 
-## 📝 Development
+<h2 id="development">📝 Development</h2>
+
 There are 2 main projects that make up this repo: the C++ ESP controller and a TypeScript-based web UI. The web UI is transpiled to Javascript and gzipped/chunked into header files with a script. All generated header files as well as transpiled JS is included in the repo, so no additional build steps are needed.
 
 ### Scripts
@@ -396,7 +397,7 @@ public:
 }
 ```
 
-## 💤 Appendix
+<h2 id="appendix">💤 Appendix</h2>
 
 ### Other files
 The `/etc` directory contains some STL files that may be useful for building WBlinds. Those are designed for use with IKEA HOPPVALS, but would be close to the TRIPPVALS, too.
