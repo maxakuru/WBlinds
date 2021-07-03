@@ -5,4 +5,6 @@ CI=true yarn build
 ./node_modules/.bin/lint-staged
 git add ./public/index.js
 git add ./public/index.html
+git add ./src/ui_index.h
+
 
