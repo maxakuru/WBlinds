@@ -420,9 +420,11 @@ As speed increases torque (generally) decreases, you can see this in the torque 
 You want to find a motor that has a high enough speed that you aren't waiting until sunset for your blinds to open, and a high enough torque that you aren't skipping steps or stalling at 90% open. 
 
 #### Putting it together
-This won't be exact, but is a good enough estimate. I'll use the defaults from the included STLs and my TRIPPEVALS, along with a constant speed. This is assuming a setup where a cord (A) or fabric (B) wraps around an axis that is directly driven by the motor.. something like these:
+This won't be exact, but is a good enough estimate. I'll use the defaults from the included STLs and IKEA TRIPPEVALS, along with a constant speed. In practice, torque will be higher at the moment it starts to move, as acceleration is applied to go from stopped to max speed. I'll ignore it since the acceleration will be very low (as will top speed).
 
-```sh
+This is assuming a setup where a cord (A) or fabric (B) wraps around an axis that is directly driven by the motor.. something like these:
+
+```
 # A
 |```````|   __________________
 | Motor |==|__||||______||||__| <- cord spooled (ie. TRIPPEVALS)
@@ -439,59 +441,58 @@ This won't be exact, but is a good enough estimate. I'll use the defaults from t
 ```
 
 1. Get some variables:
-```py
+```
 # constants
 g = 9.8m/s^2
 
 # The thicker the axis, the fewer rotations needed and faster it can move, at the cost of higher torque required.
-Axis diameter (Da) = 15mm = 1.5cm
+Axis diameter   (Da) = 15mm = 1.5cm
 
 # Thickness of cord or fabric, since Da increases as the cord is wrapped around.
-Cord diameter (Dc) = 0.5mm = 0.05cm
+Cord diameter   (Dc) = 0.5mm = 0.05cm
 
 # Roughly length from top to bottom of window.
-Cord Length (Lc) = 1650m
+Cord Length     (Lc) = 1650m
 
-# You can use a luggage scale to get a rough estimate.
-Maximum load  (m)  = 5kg
+# You can use a luggage scale to get a rough estimate, or just guesstimate conservatively.
+Maximum load    (m)  = 5kg 
 
 # Range of acceptable durations to go from fully opened to fully closed or vice versa. The faster it moves the louder it will be.
-Slowest (t-) = 3min
-Fastest (t+) = 1min
+Slowest         (t-) = 3min
+Fastest         (t+) = 1min
 ```
 
 2. Calculate revolutions to fully wrapped:
 > See handy calculator [here](https://www.giangrandi.ch/soft/spiral/spiral.shtml)
-```py
+```ruby
          Dc - Da + sqrt[(Da - Dc)^2 + (4 * Dc * Lc) / pi]
 Nrev = ------------------------------------------------
                       2 * Dc
 ```
 
-```py
+```ruby
 Nrev = (1 - 15 + sqrt((15 - 1)^2 + (4 * 0.5 * 1650) / 3.14)) / (2 * 0.5)
 Nrev ~= 21
 ```
 
-2. Calculate acceptable RPM range:
-```py
+3. Calculate acceptable RPM range:
+```ruby
 RPM = Nrev / t
 ```
-```py
+```ruby
 RPM- = 21 / 3 = 7
 RPM+ = 21 / 1 = 21
 ```
 
-2. Calculate peak torque:
-```py
-# Using cm
-# Some worst-case fudge here
+4. Calculate peak torque:
+```ruby
+# Some worst-case fudge here, in this example it barely impacts the result.
 T = m * g * ((Nrev * Dc + Da) / 2)
 ```
 
-```py
-T = 5 * 9.8 * ((30 * 0.05 + 0.15) / 2)
-T = 40.4 ~= 40N.cm
+```ruby
+T = 5 * 9.8 * ((30 * 0.0005 + 0.0015) / 2)
+T = 0.404 N.m ~= 40N.cm
 ```
 
 So, a motor that can pull **40N.cm at around 7 to 21 RPM** is good for this example. Now you can browse motors and look at torque curves to find a suitable choice, like [this $10 stepper](https://www.aliexpress.com/item/1005002191787745.html?spm=a2g0s.9042311.0.0.27424c4dTeE5ku) ([torque curve](https://ae01.alicdn.com/kf/HTB1WbFaTCzqK1RjSZFHq6z3CpXaq.jpg)) or [this $24 planetary](https://www.omc-stepperonline.com/economy-planetary-gearbox/nema-14-stepper-motor-bipolar-l33mm-w-gear-raio-511-planetary-gearbox-14hs13-0804s-pg51.html) ([torque curve](https://www.omc-stepperonline.com/download/14HS13-0804S-PG51_Torque_Curve.pdf)).
