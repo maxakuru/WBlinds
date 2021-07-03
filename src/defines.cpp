@@ -27,7 +27,7 @@ namespace stdBlinds {
 
 // AP
 char apSSID[MAX_SSID_LENGTH] = "";
-char apPass[MAX_PW_LENGTH] = "Wblinds-123";
+char apPass[MAX_PW_LENGTH] = "Wbl1nds-1337";
 int apChannel = 1;
 bool apHide = 0;
 
