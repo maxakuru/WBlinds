@@ -379,7 +379,7 @@ Out of the several variables a stepper motor has I've narrowed it down to the mo
 A skipped step happens most often when:
 1. The motor isn't provided with enough volts/amps to move the load.
 2. The load is heavier than the stepper's holding torque.
-3. Power is switched off and the motors torque is released, and the load is heavier than the motor's passive holding torque.
+3. Power is switched off, the motor is "released", and the load is greater than the motor's [detent torque](https://www.ierservices.com/blog/what-is-detent-torque).
 3. Resonance/vibrations.
 
 What skipped steps means to us is that the current state the motor "thinks" it's at is actually off by the number of steps skipped. This is especially bad if you don't have a limit switch to avoid damage, but also just annoying for the end user.
@@ -388,7 +388,7 @@ What skipped steps means to us is that the current state the motor "thinks" it's
 
 **#3** can be avoided by using a high gear ratio, a brake, or a homing switch and rehoming on reset.
 
-**#4** is hard to identify and to fix (you'll probably be fine ¯\\_(ツ)\_/¯ ).
+**#4** is tricky to identify and to fix (you'll probably be fine ¯\\_(ツ)\_/¯ ).
 
 #### Gear ratio
 Not all stepper motors will have gears, but many do. Some also have a gearbox that increases the gear ratio. There are different kinds of gearboxes: [planetary](https://www.omc-stepperonline.com/ple-series-planetary-gearbox/ple-series-planetary-gearbox-gear-ratio-5-1-backlash-15-arc-min-for-nema-17-stepper-motor.html), [worm](https://www.aliexpress.com/item/32889194047.html), [spur](https://www.omc-stepperonline.com/pm-geared-stepper-motor/15x225mm-pm-stepper-motor-w-gear-ratio-1001-spur-gearbox). Then there are different [shapes](https://www.motioncontroltips.com/spur-gears-what-are-they-and-where-are-they-used/) of [gears](https://www.motioncontroltips.com/helical-gears-what-are-they-and-where-are-they-used/).. different [gear profiles](https://khkgears.net/new/gear_knowledge/abcs_of_gears-b/gear_tooth_profile.html).. different [tooth pitches](https://khkgears.net/new/gear_knowledge/abcs_of_gears-b/gear_accuracy.html) etc. 
