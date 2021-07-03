@@ -64,6 +64,7 @@ These are some suggestions for hardware to use. The first link in each row is th
       <td>Stepper Motor</td>
       <td>
         • <a href=https://www.aliexpress.com/item/1005002191787745.html>1.5A 45Ncm (AliExpress, $18)</a><br>
+         <a href="https://www.omc-stepperonline.com/nema-17-bipolar-42ncm-59-49oz-in-1-5a-42x42x39mm-4-wires-w-1m-cable-and-connector.html">1.5A 42Ncm (StepperOnline, $5 at time of writing)</a>
         • <a href=https://www.pololu.com/product/2267>1.7A 36Ncm (Polulu, $18)</a><br>
         • <a href=https://www.amazon.com/Twotrees-Stepper-17HS4401-Connector-Printer/dp/B07THK76QQ>1.5A 42Ncm (Amazon, $10)</a>
       </td>
@@ -370,4 +371,128 @@ The `/etc` directory contains some STL files that may be useful for building WBl
 > Note: Like everything else, those designs are a WIP :)
 
 ### Choosing a motor
-TODO
+TL;DR: [putting it together](#putting-it-together).
+
+Out of the several variables a stepper motor has I've narrowed it down to the most important for our purposes. It's worth mentioning that WBlinds could be built using a regular DC motor and an encoder. Stepper motors are cheap and widely available, largely thanks to 3D printing. They also simplify the design quite a bit, so they're what I will focus on.
+
+#### Skipped steps
+A skipped step happens most often when:
+1. The motor isn't provided with enough volts/amps to move the load.
+2. The load is heavier than the stepper's holding torque.
+3. Power is switched off and the motors torque is released, and the load is heavier than the motor's passive holding torque.
+3. Resonance/vibrations.
+
+What skipped steps means to us is that the current state the motor "thinks" it's at is actually off by the number of steps skipped. This is especially bad if you don't have a limit switch to avoid damage, but also just annoying for the end user.
+
+**#1 & #2** can be avoided by choosing a proper motor, power supply, and current limit for your stepper driver.
+
+**#3** can be avoided by using a high gear ratio, a brake, or a homing switch and rehoming on reset.
+
+**#4** is hard to identify and to fix (you'll probably be fine ¯\\_(ツ)\_/¯ ).
+
+#### Gear ratio
+Not all stepper motors will have gears, but many do. Some also have a gearbox that increases the gear ratio. There are different kinds of gearboxes: [planetary](https://www.omc-stepperonline.com/ple-series-planetary-gearbox/ple-series-planetary-gearbox-gear-ratio-5-1-backlash-15-arc-min-for-nema-17-stepper-motor.html), [worm](https://www.aliexpress.com/item/32889194047.html), [spur](https://www.omc-stepperonline.com/pm-geared-stepper-motor/15x225mm-pm-stepper-motor-w-gear-ratio-1001-spur-gearbox). Then there are different [shapes](https://www.motioncontroltips.com/spur-gears-what-are-they-and-where-are-they-used/) of [gears](https://www.motioncontroltips.com/helical-gears-what-are-they-and-where-are-they-used/).. different [gear profiles](https://khkgears.net/new/gear_knowledge/abcs_of_gears-b/gear_tooth_profile.html).. different [tooth pitches](https://khkgears.net/new/gear_knowledge/abcs_of_gears-b/gear_accuracy.html) etc. 
+
+For this guide we'll just think about **gear ratios and planetary stepper motors**.
+
+Higher gear ratio benefits:
+* Higher torque for less amperage
+* Lower noise
+* High holding torque (less drift when it's off)
+* Fewer skipped steps (both from torque and resonance)
+
+Drawbacks:
+* Higher cost ($30+, or ~3-5x)
+* Lower speed
+* Often large or awkward shapes (for our purpose)
+
+Considering our speed requirements are pretty low (or at least mine are), you could reasonably go with either. If you have large/heavy blinds it may make sense to look for a planetary stepper. I personally have been using regular NEMA17 steppers, but that's because I already had them.
+
+> Note: There's also a [difference](https://blog.orientalmotor.com/stepper-motor-basics-pm-vs-vr-vs-hybrid) between permanent magnet (PM) planetary steppers and "hybrids".
+
+> If you find a good, inexpensive planetary stepper to include in the parts list, contact me!
+
+#### Speed/Torque
+Whether you choose a regular stepper or gearbox stepper, the same final choices come up: how fast it moves vs. how much weight it can move.
+
+As speed increases torque (generally) decreases, you can see this in the torque curves of a [regular stepper motor](https://ae01.alicdn.com/kf/HTB1WbFaTCzqK1RjSZFHq6z3CpXaq.jpg) and [planetary stepper](https://www.omc-stepperonline.com/download/11HS12-0674D-PG5_Torque_Curve.pdf). 
+
+You want to find a motor that has a high enough speed that you aren't waiting until sunset for your blinds to open, and a high enough torque that you aren't skipping steps or stalling at 90% open. 
+
+#### Putting it together
+This won't be exact, but is a good enough estimate. I'll use the defaults from the included STLs and my TRIPPEVALS, along with a constant speed. This is assuming a setup where a cord (A) or fabric (B) wraps around an axis that is directly driven by the motor.. something like these:
+
+```sh
+# A
+|```````|   __________________
+| Motor |==|__||||______||||__| <- cord spooled (ie. TRIPPEVALS)
+|_______|  |   ||        ||   |
+           |   ||        ||   |
+           |___||________||___|
+
+# B
+|```````|   __________________
+| Motor |==|__________________| <- roll of fabric (ie. roller blinds)
+|_______|  |                  |
+           |  Blocking window |
+           |__________________|
+```
+
+1. Get some variables:
+```py
+# constants
+g = 9.8m/s^2
+
+# The thicker the axis, the fewer rotations needed and faster it can move, at the cost of higher torque required.
+Axis diameter (Da) = 15mm = 1.5cm
+
+# Thickness of cord or fabric, since Da increases as the cord is wrapped around.
+Cord diameter (Dc) = 0.5mm = 0.05cm
+
+# Roughly length from top to bottom of window.
+Cord Length (Lc) = 1650m
+
+# You can use a luggage scale to get a rough estimate.
+Maximum load  (m)  = 5kg
+
+# Range of acceptable durations to go from fully opened to fully closed or vice versa. The faster it moves the louder it will be.
+Slowest (t-) = 3min
+Fastest (t+) = 1min
+```
+
+2. Calculate revolutions to fully wrapped:
+> See handy calculator [here](https://www.giangrandi.ch/soft/spiral/spiral.shtml)
+```py
+         Dc - Da + sqrt[(Da - Dc)^2 + (4 * Dc * Lc) / pi]
+Nrev = ------------------------------------------------
+                      2 * Dc
+```
+
+```py
+Nrev = (1 - 15 + sqrt((15 - 1)^2 + (4 * 0.5 * 1650) / 3.14)) / (2 * 0.5)
+Nrev ~= 21
+```
+
+2. Calculate acceptable RPM range:
+```py
+RPM = Nrev / t
+```
+```py
+RPM- = 21 / 3 = 7
+RPM+ = 21 / 1 = 21
+```
+
+2. Calculate peak torque:
+```py
+# Using cm
+# Some worst-case fudge here
+T = m * g * ((Nrev * Dc + Da) / 2)
+```
+
+```py
+T = 5 * 9.8 * ((30 * 0.05 + 0.15) / 2)
+T = 40.4 ~= 40N.cm
+```
+
+So, a motor that can pull **40N.cm at around 7 to 21 RPM** is good for this example. Now you can browse motors and look at torque curves to find a suitable choice, like [this $10 stepper](https://www.aliexpress.com/item/1005002191787745.html?spm=a2g0s.9042311.0.0.27424c4dTeE5ku) ([torque curve](https://ae01.alicdn.com/kf/HTB1WbFaTCzqK1RjSZFHq6z3CpXaq.jpg)) or [this $24 planetary](https://www.omc-stepperonline.com/economy-planetary-gearbox/nema-14-stepper-motor-bipolar-l33mm-w-gear-raio-511-planetary-gearbox-14hs13-0804s-pg51.html) ([torque curve](https://www.omc-stepperonline.com/download/14HS13-0804S-PG51_Torque_Curve.pdf)).
+
