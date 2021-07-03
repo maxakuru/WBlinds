@@ -47,76 +47,62 @@ These are some suggestions for hardware to use. The first link in each row is th
     <tr>
       <td>ESP32</td>
       <td>
-        <ul>
-          <li><a href=https://www.aliexpress.com/item/1005001648850998.html>32S Devkit "V1" (AliExpress, $4)</a></li>
-          <li><a href=https://www.mouser.com/ProductDetail/Espressif-Systems/ESP32-S2-DevKitM-1?qs=DPoM0jnrROXzO8seOHN%252BOQ%3D%3D>32S Devkit M1 (Mouser, $8)</a></li>
-          <li><a href=https://www.amazon.com/HiLetgo-ESP-WROOM-32-Development-Microcontroller-Integrated/dp/B0718T232Z>NodeMCU-32 (Amazon, $11)</a></li>
-        </ul>
+        • <a href=https://www.aliexpress.com/item/1005001648850998.html>32S Devkit "V1" (AliExpress, $4)</a><br>
+        • <a href=https://www.mouser.com/ProductDetail/Espressif-Systems/ESP32-S2-DevKitM-1?qs=DPoM0jnrROXzO8seOHN%252BOQ%3D%3D>32S Devkit M1 (Mouser, $8)</a><br>
+        • <a href=https://www.amazon.com/HiLetgo-ESP-WROOM-32-Development-Microcontroller-Integrated/dp/B0718T232Z>NodeMCU-32 (Amazon, $11)</a>
       </td>
       <td>Circuit below wass using the first link. Pin assignments may vary between boards, often the same pins but more/less extra pins, or power pins are in different places. Be sure to check the pinout.</td>
     </tr>
     <tr>
       <td>Stepper Driver</td>
       <td>
-        <ul>
-          <li><a href=https://www.aliexpress.com/item/1005001374747956.html>A4988 (AliExpress, $2)</a></li>
-          <li><a href=https://www.pololu.com/product/1182>A4988 (Polulu, $6)</a></li>
-          <li><a href=https://www.amazon.com/Aokin-StepStick-Stepper-Driver-Printer/dp/B07JV835SW>5x A4988 (Amazon, $8)</a></li>
-        </ul>
+        • <a href=https://www.aliexpress.com/item/1005001374747956.html>A4988 (AliExpress, $2)</a><br>
+        • <a href=https://www.pololu.com/product/1182>A4988 (Polulu, $6)</a><br>
+        • <a href=https://www.amazon.com/Aokin-StepStick-Stepper-Driver-Printer/dp/B07JV835SW>5x A4988 (Amazon, $8)</a>
       </td>
       <td>Other drivers would work too, currently only A4988 is tested (using <a href=https://github.com/gin66/FastAccelStepper>FastAccelStepper</a>). <br><br> Be sure to <a href=https://youtu.be/89BHS9hfSUk>set the current limit</a> before attaching your motor.</td>
     </tr>
     <tr>
       <td>Stepper Motor</td>
       <td>
-        <ul>
-          <li><a href=https://www.aliexpress.com/item/1005002191787745.html>1.5A 45Ncm (AliExpress, $18)</a></li>
-          <li><a href=https://www.pololu.com/product/2267>1.7A 36Ncm (Polulu, $18)</a></li>
-          <li><a href=https://www.amazon.com/Twotrees-Stepper-17HS4401-Connector-Printer/dp/B07THK76QQ>1.5A 42Ncm (Amazon, $10)</a></li>
-        </ul>
+        • <a href=https://www.aliexpress.com/item/1005002191787745.html>1.5A 45Ncm (AliExpress, $18)</a><br>
+        • <a href=https://www.pololu.com/product/2267>1.7A 36Ncm (Polulu, $18)</a><br>
+        • <a href=https://www.amazon.com/Twotrees-Stepper-17HS4401-Connector-Printer/dp/B07THK76QQ>1.5A 42Ncm (Amazon, $10)</a>
       </td>
       <td>This may be over/underpowered for your needs, depending on the weight of the blinds. <br> <br> See <a href="#choosing-a-motor">choosing a motor</a>.</td>
     </tr>
     <tr>
       <td>3.3V Step-down Regulator</td>
       <td>
-        <ul>
-          <li><a href=https://www.aliexpress.com/item/4000714041437.html>5-40V to 3.3V (AliExpress, $2)</a></li>
-          <li><a href=https://www.pololu.com/category/209/d24v5fx-step-down-voltage-regulators>D24V5Fx (Polulu, $5)</a></li>
-          <li><a href=https://www.amazon.com/Anmbest-AMS1117-3-3-4-75V-12V-Voltage-Regulator/dp/B07CP4P5XJ>10x 5-12V to 3.3v (Amazon, $9)</a></li>
-        </ul>
+        • <a href=https://www.aliexpress.com/item/4000714041437.html>5-40V to 3.3V (AliExpress, $2)</a><br>
+        • <a href=https://www.pololu.com/category/209/d24v5fx-step-down-voltage-regulators>D24V5Fx (Polulu, $5)</a><br>
+        • <a href=https://www.amazon.com/Anmbest-AMS1117-3-3-4-75V-12V-Voltage-Regulator/dp/B07CP4P5XJ>10x 5-12V to 3.3v (Amazon, $9)</a>
       </td>
       <td>Circuit below is using the one from AliExpress. Others may have different number of pins or pin orders, so check the pinout before wiring.</td>
     </tr>
     <tr>
       <td>Power supply</td>
       <td>
-        <ul>
-          <li><a href=https://www.aliexpress.com/item/1005001555277278.html>24V 5A (AliExpress, $13)</a></li>
-          <li><a href=https://www.pololu.com/product/1468>12V 5A (Polulu, $19)</a></li>
-          <li><a href=https://www.amazon.com/Converter-100-220V-Transformer-5-5x2-1mm-Accessories/dp/B08C594VNP>12V 5A (Amazon, $10)</a></li>
-        </ul>
+        • <a href=https://www.aliexpress.com/item/1005001555277278.html>24V 5A (AliExpress, $13)</a><br>
+        • <a href=https://www.pololu.com/product/1468>12V 5A (Polulu, $19)</a><br>
+        • <a href=https://www.amazon.com/Converter-100-220V-Transformer-5-5x2-1mm-Accessories/dp/B08C594VNP>12V 5A (Amazon, $10)</a>
       </td>
       <td>You can (and probably want to) use a voltage over the motor's rating. That's fine, you just need to stay below it's rated current. <br> <br> The current needed depends on motor rating and how many blinds you'll be moving simultaneously with the same power supply.</td>
     </tr>
     <tr>
       <td>Microswitch</td>
       <td>
-        <ul>
-          <li><a href=https://www.aliexpress.com/item/1926553469.html>5x (AliExpress, $2)</a></li>
-          <li><a href=https://www.pololu.com/product/1402>1x (Polulu, $1)</a></li>
-          <li><a href=https://www.amazon.com/Antrader-KW4-3Z-3-Micro-Switch-Switches/dp/B07GDD9PJL>6x (Amazon, $6)</a></li>
-        </ul>
+        • <a href=https://www.aliexpress.com/item/1926553469.html>5x (AliExpress, $2)</a><br>
+        • <a href=https://www.pololu.com/product/1402>1x (Polulu, $1)</a><br>
+        • <a href=https://www.amazon.com/Antrader-KW4-3Z-3-Micro-Switch-Switches/dp/B07GDD9PJL>6x (Amazon, $6)</a>
       </td>
       <td>Optional, used as a limit switch for the "fully open" position. Any switch could work here.</td>
     </tr>
     <tr>
       <td>Blinds</td>
       <td>
-        <ul>
-          <li><a href="https://www.ikea.com/us/en/p/hoppvals-room-darkening-cellular-blind-gray-20386440">HOPPVALS (IKEA, $20-45)</a></li>
-          <li><a href="https://www.ikea.com/us/en/p/trippevals-black-out-cellular-blind-light-gray-00445006/">TRIPPEVALS (IKEA, $40-60)</a></li>
-        </ul>
+        • <a href="https://www.ikea.com/us/en/p/hoppvals-room-darkening-cellular-blind-gray-20386440">HOPPVALS (IKEA, $20-45)</a><br>
+        • <a href="https://www.ikea.com/us/en/p/trippevals-black-out-cellular-blind-light-gray-00445006/">TRIPPEVALS (IKEA, $40-60)</a>
       </td>
       <td>My builds use cellular shades from IKEA, modified to wrap the cord around a 3D printed axis, instead of the retail spring mechanism. <br><br> Any blinds that can be moved by wrapping a cord around an axis could easily be adapted. Most cordless blinds could be used with some modifications. Roller blinds would be the easiest in most cases.</td>
     </tr>
