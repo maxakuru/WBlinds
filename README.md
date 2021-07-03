@@ -23,7 +23,6 @@ Build Wifi-connected smart blinds using ESP32 and off-the-shelf components for <
    * [APIs](#apis)
    * [Web UI](#web-ui)
    * [Configuration](#configuration)
-   * [TODO](#todo)
    * [Development](#development)
       * [Custom Integrations](#custom-integrations)
    * [Appendix](#appendix)
@@ -295,39 +294,6 @@ There are a few ways to configure WBlinds. Eventually the goal is to provide a w
 | `5` | pMs2 | Microstep resolution pin 2 (optional)
 | `17` | pMs3 | Microstep resolution pin 3 (optional)
 | `4` | pHomeSw | Home trigger switch, recommended as a way to hard stop when the blinds reach the fully contracted position to avoid damaging hardware when steps are skipped or malfunctions. (optional)
-
-<h2 id="todo">⏳ TODO</h2>
-
-List of tasks, roughly in priority and implementation order. If you think a feature should be added, open an issue!
-
-- [ ] Move TODO to issues
-- [x] Parameterize pins
-- [x] Homekit integration
-- [x] Saving settings to SPIFFS
-- [x] Web UI - Settings
-- [x] AP & captive portal wifi setup
-- [x] WS support for web clients
-- [x] Hardware list
-- [x] Web UI - Devices
-- [ ] Setting for inverting directions
-- [ ] Solidify API definitions - HTTP (WIP)
-- [ ] Solidify API definitions - MQTT (WIP)
-- [ ] Web calibration wizard - WIP
-- [ ] Allow configuring AP password
-- [ ] Start AP after Wifi failure to connect
-- [ ] Build flags for overriding defaults (AP password, default SSID, Homekit pincode, etc.)
-- [ ] Add STLs for 3D printing axis, brake, enclosure - initial
-- [ ] Build walkthrough with Ikea HOPPVALS/TRIPPEVALS
-- [ ] Add schematic, PCB
-- [ ] UDP - Hello/Ack/Ping/Pong
-- [ ] API - Devices
-- [ ] API - Presets
-- [ ] Web UI - Presets
-- [ ] API - Routines
-- [ ] Web UI - Routines
-- [ ] UDP - Sync
-- [ ] Servo brake & relay for minimizing power consumption
-- [ ] State approximation with Hall effect sensor (built-in or external)
 
 <h2 id="development">📝 Development</h2>
 
