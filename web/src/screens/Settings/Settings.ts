@@ -167,6 +167,7 @@ const SETTING_INPUT_MAP: Record<
       g: InputGroup_Physical,
       o: [
         { l: "1", v: 1 },
+        { l: "1/2", v: 2 },
         { l: "1/4", v: 4 },
         { l: "1/8", v: 8 },
         { l: "1/16", v: 16 },

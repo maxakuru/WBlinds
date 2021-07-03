@@ -33,8 +33,6 @@ writeChunks(
     {
       filePath: pathResolve(__dirname, "../public/index.html"),
       name: "PAGE_index",
-      prepend: "=====(",
-      append: ")=====",
       method: "binary",
       inline: true,
       gzip: true,
@@ -49,8 +47,13 @@ writeChunks(
     {
       filePath: pathResolve(__dirname, "../public/bg.jpg"),
       name: "IMG_background",
-      prepend: "=====(",
-      append: ")=====",
+      method: "binary",
+      inline: false,
+      gzip: true,
+    },
+    {
+      filePath: pathResolve(__dirname, "../public/favicon.ico"),
+      name: "IMG_FAVICON",
       method: "binary",
       inline: false,
       gzip: true,

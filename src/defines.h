@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "ui_index.h"
 #include <LITTLEFS.h>
-// #include "ui_fixtures.h"
+#include "ui_fixtures.h"
 
 #ifdef WBLINDS_DEBUG
 #include "esp32-hal-log.h"

@@ -137,6 +137,17 @@ static void setCacheControlHeaders(AsyncWebServerResponse* response, String etag
    response->addHeader(F("ETag"), etag);
 }
 
+static void serveFavicon(AsyncWebServerRequest* request) {
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
+
+   AsyncWebServerResponse* response = request->beginResponse_P(200, "image/x-icon", IMG_FAVICON, IMG_FAVICON_L);
+
+   response->addHeader(F("Content-Encoding"), "gzip");
+   setCacheControlHeaders(response, String(VERSION));
+
+   request->send(response);
+}
+
 static void serveIndex(AsyncWebServerRequest* request) {
    if (handleFileRead(request, "/index.html")) return;
 
@@ -279,6 +290,11 @@ void BlindsHTTPAPI::init() {
    DefaultHeaders::Instance().addHeader("Access-Control-Expose-Headers", "*");
    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
+
+   /**
+    * Fixtures
+    */
+   server.on("/favicon.ico", HTTP_GET, serveFavicon);
 
    /**
     * /api endpoints
