@@ -34,10 +34,6 @@ const labels = [
   { t: "Settings", i: cog },
 ];
 
-/**
- * @param {*} ns
- * @es6export
- */
 export const run = (ns: WBlindsNamespace): void => {
   debug("onLoad(): ", ns);
   mock.init();

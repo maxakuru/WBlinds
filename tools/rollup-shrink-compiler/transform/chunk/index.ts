@@ -12,18 +12,14 @@ import { Ebbinghaus } from "../ebbinghaus";
 import lifecycle from "./lifecycle";
 import StrictTransform from "./strict";
 import DynamicImportTransform from "./dynamic-import";
-import ES6ExportTransform from "./es6-export";
 import { Mangle } from "../mangle";
 import ExportTransform from "./exports";
 
 export { ChunkTransform } from "./ChunkTransform";
 
 const TRANSFORMS: Array<typeof ChunkTransform> = [
-  // DynamicRemoveTransform,
-  // DynamicApplyTransform,
   StrictTransform,
   DynamicImportTransform,
-  // ES6ExportTransform,
   ExportTransform,
 ];
 
