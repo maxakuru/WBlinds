@@ -16,7 +16,7 @@ BlindsMQTTAPI::BlindsMQTTAPI() {
    WLOG_I(TAG, "constructor");
 }
 
-void BlindsMQTTAPI::handleEvent(const StateEvent& event) {
+void BlindsMQTTAPI::handleEvent(const WBlindsEvent& event) {
    // TODO:
    WLOG_I(TAG, "event mask: %i", event.flags_.mask_);
 }

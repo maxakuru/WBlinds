@@ -6,7 +6,7 @@
 #include "defines.h"
 #include "state.h"
 
-class UDPNotifier : protected StateObserver {
+class UDPNotifier : protected WBlindsObserver {
 public:
     explicit UDPNotifier(State& state)
         : state_(state) {
@@ -17,7 +17,7 @@ public:
     ~UDPNotifier() override {
         state_.Detach(this);
     };
-    void handleEvent(const StateEvent& event);
+    void handleEvent(const WBlindsEvent& event);
 
 private:
     void notify(byte* dg);

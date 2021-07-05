@@ -236,7 +236,7 @@ void Homekit::init() {
 	// resetToFactory();
 }
 
-void Homekit::handleEvent(const StateEvent& event) {
+void Homekit::handleEvent(const WBlindsEvent& event) {
 	WLOG_I(TAG);
 
 	// TODO: add more flags, custom handlers for custom characteristics

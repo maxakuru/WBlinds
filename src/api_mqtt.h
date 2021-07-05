@@ -3,7 +3,7 @@
 
 #ifndef DISABLE_MQTT
 
-
+#include "event.h"
 #include "api.h"
 
 class BlindsMQTTAPI : BlindsAPI {
@@ -12,7 +12,7 @@ public:
    ~BlindsMQTTAPI() override {
       State::getInstance()->Detach(this);
    };
-   void handleEvent(const StateEvent& event) override;
+   void handleEvent(const WBlindsEvent& event) override;
    void init() override;
    bool isInit() override;
 private:

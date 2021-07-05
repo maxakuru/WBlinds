@@ -1,13 +1,17 @@
+const DomTokenProto = DOMTokenList.prototype;
+
 export function addClass(elem: HTMLElement, ...tokens: string[]): void {
-  elem.classList.add(...tokens);
+  DomTokenProto.add.call(elem.classList, ...tokens);
 }
 
 export function removeClass(elem: HTMLElement, ...tokens: string[]): void {
-  elem.classList.remove(...tokens);
+  DomTokenProto.remove.call(elem.classList, ...tokens);
 }
 
 export const toggleClass = (elem: HTMLElement, token: string): void => {
-  elem.classList.toggle(token);
+  DomTokenProto.toggle.call(elem.classList, token);
+
+  // elem.classList.toggle.call(elem, token);
 };
 
 export const nextTick = setTimeout;
@@ -54,6 +58,7 @@ export function setStyle(
   key: keyof CSSStyleDeclaration,
   value: string
 ): void {
+  // CSSStyleDeclaration.prototype.setProperty.call(elem, key, value);
   elem.style[key as any] = value;
 }
 

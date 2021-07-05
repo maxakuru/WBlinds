@@ -2,9 +2,10 @@
 #define API_H_
 
 #include "defines.h"
+#include "event.h"
 #include "state.h"
 
-class BlindsAPI : virtual protected StateObserver {
+class BlindsAPI : virtual protected WBlindsObserver {
 
 public:
     virtual ~BlindsAPI() {};

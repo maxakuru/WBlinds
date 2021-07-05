@@ -258,7 +258,8 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       debug("settings loaded: ", State._state);
       // Events that come from WS shouldn't overwrite existing data.
       // TODO: add map of key -> inputs, check state of input and allow overwriting
-      // if the input hasn't been modified by the user.
+      // if the input hasn't been modified by the user. Would be pretty rare in normal
+      // household use.
       if (!_loading && !_savingOrCanceling) return;
       // Still loading, event came in between save press and response.
       if (!_loading && State.isSaving(SETTINGS)) return;

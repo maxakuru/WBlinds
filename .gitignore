@@ -6,7 +6,8 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-public/index.js.map
+public/*.js.map
+
 
 # deps
 node_modules
@@ -20,3 +21,5 @@ src/Credentials.h
 data/*
 databu/*
 flows.txt
+**/*.bu
+**/*.bu.*

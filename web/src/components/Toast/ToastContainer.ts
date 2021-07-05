@@ -26,6 +26,8 @@ const _ToastContainer: ComponentFunction<ToastContainerAPI> = function () {
       isPersistent?: boolean,
       timeout?: number
     ) => {
+      if (isError) console.error(message);
+
       const setBottomStyle = () => {
         setStyle(t.node, "bottom", `-${50 + 200 * (_toasts.length + 1)}px`);
       };

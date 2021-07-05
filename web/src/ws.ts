@@ -1,31 +1,54 @@
 import { EventFlagStringIndices, OrderedEventFlags } from "./eventFlags";
 import { debug } from "./util";
 
-export interface WSController {
-  ws: WebSocket;
-  // push(event: WSEventType.UpdateSettings, data: WSUpdateSettingsEvent): void;
-  push(event: WSEventType.UpdateState, data: WSUpdateStateEvent): void;
-}
-
+/**
+ * Matches `wsmessage_t` enum in src/state.h
+ */
 export const enum WSEventType {
-  UpdateSettings = 0,
-  UpdateState = 1,
+  State = 0,
+  Setting = 1,
+  Calibration = 2,
 }
 
-export interface WSUpdateSettingsEvent {
-  test?: boolean;
-}
-
-export interface WSUpdateStateEvent {
+interface WSEventBase {
   mac: string;
+}
+export interface WSUpdateSettingsEvent extends WSEventBase {
+  todo?: true;
+}
+
+export interface WSUpdateStateEvent extends WSEventBase {
   tPos?: number;
   pos?: number;
   speed?: number;
   accel?: number;
 }
 
+/**
+ * 0 = stop after current move completes
+ * 1 = stop immediate
+ */
+type MoveStopType = 0 | 1;
+
+export interface WSCalibrationEvent extends WSEventBase {
+  moveBy?: number;
+  stop?: MoveStopType;
+}
+
+export interface WSEventMap {
+  [WSEventType.State]: WSUpdateStateEvent;
+  [WSEventType.Setting]: WSUpdateSettingsEvent;
+  [WSEventType.Calibration]: WSCalibrationEvent;
+}
+
+/**
+ * Message from ESP to web UI telling of state update.
+ *
+ * Used right now to inform of changes of position,
+ * when moving to target position from current position.
+ */
 export interface WSIncomingStateEvent {
-  type: WSEventType.UpdateState;
+  type: WSEventType.State;
   mac: string;
   data: {
     tPos?: number;
@@ -35,8 +58,13 @@ export interface WSIncomingStateEvent {
     [key: string]: number;
   };
 }
+
+/**
+ * Incoming settings event
+ * Not currently used
+ */
 export interface WSIncomingSettingsEvent {
-  type: WSEventType.UpdateSettings;
+  type: WSEventType.Setting;
   mac: string;
   data: {
     deviceName?: string;
@@ -48,6 +76,18 @@ export interface WSIncomingSettingsEvent {
 }
 export type WSIncomingEvent = WSIncomingStateEvent | WSIncomingSettingsEvent;
 
+/**
+ * WSController
+ */
+export interface WSController {
+  ws: WebSocket;
+  // push(event: WSEventType.UpdateSettings, data: WSUpdateSettingsEvent): void;
+  push(event: WSEventType.State, data: WSUpdateStateEvent): void;
+}
+
+/**
+ * WSOptions
+ */
 export interface WSOptions {
   onDisconnect?(e: CloseEvent, reconnectAttempt: number): void;
   onConnect?(e: Event, reconnectAttempt: number): void;
@@ -59,6 +99,11 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
   let ws: WebSocket;
   let _enabled = false;
   let _reconnectAttempt = 0;
+  const { onMessage: oM, onDisconnect: oD, onConnect: oC, onError: oE } = opts;
+  const _hasOnError = !!oE;
+  const _hasOnConnect = !!oC;
+  const _hasOnMessage = !!oM;
+  const _hasOnDisconnect = !!oD;
 
   const connect = () => {
     ws = new WebSocket(
@@ -68,33 +113,29 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
       debug("[ws] onOpen(): ", e);
       _enabled = true;
       _reconnectAttempt = 0;
-      // TODO: reconnected event
-      opts.onConnect && opts.onConnect(e, _reconnectAttempt);
+      if (_hasOnConnect) oC(e, _reconnectAttempt);
     };
 
     ws.onclose = (e: CloseEvent) => {
       debug("[ws] onClose(): ", e);
       _enabled = false;
 
-      // TODO: disconnect event
-      // TODO: reconnect
-      opts.onDisconnect && opts.onDisconnect(e, _reconnectAttempt);
+      if (_hasOnDisconnect) oD(e, _reconnectAttempt);
       setTimeout(connect, Math.min(5000 * ++_reconnectAttempt, 60000));
     };
 
     ws.onmessage = (e: MessageEvent<any>) => {
       debug("[ws] onMessage(): ", e, e.data);
-      // TODO: parse packed message
       const unpacked = unpackMessages(e.data);
-      if (opts.onMessage) {
-        unpacked.map((m) => opts.onMessage(m));
+      if (_hasOnMessage) {
+        unpacked.forEach(oM);
       }
     };
 
     ws.onerror = (e: any) => {
       debug("[ws] onError(): ", e);
       _enabled = false;
-      opts.onError && opts.onError(e, _reconnectAttempt);
+      _hasOnError && oE(e, _reconnectAttempt);
     };
   };
 
@@ -106,23 +147,36 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
    * @param data
    * @returns
    */
-  const sortData = <T extends WSUpdateStateEvent>(data: T): number[] => {
-    return [data.pos, data.tPos, data.speed, data.accel];
+  const sortData = <K extends WSEventType, D extends WSEventMap[K]>(
+    ev: K,
+    data: D
+  ): number[] => {
+    if (ev === WSEventType.State) {
+      const d = data as WSUpdateStateEvent;
+      return [d.pos, d.tPos, d.speed, d.accel];
+    }
+    if (ev === WSEventType.Calibration) {
+      const d = data as WSCalibrationEvent;
+      return [d.moveBy, d.stop];
+    }
+    return [];
   };
 
-  const push = (ev: WSEventType, data: WSUpdateStateEvent) => {
+  const push = <K extends WSEventType, D extends WSEventMap[K]>(
+    ev: K,
+    data: D
+  ) => {
     debug("[ws] push(): ", ev, data);
     if (_enabled) {
-      const s = packMessage(ev, data.mac, sortData(data));
+      const s = packMessage(ev, data.mac, sortData(ev, data));
       debug("[ws] push() str: ", s);
       ws.send(s);
     }
   };
 
   function packMessage(ev: WSEventType, mac: string, data: number[]): string {
-    // TODO: mac
     switch (ev) {
-      case WSEventType.UpdateState: {
+      case WSEventType.State: {
         const f: (0 | 1)[] = [];
         let s = "";
         for (const k in data) {
@@ -135,11 +189,14 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
           }
         }
         debug("[packMessage] f: ", f);
-        // TODO: add other event type prefix
-        return `${mac}/${parseInt(f.reverse().join(""), 2)}/${s}`;
+        const flags = parseInt(f.reverse().join(""), 2);
+        return `${mac}/${ev}/${flags}/${s}`;
       }
-      default:
-        opts.onError && opts.onError("Unexpected event type", 0);
+      default: {
+        const e = "Unexpected event type";
+        if (_hasOnError) oE(e, 0);
+        else console.error(e);
+      }
     }
   }
 
@@ -147,15 +204,36 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
     // TODO: convert string message to object
     debug("unpackMessages: ", data);
     const spl = data.split("/");
-    const mac = spl.shift();
-    const mask = parseInt(spl.shift());
-    // for each event flag, add to event
+    // eslint-disable-next-line prefer-const
+    let [mac, type, mask]: [string, number, number] = spl as [
+      string,
+      number,
+      number
+    ];
+    type = parseInt(type as unknown as string);
+    mask = parseInt(mask as unknown as string);
+
+    // Check the message contents before unpacking.
+    // It should have the same number of data segments
+    // as bits flipped in the mask.
+    const bits = mask.toString(2).split("1").length - 1;
+    if (bits !== spl.length - 4) {
+      if (_hasOnError) oE("Event flags and data don't match", 0);
+    }
+
+    // const type = parseInt(spl.shift());
+    // const mask = parseInt(spl.shift());
+
+    // for each event flag, add to corresponding event
     const stateEvData: WSIncomingStateEvent["data"] = {};
     const settingsEvData: WSIncomingSettingsEvent["data"] = {};
 
+    // Right now this loop handles any incoming event.
+    // In the future, may be better to drop the ordered flags list
+    // and use the event type & a switch.
     let j = 1;
     for (
-      let i = 0, len = OrderedEventFlags.length;
+      let i = 3, len = OrderedEventFlags.length;
       i < len && spl.length > 0;
       i++
     ) {
@@ -179,14 +257,14 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
     const evs: WSIncomingEvent[] = [];
     if (Object.keys(stateEvData).length > 0) {
       evs.push({
-        type: WSEventType.UpdateState,
+        type: WSEventType.State,
         mac,
         data: stateEvData,
       });
     }
     if (Object.keys(settingsEvData).length > 0) {
       evs.push({
-        type: WSEventType.UpdateSettings,
+        type: WSEventType.Setting,
         mac,
         data: settingsEvData,
       });

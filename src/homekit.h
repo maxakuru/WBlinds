@@ -3,9 +3,10 @@
 
 #include "defines.h"
 #include "state.h"
+#include "event.h"
 #include <ESP32HomeKit.h>
 
-class Homekit : protected StateObserver {
+class Homekit : protected WBlindsObserver {
 public:
     explicit Homekit(State& state)
         :state_(state) {
@@ -21,7 +22,7 @@ public:
         hap_stop();
         state_.Detach(this);
     };
-    void handleEvent(const StateEvent& event) override;
+    void handleEvent(const WBlindsEvent& event) override;
     void init();
     void resetToFactory();
     void resetPairings();

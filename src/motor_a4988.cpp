@@ -32,18 +32,64 @@ MotorA4988::MotorA4988() {
   digitalWrite(state->getEnablePin(), HIGH);
 }
 
-void MotorA4988::handleEvent(const StateEvent& event) {
+bool MotorA4988::handleTick_(const WBlindsEvent& event) {
+  if (!event.flags_.tick_) return false;
+
   auto state = State::getInstance();
-  if (event.flags_.tick_) {
-    // convert steps to pct
-    auto cPos = state->getPosition();
-    auto pct = this->getCurrentPercent();
-    if (cPos != pct) {
-      WLOG_D(TAG, "set current pos: %i", pct);
-      state->setPosition(this, pct);
-    }
-    return;
+  // convert steps to pct
+  auto cPos = state->getPosition();
+  auto pct = this->getCurrentPercent();
+  if (cPos != pct) {
+    WLOG_D(TAG, "set current pos: %i", pct);
+    state->setPosition(this, pct);
   }
+  return true;
+}
+
+bool MotorA4988::handleMoveEvt_(const WBlindsEvent& event) {
+  EventFlags interesting;
+  interesting.moveStop_ = true;
+  interesting.moveDown_ = true;
+  interesting.moveUp_ = true;
+  interesting.moveDown_ = true;
+  interesting.moveBySteps_ = true;
+
+  if (0 == (interesting.mask_ & event.flags_.mask_)) return false;
+
+  if (event.flags_.moveStop_) {
+    this->stop(true);
+    return true;
+  }
+  if (event.flags_.moveDown_) {
+    this->runDown();
+    return true;
+  }
+  if (event.flags_.moveUp_) {
+    this->runDown();
+    return true;
+  }
+  if (event.flags_.moveUp_) {
+    this->runDown();
+    return true;
+  }
+
+  if (event.data_ == nullptr || event.data_->calibData == nullptr) return false;
+  if (event.flags_.moveBySteps_) {
+    int currPos = this->stepper_->getCurrentPosition();
+    int32_t newPos = currPos + event.data_->calibData->moveBySteps;
+    WLOG_D(TAG, "moveEvt move from %i to: %i", currPos, newPos);
+    this->moveTo(newPos);
+    return true;
+  }
+
+  return false;
+}
+
+void MotorA4988::handleEvent(const WBlindsEvent& event) {
+  if (handleTick_(event)) return;
+  if (handleMoveEvt_(event)) return;
+
+  auto state = State::getInstance();
   if (event.flags_.resolution_) {
     auto resolution = state->getResolution();
     if (this->stepper_->isMotorRunning()) {
@@ -114,6 +160,7 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
   flags.moveUp_ = true;
   flags.moveStop_ = true;
   flags.tick_ = true;
+  flags.moveBySteps_ = true;
   state->Attach(this, flags);
 
   isInit_ = true;
@@ -181,7 +228,7 @@ void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
   }
   setMaximumPosition_(resolution);
 
-  if(stepper_ == nullptr) return; // on init
+  if (stepper_ == nullptr) return; // on init
 
   // stop motor if moving
   bool wasMoving = stepper_->isMotorRunning();

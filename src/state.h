@@ -2,157 +2,15 @@
 #define STATE_H_
 
 #include "defines.h"
+#include "event.h"
 
 extern char mqttHost[MAX_MQTT_HOST_LENGTH];
 extern char mqttTopic[MAX_MQTT_TOPIC_LENGTH];
 extern char mqttUser[MAX_MQTT_USER_LENGTH];
 extern char mqttPass[MAX_MQTT_PASS_LENGTH];
 
-
-class EventFlags {
-public:
-    EventFlags()
-        : mask_(0) {
-    }
-    union {
-        struct {
-            unsigned int pos_ : 1;
-            unsigned int targetPos_ : 1;
-            unsigned int speed_ : 1;
-            unsigned int accel_ : 1;
-
-            unsigned int deviceName_ : 1;
-            unsigned int mDnsName_ : 1;
-            unsigned int emitSyncData_ : 1;
-
-            unsigned int pinStep_ : 1;
-            unsigned int pinDir_ : 1;
-            unsigned int pinEn_ : 1;
-            unsigned int pinSleep_ : 1;
-            unsigned int pinReset_ : 1;
-            unsigned int pinMs1_ : 1;
-            unsigned int pinMs2_ : 1;
-            unsigned int pinMs3_ : 1;
-            unsigned int pinHomeSw_ : 1;
-            unsigned int cordLength_ : 1;
-            unsigned int cordDiameter_ : 1;
-            unsigned int axisDiameter_ : 1;
-            unsigned int stepsPerRev_ : 1;
-            unsigned int resolution_ : 1;
-
-            unsigned int mqttEnabled_ : 1;
-            unsigned int mqttHost_ : 1;
-            unsigned int mqttPort_ : 1;
-            unsigned int mqttTopic_ : 1;
-            unsigned int mqttUser_ : 1;
-            unsigned int mqttPass_ : 1;
-
-            unsigned int moveUp_ : 1;
-            unsigned int moveDown_ : 1;
-            unsigned int moveStop_ : 1;
-
-            unsigned int tick_ : 1;
-        };
-        unsigned int mask_;
-    };
-};
-
-// WS
-struct WSMessage {
-    char macAddress[10];
-    EventFlags flags;
-    int32_t pos;
-    int32_t targetPos;
-    uint32_t speed;
-    uint32_t accel;
-};
-
-enum class setting_t {
-    kAll = 0,
-    kGeneral = 1,
-    kHardware = 2,
-    kMqtt = 3,
-};
-
-struct StateData {
-    int32_t pos;
-    int32_t targetPos;
-    uint32_t speed;
-    uint32_t accel;
-};
-
-struct SettingsDataGeneral {
-    char* deviceName;
-    char* mDnsName;
-    bool emitSyncData;
-    int etag;
-};
-
-struct SettingsDataHardware {
-    uint8_t pinStep;
-    uint8_t pinDir;
-    uint8_t pinEn;
-    uint8_t pinSleep;
-    uint8_t pinReset;
-    uint8_t pinMs1;
-    uint8_t pinMs2;
-    uint8_t pinMs3;
-    uint8_t pinHomeSw;
-    uint32_t cordLength;
-    double cordDiameter;
-    uint32_t axisDiameter;
-    uint16_t stepsPerRev;
-    stdBlinds::resolution_t resolution;
-    int etag;
-};
-
-struct SettingsDataMQTT {
-    bool enabled;
-    char* host;
-    uint16_t port;
-    char* topic;
-    char* user;
-    char* password;
-    int etag;
-};
-
-class StateEvent {
-public:
-    StateEvent(EventFlags const& flags) :
-        flags_(flags) {
-    }
-    EventFlags flags_;
-};
-
-class StateObserver {
-public:
-    virtual ~StateObserver() {};
-    virtual void handleEvent(const StateEvent& event) = 0;
-};
-
-class ObserverItem {
-public:
-    ObserverItem()
-        : observer_(0) {
-    }
-    ObserverItem(StateObserver* observer, EventFlags const& flags)
-        : observer_(observer)
-        , flags_(flags) {
-    }
-
-    StateObserver* observer_;
-    EventFlags flags_;
-};
-
-class Mediator {
-public:
-    virtual ~Mediator() {};
-    virtual void Attach(StateObserver* observer, EventFlags const& flags) = 0;
-    virtual void Detach(StateObserver* observer) = 0;
-    virtual void Notify(StateObserver* that, EventFlags const& flags) = 0;
-};
-
-class State : Mediator {
+// TODO: move mediator off of state
+class State : WBlindsMediator {
 public:
     static State* instance;
     static State* getInstance();
@@ -164,15 +22,15 @@ public:
 
     String serialize();
     String serializeSettings(setting_t settingType);
-    stdBlinds::error_code_t loadFromJSONString(StateObserver* that, String jsonStr);
-    stdBlinds::error_code_t loadFromObject(StateObserver* that, JsonObject& jsonObj, boolean isSettings = false);
-    stdBlinds::error_code_t loadFromMessage(StateObserver* that, WSMessage& msg, boolean isSettings = false);
+    stdBlinds::error_code_t loadFromJSONString(WBlindsObserver* that, String jsonStr);
+    stdBlinds::error_code_t loadFromObject(WBlindsObserver* that, JsonObject& jsonObj, boolean isSettings = false);
+    stdBlinds::error_code_t loadFromMessage(WBlindsObserver* that, WSMessage& msg, boolean isSettings = false);
 
 
     // Observer
-    void Attach(StateObserver* observer, EventFlags const& flags) override;
-    void Detach(StateObserver* observer) override;
-    void Notify(StateObserver* that, EventFlags const& flags) override;
+    void Attach(WBlindsObserver* observer, EventFlags const& flags) override;
+    void Detach(WBlindsObserver* observer) override;
+    void Notify(WBlindsObserver* that, WBlindsEvent const& evt) override;
 
     // Getters
     String getHardwareEtag();
@@ -211,7 +69,7 @@ public:
 
 
     // Setters
-    void setPosition(StateObserver* that, int32_t v);
+    void setPosition(WBlindsObserver* that, int32_t v);
     void setTargetPosition(int32_t v);
     void setSpeed(uint32_t v);
     void setAccel(uint32_t v);
@@ -260,8 +118,8 @@ private:
     void updateGeneralDirty_(bool);
     // void updateSettingsEtag_();
 
-    stdBlinds::error_code_t setFieldsFromJSON_(StateObserver* that, JsonObject& obj, bool makesDirty);
-    stdBlinds::error_code_t setSettingsFromJSON_(StateObserver* that, JsonObject& obj, bool shouldSave);
+    stdBlinds::error_code_t setFieldsFromJSON_(WBlindsObserver* that, JsonObject& obj, bool makesDirty);
+    stdBlinds::error_code_t setSettingsFromJSON_(WBlindsObserver* that, JsonObject& obj, bool shouldSave);
     stdBlinds::error_code_t setGeneralSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave);
     stdBlinds::error_code_t setHardwareSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave);
     stdBlinds::error_code_t setMQTTSettingsFromJSON_(const JsonObject& obj, EventFlags& flags, bool& shouldSave);

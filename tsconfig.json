@@ -1,17 +1,17 @@
 {
     "compilerOptions": {
-        "module": "ES6",
+        "module": "ESNEXT",
         "noImplicitAny": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
+        "removeComments": false,
+        "preserveConstEnums": false,
         "allowSyntheticDefaultImports": true,
         "lib": [
-            "ES2015",
             "DOM",
-            "ES2019"
+            "ESNEXT"
         ],
-        "target": "ES2019",
-        "moduleResolution": "node",
+        "typeRoots": ["./node_modules/@types"],
+        "target": "ESNEXT",
+        "moduleResolution": "Node",
         "baseUrl": "./web/src",
         "paths": {
             "@Util": [

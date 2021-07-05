@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import compiler from "@ampproject/rollup-plugin-closure-compiler";
+// import compiler from "@ampproject/rollup-plugin-closure-compiler";
+import compiler from "./tools/rollup-shrink-compiler";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import replace from "@rollup/plugin-replace";
 import html from "rollup-plugin-html";
-import pkg from "./package.json";
+import * as pkg from "./package.json";
 import postcss from "rollup-plugin-postcss";
 import path from "path";
 import serve from "rollup-plugin-serve";
@@ -51,17 +52,32 @@ plugins.push(
       collapseWhitespace: true,
     },
   }),
-  postcss({ minimize: !dev, config: true }),
+  postcss({
+    minimize: !dev,
+    config: true,
+    inject: (cssVariableName, id) => {
+      return `stynj(${cssVariableName})`;
+    },
+  }),
   svg()
 );
 
 if (!dev) {
   plugins.push(
     compiler({
-      language_in: "ECMASCRIPT_2019",
-      language_out: "ECMASCRIPT_2019",
-      // compilation_level: "ADVANCED",
-      assume_function_wrapper: true,
+      language_in: "ECMASCRIPT_NEXT",
+      compilation_level: "SIMPLE",
+      // assume_function_wrapper: true,
+      allow_dynamic_import: true,
+      // dynamic_import_alias: "import",
+      externs: ["./tools/externs.js"],
+      options: {
+        ignoreDynamicImports: true,
+        implicitChunkLoadOrder: {
+          "web/src/app.ts": ["web/index.ts"],
+        },
+        templateFunction,
+      },
     })
   );
 } else {
@@ -86,9 +102,11 @@ if (!dev) {
 }
 
 export default {
-  input: "web/index.ts",
+  input: ["web/index.ts", "web/src/app.ts"],
+  // input: ["web/index.ts"],
   output: {
-    file: "public/index.js",
+    // [dev ? "file" : "dir"]: dev ? "public/index.js" : "public",
+    dir: "public",
     format: "es",
     sourcemap: dev,
     globals: {
@@ -96,8 +114,16 @@ export default {
       window: "window",
     },
   },
-  // external: (id) => {
-  //   return id in deps;
-  // },
   plugins,
 };
+
+function templateFunction(
+  names: string[]
+): { fileName: string; source: string }[] {
+  return [
+    {
+      fileName: "index.html",
+      source: `<!DOCTYPE html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><meta charset="utf-8"><meta content="yes" name="apple-mobile-web-app-capable"><title>WBlinds</title></head><body><noscript><div class="overlay" style="opacity:1;">WBlinds UI needs JS!</div></noscript><div id="bg"></div><div id="toast"></div><div id="app"></div><div id="nav"></div><script src="${names[0]}">window.ns = "tesssst";</script></body></html>`,
+    },
+  ];
+}

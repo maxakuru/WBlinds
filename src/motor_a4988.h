@@ -20,7 +20,7 @@ public:
     }
     State::getInstance()->Detach(this);
   };
-  void handleEvent(const StateEvent& event) override;
+  void handleEvent(const WBlindsEvent& event) override;
   void setResolution(const stdBlinds::resolution_t resolution) override;
   void setSleep(const bool shouldSleep) override;
   void setEnabled(const bool isEnabled) override;
@@ -60,6 +60,8 @@ private:
   uint32_t maxTurns_;
   uint32_t maxPosition_;
   void setMaximumPosition_(stdBlinds::resolution_t res);
+  bool handleTick_(const WBlindsEvent& event);
+  bool handleMoveEvt_(const WBlindsEvent& event);
 };
 
 #endif  // MOTOR_A4988_H_

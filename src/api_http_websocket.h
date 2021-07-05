@@ -8,10 +8,14 @@
 #define DELIMITER '/'
 
 
-static String packWSMessage(const StateEvent& event) {
+static String packWSMessage(const WBlindsEvent& event, wsmessage_t type) {
     auto state = State::getInstance();
     String s = "";
     s += macAddress;
+
+    s += DELIMITER;
+    s += (int)type;
+    s += DELIMITER;
 
     s += DELIMITER;
     s += event.flags_.mask_;
@@ -56,12 +60,38 @@ static void unpackWSMessage(WSMessage& msg, char* message, size_t len) {
                     continue;
                 }
                 else if (k == 1) {
+                    msg.type = (wsmessage_t)atoi(d);
+                    k++;
+                    continue;
+                }
+                else if (k == 2) {
                     k = (msg.flags.mask_ = atoi(d));
                     gotPreData = true;
                     continue;
                 }
             }
             int lastSetBit = k ^ (k & (k - 1));
+            k -= lastSetBit;
+
+            if (msg.type == wsmessage_t::kCalibration) {
+                if (msg.calibration == nullptr) {
+                    CalibrationData d;
+                    msg.calibration = &d;
+                }
+                switch (lastSetBit) {
+                case 0:
+                    break;
+                case 1:
+                    msg.calibration->moveBySteps = atoi(d);
+                    break;
+                case 2:
+                    // maybe use this segment to set immediate?
+                    // msg.calibration->moveStop = atoi(d);
+                    break;
+                }
+                continue;
+            }
+
             switch (lastSetBit) {
             case 0:
                 break;
@@ -78,7 +108,6 @@ static void unpackWSMessage(WSMessage& msg, char* message, size_t len) {
                 msg.accel = atoi(d);
                 break;
             }
-            k -= lastSetBit;
             continue;
         }
         d[j] = message[i];
@@ -99,7 +128,14 @@ static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
         if (0 != strncmp(msg.macAddress, macAddress.c_str(), 12)) return;
         // otherwise, handle the event on current device
         auto state = State::getInstance();
-        state->loadFromMessage(nullptr, msg);
+        if (msg.type == wsmessage_t::kState) {
+            state->loadFromMessage(nullptr, msg);
+        }
+        else if (msg.type == wsmessage_t::kCalibration) {
+            EventData d;
+            d.calibData = msg.calibration;
+            state->Notify(nullptr, WBlindsEvent(msg.flags, &d));
+        }
     }
 }
 

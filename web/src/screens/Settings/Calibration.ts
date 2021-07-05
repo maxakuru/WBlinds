@@ -14,6 +14,7 @@ import {
 } from "min";
 import template from "./Calibration.html";
 import "./Calibration.css";
+import { getFromNamespace } from "@Util";
 
 export type SaveHandler = () => void;
 export interface CalibrationAPI {
@@ -88,6 +89,7 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
   let _saveHandlers: SaveHandler[] = [];
   let _container: HTMLElement;
   let _stepIndex = 0;
+  const _tc = getFromNamespace("tc");
 
   const makeStep = (
     data: CalibrationStep,
@@ -125,8 +127,7 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
         try {
           if (ctx[preFn]) await ctx[preFn]();
         } catch (e) {
-          // TODO: show toast
-          console.error("[Calib] Error in pre: ", e);
+          _tc.pushToast(`"[Calib] Error in pre: ${e}"`);
         }
 
         _stepIndex += isNext ? 1 : -1;

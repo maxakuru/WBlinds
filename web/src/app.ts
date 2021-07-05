@@ -1,6 +1,6 @@
 import { Nav, Card, ToastContainer } from "@Components";
 import { Home, Settings } from "@Screens";
-import { WBlindsNamespace } from "./namespace";
+import type { WBlindsNamespace } from "./namespace";
 import {
   appendChild,
   debug,
@@ -45,12 +45,40 @@ export default (ns: WBlindsNamespace): void => {
 
   // Toasts
   const tc = ToastContainer();
+  ns.tc = tc;
   appendChild(body, tc.node);
   WINDOW.onerror = handleError;
   WINDOW.onpopstate = (e: PopStateEvent) => {
     handleRoute(pathname());
     emitQueryChange();
   };
+
+  // Websocket
+  const wsc = makeWebsocket({
+    onMessage(msg: WSIncomingEvent) {
+      debug("WS msg: ", msg);
+      if (msg.type === WSEventType.Setting) {
+        State.update(SETTINGS, {
+          ...State.get<StateData["settings"]>(SETTINGS),
+          ...msg.data,
+        });
+      }
+    },
+    onError(e: any, num: number) {
+      if (!num) {
+        tc.pushToast("Websocket disconnected!", true, false, 5000);
+      }
+    },
+    onConnect(e: Event, num: number) {
+      debug("WS connect: ", e);
+      if (num) {
+        tc.pushToast("Websocket connected!");
+      }
+    },
+    onDisconnect(e: CloseEvent) {
+      debug("WS disconnect: ", e);
+    },
+  });
 
   // Nav
   const nav = Nav({ labels });
@@ -158,7 +186,7 @@ export default (ns: WBlindsNamespace): void => {
     const card = Card(data);
     appendChild(body, card.node);
     card.onChange((e) => {
-      wsc.push(WSEventType.UpdateState, e);
+      wsc.push(WSEventType.State, e);
     });
     setTimeout(card.show);
   }
@@ -179,37 +207,9 @@ export default (ns: WBlindsNamespace): void => {
       .catch(handleError);
   }
 
-  // Websocket
-  const wsc = makeWebsocket({
-    onMessage(msg: WSIncomingEvent) {
-      debug("WS msg: ", msg);
-      if (msg.type === WSEventType.UpdateSettings) {
-        State.update(SETTINGS, {
-          ...State.get<StateData["settings"]>(SETTINGS),
-          ...msg.data,
-        });
-      }
-    },
-    onError(e: any, num: number) {
-      if (!num) {
-        tc.pushToast("Websocket disconnected!", true, false, 5000);
-      }
-    },
-    onConnect(e: Event, num: number) {
-      debug("WS connect: ", e);
-      if (num) {
-        tc.pushToast("Websocket connected!");
-      }
-    },
-    onDisconnect(e: CloseEvent) {
-      debug("WS disconnect: ", e);
-    },
-  });
-
   function handleError(
     err: string | Event | (Error & { response?: Response; message?: string })
   ): void {
-    console.error(err);
     const m = isObject(err)
       ? (err?.message || DEFAULT_ERROR) + "\n" + err.stack
       : err;

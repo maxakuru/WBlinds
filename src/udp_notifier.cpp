@@ -5,7 +5,7 @@ void pack(byte* dg, byte* data, size_t len) {
     memcpy(&dg[4], data, len);
 }
 
-void UDPNotifier::handleEvent(const StateEvent& event) {
+void UDPNotifier::handleEvent(const WBlindsEvent& event) {
     // byte dg[DatagramSize[stdBlinds::datagram_t::UpdateState]];
     // byte data[4] = { 0x01, 0x02, 0x03, 0x04 };
     // pack(dg, data, 4);

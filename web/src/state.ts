@@ -113,6 +113,10 @@ const DEFAULT_STATE_DATA = {
   presets: {},
 };
 
+interface _State {
+  _loadedKeys: Record<keyof StateData, boolean>;
+  _savingKeys: Record<keyof StateData, boolean>;
+}
 class _State {
   //   private _observers: Record<string, StateHandler[]>;
   //   private _state: any;
@@ -127,9 +131,6 @@ class _State {
     this._loadedKeys = { ...t };
     this._savingKeys = { ...t };
   }
-
-  private _loadedKeys: Record<keyof StateData, boolean>;
-  private _savingKeys: Record<keyof StateData, boolean>;
 
   get<T>(path: string): T {
     const spl = path.split(".");

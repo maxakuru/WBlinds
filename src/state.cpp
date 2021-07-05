@@ -29,13 +29,13 @@ bool State::isDirty() {
     return isDirty_;
 }
 
-void State::Attach(StateObserver* observer, EventFlags const& flags) {
+void State::Attach(WBlindsObserver* observer, EventFlags const& flags) {
     observers_.push_back(ObserverItem(observer, flags));
 }
-void State::Detach(StateObserver* observer) {
+void State::Detach(WBlindsObserver* observer) {
     struct ObserverEquals {
-        StateObserver* observer_;
-        ObserverEquals(StateObserver* observer)
+        WBlindsObserver* observer_;
+        ObserverEquals(WBlindsObserver* observer)
             : observer_(observer) {
         }
         bool operator()(ObserverItem const& e) const {
@@ -46,10 +46,9 @@ void State::Detach(StateObserver* observer) {
         std::remove_if(observers_.begin(), observers_.end(), ObserverEquals(observer)),
         observers_.end());
 }
-void State::Notify(StateObserver* that, EventFlags const& flags) {
-    StateEvent evt(flags);
+void State::Notify(WBlindsObserver* that, WBlindsEvent const& evt) {
     for (Observers::iterator i = observers_.begin(); i != observers_.end(); ++i) {
-        if (0 != (i->flags_.mask_ & flags.mask_)) {
+        if (0 != (i->flags_.mask_ & evt.flags_.mask_)) {
             i->observer_->handleEvent(evt);
         }
     }
@@ -203,7 +202,7 @@ void State::restore() {
     LITTLEFS.remove("/state.json");
 }
 
-stdBlinds::error_code_t State::loadFromMessage(StateObserver* that, WSMessage& msg, boolean isSettings) {
+stdBlinds::error_code_t State::loadFromMessage(WBlindsObserver* that, WSMessage& msg, boolean isSettings) {
     stdBlinds::error_code_t err = stdBlinds::error_code_t::NoError;
 
     bool makesDirty = false;
@@ -570,7 +569,7 @@ stdBlinds::error_code_t State::setMQTTSettingsFromJSON_(const JsonObject& obj, E
     return stdBlinds::error_code_t::NoError;
 }
 
-stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObject& obj, bool shouldSave) {
+stdBlinds::error_code_t State::setSettingsFromJSON_(WBlindsObserver* that, JsonObject& obj, bool shouldSave) {
     auto err = stdBlinds::error_code_t::NoError;
 
     EventFlags flags;
@@ -613,7 +612,7 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
     WLOG_I(TAG, "(flags.mask_ & toNotify.mask_): %i", (flags.mask_ & toNotify.mask_));
     if (0 != (flags.mask_ & toNotify.mask_)) {
         WLOG_I(TAG, "notifying...");
-        Notify(that, flags);
+        Notify(that, WBlindsEvent(flags));
     }
 
     WLOG_D(TAG, "AFTER SETTINGS LOAD");
@@ -629,7 +628,7 @@ stdBlinds::error_code_t State::setSettingsFromJSON_(StateObserver* that, JsonObj
     return err;
 }
 
-stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObject& obj, bool makesDirty) {
+stdBlinds::error_code_t State::setFieldsFromJSON_(WBlindsObserver* that, JsonObject& obj, bool makesDirty) {
     stdBlinds::error_code_t err = stdBlinds::error_code_t::NoError;
     WLOG_D(TAG, "obj in: %i", obj.containsKey("speed"));
     WLOG_D(TAG, "obj.speed: %i", obj["speed"]);
@@ -684,7 +683,7 @@ stdBlinds::error_code_t State::setFieldsFromJSON_(StateObserver* that, JsonObjec
     return err;
 }
 
-stdBlinds::error_code_t State::loadFromObject(StateObserver* that, JsonObject& jsonObj, boolean isSettings /* =false */) {
+stdBlinds::error_code_t State::loadFromObject(WBlindsObserver* that, JsonObject& jsonObj, boolean isSettings /* =false */) {
     WLOG_I(TAG);
     if (isSettings) {
         return setSettingsFromJSON_(that, jsonObj, true);
@@ -694,7 +693,7 @@ stdBlinds::error_code_t State::loadFromObject(StateObserver* that, JsonObject& j
     }
 }
 
-stdBlinds::error_code_t State::loadFromJSONString(StateObserver* that, String jsonStr) {
+stdBlinds::error_code_t State::loadFromJSONString(WBlindsObserver* that, String jsonStr) {
     DynamicJsonDocument doc(512);
     DeserializationError error = deserializeJson(doc, jsonStr);
     if (error) {
@@ -875,7 +874,7 @@ stdBlinds::resolution_t State::getResolution() {
 }
 
 // Setters
-void State::setPosition(StateObserver* that, int32_t v) {
+void State::setPosition(WBlindsObserver* that, int32_t v) {
     updateDirty_(data_.pos != v);
     data_.pos = v;
 

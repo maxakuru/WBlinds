@@ -4,10 +4,10 @@
 #include "defines.h"
 #include "state.h"
 
-class BlindsMotor : virtual protected StateObserver {
+class BlindsMotor : virtual protected WBlindsObserver {
 public:
     virtual ~BlindsMotor() {};
-    virtual void handleEvent(const StateEvent& event) = 0;
+    virtual void handleEvent(const WBlindsEvent& event) = 0;
     virtual void setResolution(const stdBlinds::resolution_t resolution) = 0;
     virtual void setSleep(const bool shouldSleep) = 0;
     virtual void setEnabled(const bool isEnabled) = 0;

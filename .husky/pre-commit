@@ -1,7 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-CI=true yarn build
+CI=true npm run build:ui
 ./node_modules/.bin/lint-staged
 git add ./public/index.js
 git add ./public/index.html

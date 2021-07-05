@@ -12,7 +12,7 @@ public:
    void init() override;
    bool isInit() override;
 
-   void handleEvent(const StateEvent& event) override;
+   void handleEvent(const WBlindsEvent& event) override;
 private:
    bool isInit_ = false;
    // void handlePOST();

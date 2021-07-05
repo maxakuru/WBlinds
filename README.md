@@ -123,7 +123,7 @@ I've created PCBs that fit the components, but am still tweaking it -- the desig
 1. Connect ESP32 to your computer via USB
 2. `git clone https://github.com/maxakuru/WBlinds.git`
 3. `cd WBlinds && yarn`
-4. `yarn build`
+4. `yarn build:cpp`
 5. `yarn flash`
 6. On first boot an access point will be started, connect to it:
     * SSID: `WBlinds-XXXXXX`
@@ -131,7 +131,7 @@ I've created PCBs that fit the components, but am still tweaking it -- the desig
 7. After connecting, a webpage should open to configure settings. If not, go to http://4.3.2.1/settings?type=gen
 8. Configure SSID, password, pins, etc. and tap "SAVE"
 9. You will be disconnected from the AP. Find the IP address of the device on your network and enter it in your browser.
-> Steps 3-5 assume you have PlatformIO, Node.js, Yarn installed. You can also flash without Node/Yarn by using the [PlatformIO VSCode Plugin](#tools).
+> Steps 3-5 assume you have PlatformIO, Node.js, and Yarn installed. You can also flash without Node/Yarn by using the [PlatformIO VSCode Plugin](#tools). You can also use the [scripts](#scripts) to do other stuff.
 
 <h2 id="apis">🔌 APIs</h2>
 
@@ -298,30 +298,30 @@ There are a few ways to configure WBlinds. Eventually the goal is to provide a w
 
 <h2 id="development">📝 Development</h2>
 
-There are 2 main projects that make up this repo: the C++ ESP controller and a TypeScript-based web UI. The web UI is transpiled to Javascript and gzipped/chunked into header files with a script. All generated header files as well as transpiled JS is included in the repo, so no additional build steps are needed.
+There are 2 projects that make up this repo: the C++ ESP controller and a TypeScript-based web UI. The web UI is transpiled to Javascript, inlined into HTML, then gzipped/chunked into header files with a script. All generated header files as well as transpiled JS is included in the repo, so no additional build steps are needed.
 
 ### Scripts
+These can be run with `npm` or `yarn`, I'm currently using yarn. None of these are required to build and flash the ESP bin, as mentioned above all the files are checked into git, so you can compile the C part however you like.
+
+However, these scripts are used for pre-commit hooks, so if you want to contribute you'll need Node.js.
+
+#### UI
 Build web UI in development/watch mode (outputs to `public/`):
 ```sh
 yarn dev
 ```
 
-Build web UI minified (outputs to `public/`):
+Build web UI minified (outputs to `public/`, also runs `build:uih` afterwards):
 ```sh
 yarn build:ui
 ```
 
-Generate header files from `public/`:
+Only generate header files from `public/`:
 ```sh
 yarn build:uih
 ```
 
-The previous 2 scripts can be combined with:
-```sh
-yarn build
-```
-
-
+#### ESP
 The following scripts depend on PlatformIO, and can be replaced with the toolbar quick actions in VSCode if you prefer.
 
 Compile C++ (assumes *nix machine right now):
@@ -334,20 +334,27 @@ Build & flash using pio:
 yarn flash
 ```
 
+#### Both
+You can combine all build scripts with:
+```sh
+yarn build
+```
+
 ### Tools
 I recommend using VSCode to build/flash. Eventually I plan to cut releases of precompiled binary that can be flashed directly, but for the time being you'll need to pull the code and compile it yourself. That is made very simple by the wonderful [PlatformIO](https://platformio.org/) - I highly recommend using it with their [VSCode plugin](https://platformio.org/install/ide?install=vscode).
 
 There are some other suggested plugins in the `.vscode` directory; VSCode should suggest installing any missing plugin on first boot, but none are required.
 
 ### Custom integrations
-Additional integrations can be built in by extending the `StateObserver` class and attaching to it, specifying the event flags you are interested in.
+Additional integrations can be built in by extending the `WBlindsObserver` class and attaching to it, specifying the event flags you are interested in.
 
 ```cpp
 #include "defines.h"
 #include "state.h"
+#include "event.h"
 #include <SpecialLib.h>
 
-class SpecialLibIntegration : protected StateObserver {
+class SpecialLibIntegration : protected WBlindsObserver {
 public:
     explicit SpecialLibIntegration() {
         EventFlags flags;
@@ -355,12 +362,21 @@ public:
         flags.speed_ = true;
         flags.accel_ = true;
         flags.targetPos_ = true;
+        // ... any other flags you're interested in
         State::getInstance()->Attach(this, flags);
     };
     ~SpecialLibIntegration() override {
         specialLib.teardown();
-        state_.Detach(this);
+        State::getInstance()->Detach(this);
     };
+    void SpecialLibIntegration::handleEvent(const WBlindsEvent& event) {
+        // ... do something with the event
+        auto state = State::getInstance();
+        if(event.flags_.pos) {
+            int pos = state.getPosition();
+            specialLib.doStuffWithPosition(pos);
+        }
+     };
 }
 ```
 

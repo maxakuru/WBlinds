@@ -37,11 +37,10 @@ bool isIp(String str) {
 
 bool captivePortal(AsyncWebServerRequest* request) {
    if (ON_STA_FILTER(request)) return false; // only serve captive in AP mode
-   String hostH;
    if (!request->hasHeader("Host")) return false;
-   hostH = request->getHeader("Host")->value();
+   String host = request->getHeader("Host")->value();
 
-   if (!isIp(hostH) && hostH.indexOf(mDnsName) < 0) {
+   if (!isIp(host) && host.indexOf(mDnsName) < 0) {
       AsyncWebServerResponse* response = request->beginResponse(302);
       response->addHeader(F("Location"), F("http://4.3.2.1/settings?tab=general"));
       request->send(response);
@@ -63,8 +62,8 @@ bool configRedirect(AsyncWebServerRequest* request) {
    return false;
 }
 
-void BlindsHTTPAPI::handleEvent(const StateEvent& event) {
-   String m = packWSMessage(event);
+void BlindsHTTPAPI::handleEvent(const WBlindsEvent& event) {
+   String m = packWSMessage(event, wsmessage_t::kState);
    WLOG_I(TAG, "DG message: %s", m.c_str());
 
    ws.textAll(m);
@@ -86,15 +85,15 @@ static char* valJson(char* msg) {
 
 static String getContentType(AsyncWebServerRequest* request, String filename) {
    if (request->hasArg("download")) return "application/octet-stream";
-   else if (filename.endsWith(".htm")) return "text/html";
-   else if (filename.endsWith(".html")) return "text/html";
+   // else if (filename.endsWith(".htm")) return "text/html";
+   // else if (filename.endsWith(".html")) return "text/html";
    //  else if(filename.endsWith(".css")) return "text/css";
    //  else if(filename.endsWith(".js")) return "application/javascript";
    else if (filename.endsWith(".json")) return "application/json";
-   else if (filename.endsWith(".png")) return "image/png";
+   // else if (filename.endsWith(".png")) return "image/png";
    //  else if(filename.endsWith(".gif")) return "image/gif";
-   else if (filename.endsWith(".jpg")) return "image/jpeg";
-   else if (filename.endsWith(".ico")) return "image/x-icon";
+   // else if (filename.endsWith(".jpg")) return "image/jpeg";
+   // else if (filename.endsWith(".ico")) return "image/x-icon";
    //  else if(filename.endsWith(".xml")) return "text/xml";
    //  else if(filename.endsWith(".pdf")) return "application/x-pdf";
    //  else if(filename.endsWith(".zip")) return "application/x-zip";
@@ -105,7 +104,6 @@ static String getContentType(AsyncWebServerRequest* request, String filename) {
 static bool handleFileRead(AsyncWebServerRequest* request, String path) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
 
-   if (path.endsWith("/")) path += "index.html";
    String contentType = getContentType(request, path);
    if (LITTLEFS.exists(path)) {
       WLOG_I(TAG, "exists");
@@ -149,8 +147,6 @@ static void serveFavicon(AsyncWebServerRequest* request) {
 }
 
 static void serveIndex(AsyncWebServerRequest* request) {
-   if (handleFileRead(request, "/index.html")) return;
-
    if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, PAGE_index, PAGE_index_L);

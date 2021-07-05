@@ -2,11 +2,12 @@
 #define DATAGRAM_H_
 
 #include "defines.h"
+#include "event.h"
 #include "state.h"
 
 
 namespace Datagram {
-    byte* pack(const StateEvent& event);
+    byte* pack(const WBlindsEvent& event);
     // todo unpackString(byte* message);
 
     enum class type_t {
