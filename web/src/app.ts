@@ -34,7 +34,11 @@ const labels = [
   { t: "Settings", i: cog },
 ];
 
-export default (ns: WBlindsNamespace): void => {
+/**
+ * @param {*} ns
+ * @es6export
+ */
+export const run = (ns: WBlindsNamespace): void => {
   debug("onLoad(): ", ns);
   mock.init();
   const body = querySelector("body");
@@ -216,3 +220,7 @@ export default (ns: WBlindsNamespace): void => {
     tc.pushToast(m as string, true);
   }
 };
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// goog.exportSymbol("run", run);

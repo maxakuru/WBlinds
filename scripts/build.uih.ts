@@ -37,6 +37,12 @@ writeChunks(
       inline: true,
       gzip: true,
     },
+    {
+      filePath: pathResolve(__dirname, "../public/app.js"),
+      name: "JS_app",
+      method: "binary",
+      gzip: true,
+    },
   ],
   "src/ui_index.h"
 );

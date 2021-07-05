@@ -22,6 +22,7 @@ import {
 } from "rollup";
 import { CompilerOptions } from "../options";
 import { Ebbinghaus } from "./ebbinghaus";
+import { Mangle } from "./mangle";
 
 export interface ITransform {
   name: string;
@@ -33,13 +34,13 @@ export default class implements ITransform {
   protected inputOptions: InputOptions;
   protected outputOptions: OutputOptions;
   protected memory: Ebbinghaus;
-  //   protected mangler: Mangle;
+  protected mangler: Mangle;
   public name = "Transform";
 
   constructor(
     context: PluginContext,
     pluginOptions: CompilerOptions,
-    // mangler: Mangle,
+    mangler: Mangle,
     memory: Ebbinghaus,
     inputOptions: InputOptions,
     outputOptions: OutputOptions
@@ -49,6 +50,6 @@ export default class implements ITransform {
     this.inputOptions = inputOptions;
     this.outputOptions = outputOptions;
     this.memory = memory;
-    // this.mangler = mangler;
+    this.mangler = mangler;
   }
 }

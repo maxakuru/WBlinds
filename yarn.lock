@@ -1865,7 +1865,7 @@ estree-walker@^1.0.1:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-1.0.1.tgz#31bc5d612c96b704106b477e6dd5d8aa138cb700"
   integrity sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==
 
-estree-walker@^2.0.1:
+estree-walker@^2.0.1, estree-walker@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
@@ -2173,6 +2173,11 @@ google-closure-compiler@^20210601.0.0:
     google-closure-compiler-linux "^20210601.0.0"
     google-closure-compiler-osx "^20210601.0.0"
     google-closure-compiler-windows "^20210601.0.0"
+
+google-closure-library@^20210601.0.0:
+  version "20210601.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-library/-/google-closure-library-20210601.0.0.tgz#52bff34b41880d380c1757a698acb035b8e38f3e"
+  integrity sha512-tOpdq+BnDCjJTXrKGoHRsypobTO1YrpjZzYPVIsYmoihtDRppmKYpmcAylRumZgXSiJXl7ekOwU1RD4wP7lbig==
 
 got@^3.2.0:
   version "3.3.1"

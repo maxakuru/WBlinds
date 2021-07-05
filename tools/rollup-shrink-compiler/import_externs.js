@@ -4,8 +4,4 @@
  * @externs
  */
 
-// const DEFAULT_SETTINGS_DATA = {};
-
-const stynj = {};
-
-// const run = {};
+const __import__ = {};

@@ -66,6 +66,7 @@ if (!dev) {
   plugins.push(
     compiler({
       language_in: "ECMASCRIPT_NEXT",
+      language_out: "ECMASCRIPT_2020",
       compilation_level: "SIMPLE",
       // assume_function_wrapper: true,
       allow_dynamic_import: true,
@@ -123,7 +124,7 @@ function templateFunction(
   return [
     {
       fileName: "index.html",
-      source: `<!DOCTYPE html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><meta charset="utf-8"><meta content="yes" name="apple-mobile-web-app-capable"><title>WBlinds</title></head><body><noscript><div class="overlay" style="opacity:1;">WBlinds UI needs JS!</div></noscript><div id="bg"></div><div id="toast"></div><div id="app"></div><div id="nav"></div><script src="${names[0]}">window.ns = "tesssst";</script></body></html>`,
+      source: `<!DOCTYPE html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><meta charset="utf-8"><meta content="yes" name="apple-mobile-web-app-capable"><title>WBlinds</title></head><body><noscript><div class="overlay" style="opacity:1;">WBlinds UI needs JS!</div></noscript><div id="bg"></div><div id="toast"></div><div id="app"></div><div id="nav"></div><script>window.ns = "tesssst"; window.stynj=function(a){if(a&&"undefined"!==typeof document){var d=document.head||document.getElementsByTagName("head")[0],b=document.createElement("style");d.appendChild(b);b.appendChild(document.createTextNode(a))}};</script><script src="${names[0]}"></script></body></html>`,
     },
   ];
 }

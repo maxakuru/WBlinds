@@ -29,8 +29,8 @@ import {
   ClassDeclaration,
   ExportSpecifier,
   Property,
+  Node,
 } from "estree";
-import { Node as AcornNode } from "acorn";
 import type acornWalkType from "acorn-walk";
 import { writeTempFile } from "./temp-file";
 import { log } from "./debug";
@@ -85,13 +85,13 @@ const acorn = require("acorn");
 
 export const walk: {
   simple<TState>(
-    node: AcornNode,
+    node: Node,
     visitors: acornWalkType.SimpleVisitors<TState>,
     base?: acornWalkType.RecursiveVisitors<TState>,
     state?: TState
   ): void;
   ancestor<TState>(
-    node: AcornNode,
+    node: Node,
     visitors: acornWalkType.AncestorVisitors<TState>,
     base?: acornWalkType.RecursiveVisitors<TState>,
     state?: TState
@@ -108,10 +108,7 @@ const DEFAULT_ACORN_OPTIONS = {
   ranges: true,
 };
 
-export async function parse(
-  fileName: string,
-  source: string
-): Promise<AcornNode> {
+export async function parse(fileName: string, source: string): Promise<Node> {
   // eslint-disable-next-line no-useless-catch
   try {
     return acorn.parse(source, DEFAULT_ACORN_OPTIONS);

@@ -9,7 +9,9 @@
             "DOM",
             "ESNEXT"
         ],
-        "typeRoots": ["./node_modules/@types"],
+        "typeRoots": [
+            "./node_modules/@types"
+        ],
         "target": "ESNEXT",
         "moduleResolution": "Node",
         "baseUrl": "./web/src",

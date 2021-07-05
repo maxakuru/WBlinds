@@ -12,6 +12,9 @@ import { Ebbinghaus } from "../ebbinghaus";
 import lifecycle from "./lifecycle";
 import StrictTransform from "./strict";
 import DynamicImportTransform from "./dynamic-import";
+import ES6ExportTransform from "./es6-export";
+import { Mangle } from "../mangle";
+import ExportTransform from "./exports";
 
 export { ChunkTransform } from "./ChunkTransform";
 
@@ -20,6 +23,8 @@ const TRANSFORMS: Array<typeof ChunkTransform> = [
   // DynamicApplyTransform,
   StrictTransform,
   DynamicImportTransform,
+  // ES6ExportTransform,
+  ExportTransform,
 ];
 
 /**
@@ -35,7 +40,7 @@ const TRANSFORMS: Array<typeof ChunkTransform> = [
 export function create(
   context: PluginContext,
   options: CompilerOptions,
-  // mangler: Mangle,
+  mangler: Mangle,
   memory: Ebbinghaus,
   inputOptions: InputOptions,
   outputOptions: OutputOptions
@@ -46,7 +51,7 @@ export function create(
       new transform(
         context,
         options,
-        // mangler,
+        mangler,
         memory,
         inputOptions,
         outputOptions

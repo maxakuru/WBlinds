@@ -27,6 +27,7 @@ import {
   preCompilation,
   postCompilation,
 } from "./transform";
+import { Mangle } from "./transform/mangle";
 
 export default function (
   incomingOptions: CompilerOptionsExtended = {}
@@ -42,6 +43,7 @@ export default function (
 
   // transforms
   const memory = new Ebbinghaus();
+  const mangler: Mangle = new Mangle();
   let context: PluginContext;
   let sourceTransforms: Array<SourceTransform>;
 
@@ -55,7 +57,7 @@ export default function (
       sourceTransforms = createSourceTransforms(
         context,
         options,
-        // mangler,
+        mangler,
         memory,
         inputOptions,
         {}
@@ -114,7 +116,7 @@ export default function (
       const renderChunkTransforms = createChunkTransforms(
         context,
         options,
-        // mangler,
+        mangler,
         memory,
         inputOptions,
         outputOptions
@@ -127,7 +129,7 @@ export default function (
 
       // console.log("precompile out: ", preCompileOutput);
 
-      const cFlags = getOptions(flags, outputOptions);
+      const cFlags = getOptions(flags, options, outputOptions);
       // console.log("precompiled src map: ", preCompileOutput.map);
       const out = await compiler(
         {
@@ -156,6 +158,7 @@ export default function (
       bundle: OutputBundle,
       isWrite: boolean
     ) {
+      console.log("generate bundle: ", bundle);
       if (!options.templateFunction) return null;
 
       let outs: any[];

@@ -146,6 +146,17 @@ static void serveFavicon(AsyncWebServerRequest* request) {
    request->send(response);
 }
 
+static void serveApp(AsyncWebServerRequest* request) {
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
+
+   AsyncWebServerResponse* response = request->beginResponse_P(200, "text/javascript", JS_app, JS_app_L);
+
+   response->addHeader(F("Content-Encoding"), "gzip");
+   setCacheControlHeaders(response, String(VERSION));
+
+   request->send(response);
+}
+
 static void serveIndex(AsyncWebServerRequest* request) {
    if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
@@ -291,6 +302,11 @@ void BlindsHTTPAPI::init() {
     * Fixtures
     */
    server.on("/favicon.ico", HTTP_GET, serveFavicon);
+
+   /**
+    * Fixtures
+    */
+   server.on("/app.js", HTTP_GET, serveApp);
 
    /**
     * /api endpoints

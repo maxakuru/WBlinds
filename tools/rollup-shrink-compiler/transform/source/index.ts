@@ -8,6 +8,7 @@ import { CompilerOptions } from "../../options";
 import { SourceTransform } from "./SourceTransform";
 import lifecycle from "./lifecycle";
 import { Ebbinghaus } from "../ebbinghaus";
+import { Mangle } from "../mangle";
 
 export { SourceTransform } from "./SourceTransform";
 
@@ -26,21 +27,14 @@ const TRANSFORMS: Array<typeof SourceTransform> = [];
 export const create = (
   context: PluginContext,
   options: CompilerOptions,
-  // mangler: Mangle,
+  mangler: Mangle,
   memory: Ebbinghaus,
   inputOptions: InputOptions,
   outputOptions: OutputOptions
 ): SourceTransform[] =>
   TRANSFORMS.map(
     (transform) =>
-      new transform(
-        context,
-        {},
-        // mangler,
-        memory,
-        inputOptions,
-        outputOptions
-      )
+      new transform(context, {}, mangler, memory, inputOptions, outputOptions)
   );
 
 /**

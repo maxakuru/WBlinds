@@ -3,5 +3,18 @@
     "include": [
         "**/*.ts",
         "**/*.js"
+    ],
+    "exclude": [
+        "node_modules",
+        "public",
+        "./src",
+        "partitions",
+        "lib",
+        "include",
+        "etc",
+        "databu",
+        ".vscode",
+        ".pio",
+        "husky"
     ]
 }

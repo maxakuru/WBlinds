@@ -1,7 +1,7 @@
 require("ts-node").register({
   extends: "./tsconfig.json",
   compilerOptions: {
-    module: "CommonJS",
+    module: "commonjs",
     baseUrl: ".",
     resolveJsonModule: true,
     moduleResolution: "node",

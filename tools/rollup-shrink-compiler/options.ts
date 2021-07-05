@@ -193,15 +193,23 @@ export function getDefaultOptions(
  */
 export function getOptions(
   incomingFlags: ClosureCompilerOptions,
+  pluginOptions: CompilerOptions,
   rollupOptions: OutputOptions
 ): ClosureCompilerOptions {
   const defaults = getDefaultOptions(incomingFlags, rollupOptions);
   const overrides = { ...incomingFlags };
+
   if (overrides.externs && Array.isArray(overrides.externs)) {
     overrides.externs = overrides.externs.map((e) => {
       return path.resolve(cwd(), e);
     });
   }
+
+  if (pluginOptions.ignoreDynamicImports) {
+    overrides.externs ??= [];
+    overrides.externs.push(path.resolve(__dirname, "./import_externs.js"));
+  }
+
   return Object.assign({}, defaults, overrides);
 }
 
