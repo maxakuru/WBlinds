@@ -55,6 +55,11 @@ const ui_index_data: ChunkData = {
       // Replace the base escape character "$$$" with the
       // AWS replace character "%" afterwards.
       replace: [
+        [
+          `<link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,">`,
+          `<link rel="icon" type="image/x-icon" href="favicon.ico">`,
+          // ``,
+        ],
         [/%/g, "%%"],
         [/\$\$\$/g, "%"],
       ],
@@ -103,6 +108,7 @@ function inlineFile(srcFilePath: string, opts?: any): Promise<string> {
       if (err) {
         return reject(err);
       }
+      console.log("inlined: ", result);
       resolve(result);
     });
   });
@@ -178,7 +184,7 @@ async function specToChunk(s: Spec) {
   let buf: Buffer | string;
 
   if (inline) {
-    buf = await inlineFile(filePath);
+    buf = await inlineFile(filePath, { images: false });
   }
   if (!buf) {
     buf = await readFile(filePath);
@@ -190,6 +196,7 @@ async function specToChunk(s: Spec) {
     replace.forEach((r) => {
       buf = (buf as string).replace(...r);
     });
+    console.log("replaced: ", buf);
   }
 
   const beforeSize = buf.length;

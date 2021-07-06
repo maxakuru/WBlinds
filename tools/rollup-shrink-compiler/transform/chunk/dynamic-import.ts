@@ -2,7 +2,13 @@ import { ChunkTransform } from "./ChunkTransform";
 import { CompilerOptions } from "../../options";
 import MagicString from "magic-string";
 import { walk, parse, isIdentifier } from "../../acorn";
-import { CallExpression, ImportExpression, Identifier, Literal } from "estree";
+import {
+  CallExpression,
+  ImportExpression,
+  Identifier,
+  Literal,
+  SimpleCallExpression,
+} from "estree";
 import { OutputOptions } from "rollup";
 import { ITransform } from "../Transform";
 
@@ -78,6 +84,8 @@ export default class DynamicImportTransform
     source: MagicString
   ): Promise<MagicString> {
     const { file } = this.outputOptions;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const context = this;
 
     if (
       shouldSkipDynamicImports(this.pluginOptions, this.outputOptions, file)
@@ -85,17 +93,17 @@ export default class DynamicImportTransform
       const program = await parse(fileName, source.toString());
       walk.simple(program, {
         CallExpression(_node) {
-          const node = _node as unknown as CallExpression;
+          const node = _node as unknown as SimpleCallExpression;
           const {
             callee,
             range: [s, e],
             arguments: args,
-          } = node as CallExpression;
+          } = node;
           const { name } = callee as Identifier;
 
           if (name === IMPORT_REPLACE_NAME && isIdentifier(callee)) {
             source.remove(s, e);
-            source.appendRight(s, `import(${(args[0] as Literal).raw})`);
+            source.appendRight(s, context.getDynamicImportInsert(node));
           }
         },
       });
@@ -104,5 +112,15 @@ export default class DynamicImportTransform
     }
 
     return source;
+  }
+
+  private getDynamicImportInsert(node: SimpleCallExpression) {
+    const { file } = this.outputOptions;
+    if (this.pluginOptions.dynamicImportReinsertCallback) {
+      return this.pluginOptions.dynamicImportReinsertCallback(node, file);
+    }
+
+    const { arguments: args } = node;
+    return `import(${(args[0] as Literal).raw})`;
   }
 }

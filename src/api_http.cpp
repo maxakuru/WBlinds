@@ -21,10 +21,6 @@ enum class CacheMode {
    // Revalidate with etag on each request
    // Cache-Control: no-cache
    // Used for: index.html, since it embeds device info into window.
-   //           If the Etag cached is an older version, 
-   //           the global flag `clearCache: true` is injected.
-   //           If the web UI encounters that flag, it will force reload
-   //           the app.js module with `max-age: 0`. 
    kRevalidate = 1,
 
    // Short term cache, 1 day, revalidate afterwards
@@ -34,9 +30,7 @@ enum class CacheMode {
    // Long term cache, 28 days
    // Cache-Control: public, max-age=2419400, immutable
    // Used for: assets, static js (gzipped), this will be served from
-   //           cache with no conditional request. Since the Etag is based on 
-   //           the version number, the cache is explicitly purged by the logic
-   //           in the `kRevalidate` description.
+   //           cache with no conditional request.
    kLongTerm = 3,
 
    // Throttle requests by setting a cache time for that action and no revalidate.
@@ -161,16 +155,16 @@ static bool handleFileRead(AsyncWebServerRequest* request, String path) {
 }
 
 
-static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag) {
+static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag, bool ignoreMaxAge) {
    WLOG_D(TAG, "%s (%d args), etag %s", request->url().c_str(), request->params(), etag);
 
    AsyncWebHeader* maxAgeHeader = request->getHeader("Max-Age");
-   if (maxAgeHeader && maxAgeHeader->value() == String("0")) {
+   if (!ignoreMaxAge && maxAgeHeader && maxAgeHeader->value() == String("0")) {
       return false;
    }
 
    AsyncWebHeader* etagHeader = request->getHeader("If-None-Match");
-   if (etagHeader && etagHeader->value() == etag) {
+   if (etagHeader && etagHeader->value() == "W/\"" + etag + "\"") {
       WLOG_D(TAG, "matched etag, 304 %i", millis());
       request->send(304);
       return true;
@@ -204,13 +198,18 @@ static void setCacheControlHeaders(AsyncWebServerResponse* response, CacheMode m
       break;
    }
    response->addHeader(F("Cache-Control"), controlHeader);
-   response->addHeader(F("ETag"), etag);
+   // if (mode != CacheMode::kLongTerm)
+   response->addHeader(F("ETag"), "W/\"" + etag + "\"");
 }
 
 static void serveFavicon(AsyncWebServerRequest* request) {
-   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
+   WLOG_D(TAG, "fetch favicon");
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION), true)) return;
+   WLOG_D(TAG, "fetch favicon not from cache");
 
+   // AsyncWebServerResponse* response = request->beginResponse_P(200, "image/png", IMG_favicon, IMG_favicon_L);
    AsyncWebServerResponse* response = request->beginResponse_P(200, "image/x-icon", IMG_favicon, IMG_favicon_L);
+
 
    response->addHeader(F("Content-Encoding"), "gzip");
    setCacheControlHeaders(response, CacheMode::kLongTerm, String(VERSION), 0 /*ignored*/);
@@ -220,7 +219,7 @@ static void serveFavicon(AsyncWebServerRequest* request) {
 
 static void serveApp(AsyncWebServerRequest* request) {
    WLOG_D(TAG, "serving app: %i", millis());
-   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION), false)) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/javascript", JS_app, JS_app_L);
 
@@ -235,18 +234,21 @@ String indexProcessor(const String& var) {
    WLOG_D(TAG, "indexProcessor var: %s", var);
    if (var == "IP") return ipAddress;
    if (var == "MAC") return macAddress;
+   if (var == "DEVICE_NAME") return String(deviceName);
+   if (var == "TIMESTAMP") return String(deviceName);
+
    return String();
 }
 
 static void serveIndex(AsyncWebServerRequest* request) {
    WLOG_D(TAG, "serving index: %i", millis());
 
-   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION), false)) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, HTML_index, HTML_index_L, indexProcessor);
 
    // response->addHeader(F("Content-Encoding"), "gzip");
-   // setCacheControlHeaders(response, String(VERSION));
+   setCacheControlHeaders(response, CacheMode::kShortTerm, String(VERSION), 0 /* ignored */);
 
    request->send(response);
    WLOG_D(TAG, "serving index sent: %i", millis());
@@ -332,17 +334,17 @@ static void getSettings(AsyncWebServerRequest* request) {
       auto p = request->getParam("type")->value();
       if (0 != strcmp(p.c_str(), "mqtt")) {
          etag = state->getMqttEtag();
-         if (handleIfNoneMatchCacheHeader(request, etag)) return;
+         if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
          data = state->serializeSettings(setting_t::kMqtt);
       }
       else if (0 != strcmp(p.c_str(), "hw")) {
          etag = state->getHardwareEtag();
-         if (handleIfNoneMatchCacheHeader(request, etag)) return;
+         if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
          data = state->serializeSettings(setting_t::kHardware);
       }
       else if (0 != strcmp(p.c_str(), "gen")) {
          etag = state->getGeneralEtag();
-         if (handleIfNoneMatchCacheHeader(request, etag)) return;
+         if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
          data = state->serializeSettings(setting_t::kGeneral);
       }
       else {
@@ -351,7 +353,7 @@ static void getSettings(AsyncWebServerRequest* request) {
    }
    else {
       etag = state->getAllSettingsEtag();
-      if (handleIfNoneMatchCacheHeader(request, etag)) return;
+      if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
       data = state->serializeSettings(setting_t::kAll);
    }
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, data);
@@ -385,7 +387,10 @@ void BlindsHTTPAPI::init() {
    /**
     * Modules
     */
-   server.on("/app.js", HTTP_GET, serveApp);
+   String appModule = "/app-";
+   appModule += String(VERSION);
+   appModule += ".js";
+   server.on(appModule.c_str(), HTTP_GET, serveApp);
 
    /**
     * Index serving endpoints (routes)

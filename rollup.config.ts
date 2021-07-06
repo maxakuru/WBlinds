@@ -11,6 +11,7 @@ import serve from "rollup-plugin-serve";
 import svg from "rollup-plugin-svg";
 import importHtml from "./tools/import-html";
 import { ChunkDescriptor } from "./tools/rollup-shrink-compiler/options";
+import { Literal } from "estree";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parsed: env } = require("dotenv-flow").config();
@@ -30,6 +31,7 @@ while (env.API_ENDPOINT.endsWith("/")) {
 }
 
 const dev = env.MODE !== "prod";
+const version = env.VERSION || pkg.version.replace("v", "");
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 const plugins = [];
@@ -41,6 +43,7 @@ plugins.push(
     "process.env.USE_MOCKS": JSON.stringify(env.USE_MOCKS),
     "process.env.API_ENDPOINT": JSON.stringify(env.API_ENDPOINT || ""),
     "process.env.WS_ENDPOINT": JSON.stringify(env.WS_ENDPOINT || ""),
+    "process.env.VERSION": JSON.stringify(version),
   }),
   typescript({
     sourceMap: dev,
@@ -77,6 +80,14 @@ if (!dev) {
       externs: ["./tools/externs.js"],
       options: {
         ignoreDynamicImports: true,
+        dynamicImportReinsertCallback: (node) => {
+          const { arguments: args } = node;
+          const rawPath = (args[0] as Literal).raw;
+          const spl = rawPath.split(".");
+          spl.pop(); // .js"
+          spl.push(`${spl.pop()}-${version}.js"`); // X-x.x.x.js
+          return `import(${spl.join(".")})`;
+        },
         implicitChunkLoadOrder: {
           // app.ts is always loaded after
           // index by dynamic import
@@ -123,12 +134,12 @@ export default {
 
 async function templateFunction(names: string[]): Promise<ChunkDescriptor[]> {
   const template = await importHtml("./web/index.html");
-  template.insertAtEndOf("body", `<script src="${names[0]}"></script>`);
-  template.insertAtEndOf("body", `<script src="${names[1]}"></script>`);
   template.insertAtEndOf(
     "body",
-    `<script>window.wblinds={inj:{ip:"$$$IP$$$",mac:"$$$MAC$$$"}};</script>`
+    `<script>window.wblinds={inj:{ip:"$$$IP$$$",mac:"$$$MAC$$$",deviceName:"$$$DEVICE_NAME$$$",when:"$$$TIMESTAMP$$$"}};</script>`
   );
+  template.insertAtEndOf("body", `<script src="${names[0]}"></script>`);
+  template.insertAtEndOf("body", `<script src="${names[1]}"></script>`);
 
   return [
     {

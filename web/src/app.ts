@@ -36,8 +36,10 @@ const labels = [
   { t: "Settings", i: cog },
 ];
 
+export const s = State;
+
 export const run = (ns: WBlindsNamespace): void => {
-  debug("onLoad(): ", ns);
+  console.log("onLoad(): ", ns);
   mock.init();
   const body = querySelector("body");
   const app = getElement("app");
@@ -62,6 +64,12 @@ export const run = (ns: WBlindsNamespace): void => {
       if (msg.type === WSEventType.Setting) {
         State.update(SETTINGS, {
           ...State.get<StateData["settings"]>(SETTINGS),
+          ...msg.data,
+        });
+      }
+      if (msg.type === WSEventType.State) {
+        State.update(STATE, {
+          ...State.get<StateData["state"]>(STATE),
           ...msg.data,
         });
       }
@@ -107,14 +115,14 @@ export const run = (ns: WBlindsNamespace): void => {
         const t = Home();
         pushToHistory(newPath, undefined, true);
         t.onDeviceClick(handleDeviceClick);
-        if (!State.isLoaded(STATE)) {
-          load(STATE);
-          // load("settings?type=gen", [], ["settings.gen"]).then(() => {
-          //   load(STATE);
-          //   load(PRESETS);
-          //   load(DEVICES);
-          // });
-        }
+        // if (!State.isLoaded(STATE)) {
+        //   load(STATE);
+        // load("settings?type=gen", [], ["settings.gen"]).then(() => {
+        //   load(STATE);
+        //   load(PRESETS);
+        //   load(DEVICES);
+        // });
+        // }
         currentTab = t;
         break;
       }

@@ -126,7 +126,11 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
 
     ws.onmessage = (e: MessageEvent<any>) => {
       debug("[ws] onMessage(): ", e, e.data);
+      console.log("[ws] onMessage(): ", e, e.data);
+
       const unpacked = unpackMessages(e.data);
+      console.log("[ws] onMessage() unpacked: ", unpacked);
+
       if (_hasOnMessage) {
         unpacked.forEach(oM);
       }
@@ -203,26 +207,19 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
   function unpackMessages(data: string): WSIncomingEvent[] {
     // TODO: convert string message to object
     debug("unpackMessages: ", data);
+    if (data.endsWith("/")) data = data.substr(0, data.length - 1);
     const spl = data.split("/");
-    // eslint-disable-next-line prefer-const
-    let [mac, type, mask]: [string, number, number] = spl as [
-      string,
-      number,
-      number
-    ];
-    type = parseInt(type as unknown as string);
-    mask = parseInt(mask as unknown as string);
+    const mac = spl.shift();
+    const type = parseInt(spl.shift());
+    const mask = parseInt(spl.shift());
 
     // Check the message contents before unpacking.
     // It should have the same number of data segments
     // as bits flipped in the mask.
     const bits = mask.toString(2).split("1").length - 1;
-    if (bits !== spl.length - 4) {
+    if (bits !== spl.length) {
       if (_hasOnError) oE("Event flags and data don't match", 0);
     }
-
-    // const type = parseInt(spl.shift());
-    // const mask = parseInt(spl.shift());
 
     // for each event flag, add to corresponding event
     const stateEvData: WSIncomingStateEvent["data"] = {};
@@ -233,13 +230,14 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
     // and use the event type & a switch.
     let j = 1;
     for (
-      let i = 3, len = OrderedEventFlags.length;
+      let i = 0, len = OrderedEventFlags.length;
       i < len && spl.length > 0;
       i++
     ) {
       if (j & mask) {
         const k = OrderedEventFlags[i];
         const v = spl.shift();
+
         if (i < 4) {
           // All state updates are numbers
           stateEvData[k] = parseInt(v);

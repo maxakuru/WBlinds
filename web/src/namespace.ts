@@ -4,9 +4,10 @@ import type { State, StateData } from "./state";
 export interface WBlindsNamespace {
   state: State;
   tc: ToastContainer;
+  inj: InjectedNamespace;
 }
 
-interface InjectedNamespace {
+export interface InjectedNamespace {
   state?: Partial<StateData>;
   mac?: string;
   ip?: string;
@@ -21,6 +22,6 @@ export const initNamespace = (w: Window): WBlindsNamespace => {
   // debug("injecting namespace: ", inject);
   // const ns = (w.wblinds = inject);
 
-  const ns = (w.wblinds = {} as any);
+  const ns = (w.wblinds = w.wblinds || ({} as any));
   return ns;
 };

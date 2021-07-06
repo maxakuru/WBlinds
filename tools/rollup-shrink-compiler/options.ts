@@ -5,6 +5,7 @@ import {
 } from "rollup";
 import path from "path";
 import { cwd } from "process";
+import { CallExpression } from "estree";
 
 // TODO: finish these keys
 const compilerFlagKeys = [
@@ -150,9 +151,22 @@ export interface CompilerOptions {
 
   /**
    * Ignore dynamic imports during Closure Compiler run
+   * Does this by replacing the dynamic import call
+   * with a fake function, then replacing it again after
+   * Closure Compiler is done.
+   *
    * Default true
    */
   ignoreDynamicImports?: boolean;
+
+  /**
+   * Callback to modify the reinserted dynamic import
+   * Only works with `ignoreDynamicImports: true`
+   */
+  dynamicImportReinsertCallback?: (
+    node: CallExpression,
+    file: string
+  ) => string;
 
   /**
    * Remove `use strict`

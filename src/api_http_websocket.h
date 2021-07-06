@@ -12,11 +12,8 @@ static String packWSMessage(const WBlindsEvent& event, wsmessage_t type) {
     auto state = State::getInstance();
     String s = "";
     s += macAddress;
-
     s += DELIMITER;
     s += (int)type;
-    s += DELIMITER;
-
     s += DELIMITER;
     s += event.flags_.mask_;
     s += DELIMITER;
@@ -37,7 +34,7 @@ static String packWSMessage(const WBlindsEvent& event, wsmessage_t type) {
         s += state->getAccel();
         s += DELIMITER;
     }
-    WLOG_I(TAG, "DG string: %s", s);
+    WLOG_I(TAG, "DG string: %s", s.c_str());
     return s;
 }
 
@@ -142,9 +139,18 @@ static void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 static void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type,
     void* arg, uint8_t* data, size_t len) {
     switch (type) {
-    case WS_EVT_CONNECT:
+    case WS_EVT_CONNECT:{
         WLOG_I(TAG, "WebSocket client #%u connected from %s", client->id(), client->remoteIP().toString().c_str());
+        EventFlags flags;
+        flags.accel_ = true;
+        flags.pos_ = true;
+        flags.targetPos_ = true;
+        flags.speed_ = true;
+
+        String m = packWSMessage(WBlindsEvent(flags), wsmessage_t::kState);
+        client->text(m);
         break;
+    }
     case WS_EVT_DISCONNECT:
         WLOG_I(TAG, "WebSocket client #%u disconnected", client->id());
         break;
