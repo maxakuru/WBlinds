@@ -15,7 +15,7 @@
 }
 
 #bg {
-    background-image: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);
+    background-image: url(bg-__VERSION__.jpg), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);
 }
 
 /* uncss:ignore */

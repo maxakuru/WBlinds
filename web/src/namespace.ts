@@ -11,6 +11,8 @@ export interface InjectedNamespace {
   state?: Partial<StateData>;
   mac?: string;
   ip?: string;
+  deviceName?: string;
+  when?: string;
 }
 
 export const initNamespace = (w: Window): WBlindsNamespace => {

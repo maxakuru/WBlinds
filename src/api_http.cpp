@@ -27,10 +27,11 @@ enum class CacheMode {
    // Cache-Control: max-age=86400, must-revalidate
    kShortTerm = 2,
 
-   // Long term cache, 28 days
-   // Cache-Control: public, max-age=2419400, immutable
-   // Used for: assets, static js (gzipped), this will be served from
-   //           cache with no conditional request.
+   // Long term cache, 1 year
+   // Cache-Control: public, max-age=31536000, immutable
+   // Used for: Assets & static js (gzipped) with version in path.
+   //           Favicon with no version. This will be served from
+   //           cache with no conditional request. 
    kLongTerm = 3,
 
    // Throttle requests by setting a cache time for that action and no revalidate.
@@ -155,11 +156,11 @@ static bool handleFileRead(AsyncWebServerRequest* request, String path) {
 }
 
 
-static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag, bool ignoreMaxAge) {
+static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag) {
    WLOG_D(TAG, "%s (%d args), etag %s", request->url().c_str(), request->params(), etag);
 
    AsyncWebHeader* maxAgeHeader = request->getHeader("Max-Age");
-   if (!ignoreMaxAge && maxAgeHeader && maxAgeHeader->value() == String("0")) {
+   if (maxAgeHeader && maxAgeHeader->value() == String("0")) {
       return false;
    }
 
@@ -189,7 +190,7 @@ static void setCacheControlHeaders(AsyncWebServerResponse* response, CacheMode m
       controlHeader = "max-age=86400, must-revalidate";
       break;
    case CacheMode::kLongTerm:
-      controlHeader = "public, max-age=2419400, immutable";
+      controlHeader = "public, max-age=31536000, immutable";
       break;
    case CacheMode::kSoftThrottle:
       controlHeader = "private, max-age=";
@@ -204,13 +205,11 @@ static void setCacheControlHeaders(AsyncWebServerResponse* response, CacheMode m
 
 static void serveFavicon(AsyncWebServerRequest* request) {
    WLOG_D(TAG, "fetch favicon");
-   if (handleIfNoneMatchCacheHeader(request, String(VERSION), true)) return;
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
    WLOG_D(TAG, "fetch favicon not from cache");
 
    // AsyncWebServerResponse* response = request->beginResponse_P(200, "image/png", IMG_favicon, IMG_favicon_L);
    AsyncWebServerResponse* response = request->beginResponse_P(200, "image/x-icon", IMG_favicon, IMG_favicon_L);
-
-
    response->addHeader(F("Content-Encoding"), "gzip");
    setCacheControlHeaders(response, CacheMode::kLongTerm, String(VERSION), 0 /*ignored*/);
 
@@ -219,7 +218,7 @@ static void serveFavicon(AsyncWebServerRequest* request) {
 
 static void serveApp(AsyncWebServerRequest* request) {
    WLOG_D(TAG, "serving app: %i", millis());
-   if (handleIfNoneMatchCacheHeader(request, String(VERSION), false)) return;
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/javascript", JS_app, JS_app_L);
 
@@ -243,7 +242,7 @@ String indexProcessor(const String& var) {
 static void serveIndex(AsyncWebServerRequest* request) {
    WLOG_D(TAG, "serving index: %i", millis());
 
-   if (handleIfNoneMatchCacheHeader(request, String(VERSION), false)) return;
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, HTML_index, HTML_index_L, indexProcessor);
 
@@ -255,18 +254,16 @@ static void serveIndex(AsyncWebServerRequest* request) {
 
 }
 
-// void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
-//    if (handleFileRead(request, "/bg.jpg")) return;
+static void serveBackground(AsyncWebServerRequest* request) {
+   if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
-//    if (handleIfNoneMatchCacheHeader(request)) return;
+   AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_JPG, IMG_background, IMG_background_L);
 
-//    AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_JPG, IMG_background, IMG_background_L);
+   response->addHeader(F("Content-Encoding"), "gzip");
+   setCacheControlHeaders(response, CacheMode::kLongTerm, String(VERSION), 0 /*ignored*/);
 
-//    response->addHeader(F("Content-Encoding"), "gzip");
-//    setStaticContentCacheHeaders(response);
-
-//    request->send(response);
-// }
+   request->send(response);
+}
 
 static void getState(AsyncWebServerRequest* request) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
@@ -334,17 +331,17 @@ static void getSettings(AsyncWebServerRequest* request) {
       auto p = request->getParam("type")->value();
       if (0 != strcmp(p.c_str(), "mqtt")) {
          etag = state->getMqttEtag();
-         if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
+         if (handleIfNoneMatchCacheHeader(request, etag)) return;
          data = state->serializeSettings(setting_t::kMqtt);
       }
       else if (0 != strcmp(p.c_str(), "hw")) {
          etag = state->getHardwareEtag();
-         if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
+         if (handleIfNoneMatchCacheHeader(request, etag)) return;
          data = state->serializeSettings(setting_t::kHardware);
       }
       else if (0 != strcmp(p.c_str(), "gen")) {
          etag = state->getGeneralEtag();
-         if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
+         if (handleIfNoneMatchCacheHeader(request, etag)) return;
          data = state->serializeSettings(setting_t::kGeneral);
       }
       else {
@@ -353,7 +350,7 @@ static void getSettings(AsyncWebServerRequest* request) {
    }
    else {
       etag = state->getAllSettingsEtag();
-      if (handleIfNoneMatchCacheHeader(request, etag, false)) return;
+      if (handleIfNoneMatchCacheHeader(request, etag)) return;
       data = state->serializeSettings(setting_t::kAll);
    }
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, data);
@@ -368,6 +365,8 @@ void BlindsHTTPAPI::init() {
    interestingFlags.pos_ = true;
    interestingFlags.targetPos_ = true;
    interestingFlags.accel_ = true;
+   interestingFlags.speed_ = true;
+
 
    State::getInstance()->Attach(this, interestingFlags);
 
@@ -383,14 +382,18 @@ void BlindsHTTPAPI::init() {
     * Fixtures
     */
    server.on("/favicon.ico", HTTP_GET, serveFavicon);
+   String bgVersioned = "/bg-";
+   bgVersioned += String(VERSION);
+   bgVersioned += ".jpg";
+   server.on(bgVersioned.c_str(), HTTP_GET, serveBackground);
 
    /**
     * Modules
     */
-   String appModule = "/app-";
-   appModule += String(VERSION);
-   appModule += ".js";
-   server.on(appModule.c_str(), HTTP_GET, serveApp);
+   String appVersioned = "/app-";
+   appVersioned += String(VERSION);
+   appVersioned += ".js";
+   server.on(appVersioned.c_str(), HTTP_GET, serveApp);
 
    /**
     * Index serving endpoints (routes)

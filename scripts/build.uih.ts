@@ -7,6 +7,15 @@ const Inliner = require("inliner");
 import { writeFile, readFile } from "fs/promises";
 import { resolve as pathResolve, relative as relPath } from "path";
 import * as zlib from "zlib";
+import * as pkg from "../package.json";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { parsed: env } = require("dotenv-flow").config();
+const dev = env.MODE !== "prod";
+const version = env.VERSION
+  ? env.VERSION
+  : dev
+  ? ""
+  : pkg.version.replace("v", "");
 
 const UINT16_MAX = 65535;
 
@@ -50,26 +59,23 @@ const ui_index_data: ChunkData = {
       name: "HTML_index",
       method: "binary",
       inline: true,
+      gzip: false,
       // For using asyncwebserver templates with embedded CSS
       // percents are escaped with "%%".
       // Replace the base escape character "$$$" with the
       // AWS replace character "%" afterwards.
       replace: [
-        [
-          `<link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,">`,
-          `<link rel="icon" type="image/x-icon" href="favicon.ico">`,
-          // ``,
-        ],
+        // [/__VERSION__/g, version],
         [/%/g, "%%"],
         [/\$\$\$/g, "%"],
       ],
-      gzip: false,
     },
     {
       filePath: pathResolve(__dirname, "../public/app.js"),
       name: "JS_app",
       method: "binary",
       gzip: true,
+      // replace: [[/__VERSION__/g, version]],
     },
   ],
 };
@@ -108,7 +114,6 @@ function inlineFile(srcFilePath: string, opts?: any): Promise<string> {
       if (err) {
         return reject(err);
       }
-      console.log("inlined: ", result);
       resolve(result);
     });
   });
@@ -196,7 +201,6 @@ async function specToChunk(s: Spec) {
     replace.forEach((r) => {
       buf = (buf as string).replace(...r);
     });
-    console.log("replaced: ", buf);
   }
 
   const beforeSize = buf.length;

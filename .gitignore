@@ -8,6 +8,8 @@
 .vscode/ipch
 public/*.js.map
 
+# dev
+public/*-dev.*
 
 # deps
 node_modules

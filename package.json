@@ -13,7 +13,7 @@
     "build": "npm run build:ui && npm run build:cpp",
     "build:ui": "rollup -c rollup.config.js",
     "postbuild:ui": "npm run build:uih",
-    "build:uih": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"] }' ts-node ./scripts/build.uih.ts",
+    "build:uih": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"], \"resolveJsonModule\": true }' ts-node ./scripts/build.uih.ts",
     "build:cpp": "PATH=$PATH:~/.platformio/penv/bin pio run",
     "flash": "PATH=$PATH:~/.platformio/penv/bin pio run --target upload",
     "pull:homekit": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\", \"lib\": [\"ES2020\"] }' ts-node ./scripts/pull.homekit.ts"

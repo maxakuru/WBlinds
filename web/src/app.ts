@@ -41,6 +41,9 @@ export const s = State;
 export const run = (ns: WBlindsNamespace): void => {
   console.log("onLoad(): ", ns);
   mock.init();
+  // Hack to make favicon cacheable in Chrome
+  // add href after document load, replacing empty data url
+  (getElement("favicon") as HTMLLinkElement).href = "favicon.ico";
   const body = querySelector("body");
   const app = getElement("app");
   let currentIndex = -1;
@@ -103,7 +106,8 @@ export const run = (ns: WBlindsNamespace): void => {
 
   function handleTabChange(nextIndex: number) {
     if (currentIndex === nextIndex) return;
-    const newPath = `/${labels[nextIndex].t.toLowerCase()}`;
+    const newPath =
+      nextIndex > 0 ? `/${labels[nextIndex].t.toLowerCase()}` : `/`;
     currentIndex = nextIndex;
     currentTab?.destroy?.();
     currentTab?.node.remove();

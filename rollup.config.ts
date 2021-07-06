@@ -12,6 +12,7 @@ import svg from "rollup-plugin-svg";
 import importHtml from "./tools/import-html";
 import { ChunkDescriptor } from "./tools/rollup-shrink-compiler/options";
 import { Literal } from "estree";
+import { copyFile, stat } from "fs/promises";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parsed: env } = require("dotenv-flow").config();
@@ -31,7 +32,8 @@ while (env.API_ENDPOINT.endsWith("/")) {
 }
 
 const dev = env.MODE !== "prod";
-const version = env.VERSION || pkg.version.replace("v", "");
+const version =
+  env.VERSION !== undefined ? env.VERSION : pkg.version.replace("v", "");
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 const plugins = [];
@@ -43,7 +45,7 @@ plugins.push(
     "process.env.USE_MOCKS": JSON.stringify(env.USE_MOCKS),
     "process.env.API_ENDPOINT": JSON.stringify(env.API_ENDPOINT || ""),
     "process.env.WS_ENDPOINT": JSON.stringify(env.WS_ENDPOINT || ""),
-    "process.env.VERSION": JSON.stringify(version),
+    __VERSION__: version,
   }),
   typescript({
     sourceMap: dev,
@@ -81,6 +83,9 @@ if (!dev) {
       options: {
         ignoreDynamicImports: true,
         dynamicImportReinsertCallback: (node) => {
+          // This allows Typescript to give type completion and hinting.
+          // Any other assets that should be versioned can use the template
+          // `file-__VERSION__.ext` and it will be filled in by scripts/build.uih.ts
           const { arguments: args } = node;
           const rawPath = (args[0] as Literal).raw;
           const spl = rawPath.split(".");
@@ -101,7 +106,9 @@ if (!dev) {
   plugins.push(
     {
       name: "watch-external",
-      buildStart() {
+      buildStart: async function () {
+        // if dev files don't exit, add them
+        await copyDevFile("./public/bg.jpg");
         this.addWatchFile(path.resolve(__dirname, "web/**/*.css"));
         this.addWatchFile(path.resolve(__dirname, "web/**/*.html"));
         this.addWatchFile(path.resolve(__dirname, "postcss.config.js"));
@@ -119,7 +126,12 @@ if (!dev) {
 }
 
 export default {
-  input: ["web/style-inject.ts", "web/index.ts", "web/src/app.ts"],
+  input: [
+    "web/tools/esp-inject.ts",
+    "web/tools/style-inject.ts",
+    "web/index.ts",
+    "web/src/app.ts",
+  ],
   output: {
     dir: "public",
     format: "es",
@@ -134,12 +146,10 @@ export default {
 
 async function templateFunction(names: string[]): Promise<ChunkDescriptor[]> {
   const template = await importHtml("./web/index.html");
-  template.insertAtEndOf(
-    "body",
-    `<script>window.wblinds={inj:{ip:"$$$IP$$$",mac:"$$$MAC$$$",deviceName:"$$$DEVICE_NAME$$$",when:"$$$TIMESTAMP$$$"}};</script>`
-  );
-  template.insertAtEndOf("body", `<script src="${names[0]}"></script>`);
-  template.insertAtEndOf("body", `<script src="${names[1]}"></script>`);
+  template.insertAtEndOf("body", `<script src="${names[0]}"></script>`); // esp-inject
+  template.insertAtEndOf("body", `<script src="${names[1]}"></script>`); // style-inject
+  template.insertAtEndOf("body", `<script src="${names[2]}"></script>`); // index
+  // names[3] == app.js, loaded async
 
   return [
     {
@@ -147,4 +157,18 @@ async function templateFunction(names: string[]): Promise<ChunkDescriptor[]> {
       source: template.toString(),
     },
   ];
+}
+
+async function copyDevFile(relPath: string) {
+  const spl = relPath.split(".");
+  const ext = spl.pop();
+  const devFilePath = path.resolve(__dirname, spl.join(".") + "-dev." + ext);
+  try {
+    await stat(devFilePath);
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      const ogFilePath = path.resolve(__dirname, relPath);
+      await copyFile(ogFilePath, devFilePath);
+    } else throw e;
+  }
 }
