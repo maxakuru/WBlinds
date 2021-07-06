@@ -1,4 +1,4 @@
-export function inject(css: string, ref: any = {}): void {
+window.stynj = function inject(css: string, ref: any = {}): void {
   if (!css || typeof document === "undefined") {
     return;
   }
@@ -9,4 +9,4 @@ export function inject(css: string, ref: any = {}): void {
 
   head.appendChild(style);
   style.appendChild(document.createTextNode(css));
-}
+};

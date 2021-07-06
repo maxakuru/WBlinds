@@ -153,17 +153,19 @@ export default function (
       // console.log("[Compiler] postCompiled: ", postCompiled);
       return postCompiled;
     },
-    generateBundle(
+    generateBundle: async function (
       outputOptions: NormalizedOutputOptions,
       bundle: OutputBundle,
       isWrite: boolean
     ) {
-      console.log("generate bundle: ", bundle);
+      // console.log("generate bundle: ", bundle);
       if (!options.templateFunction) return null;
 
       let outs: any[];
       try {
-        outs = options.templateFunction(refs.map(this.getFileName.bind(this)));
+        outs = await options.templateFunction(
+          refs.map(this.getFileName.bind(this))
+        );
       } catch (e) {
         throw Error("Error in templateFunction: " + e);
       }

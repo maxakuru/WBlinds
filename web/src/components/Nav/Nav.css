@@ -2,7 +2,7 @@
 	background: rgba(0,0,0,0.5);
 	height: 50px;
 	display: flex;
-	font-size: 14px;
+	font-size: 10px;
 	justify-content: center;
 }
 
@@ -21,5 +21,4 @@
 #nav>ul>li>.l {
 	margin-block-start: 0em;
     margin-block-end: 0em;
-	font-size: 8px;
 }

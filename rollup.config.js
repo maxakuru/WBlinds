@@ -10,6 +10,7 @@ require("ts-node").register({
       "rollup-plugin-serve": ["./tools/@types"],
       "rollup-plugin-svg": ["./tools/@types"],
       "rollup-plugin-html": ["./tools/@types"],
+      // "*.html": ["./tools/@types"],
     },
   },
 });

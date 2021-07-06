@@ -4,11 +4,11 @@ module.exports = {
     require("autoprefixer"),
     require("postcss-import"),
     require("postcss-nested"),
-    require("postcss-uncss")({
-      html: ["web/**/*.html"],
-      ignore: [
-        // defined inline
-      ],
-    }),
+    // require("postcss-uncss")({
+    //   html: ["web/**/*.html"],
+    //   ignore: [
+    //     // defined inline
+    //   ],
+    // }),
   ],
 };

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 // import compiler from "@ampproject/rollup-plugin-closure-compiler";
 import compiler from "./tools/rollup-shrink-compiler";
 import nodeResolve from "@rollup/plugin-node-resolve";
@@ -10,7 +9,10 @@ import postcss from "rollup-plugin-postcss";
 import path from "path";
 import serve from "rollup-plugin-serve";
 import svg from "rollup-plugin-svg";
+import importHtml from "./tools/import-html";
+import { ChunkDescriptor } from "./tools/rollup-shrink-compiler/options";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parsed: env } = require("dotenv-flow").config();
 if (process.env.CI) {
   // Force settings for precommit hooks,
@@ -56,6 +58,7 @@ plugins.push(
     minimize: !dev,
     config: true,
     inject: (cssVariableName, id) => {
+      // global added to window via templateFunction
       return `stynj(${cssVariableName})`;
     },
   }),
@@ -69,12 +72,14 @@ if (!dev) {
       language_out: "ECMASCRIPT_2020",
       compilation_level: "SIMPLE",
       // assume_function_wrapper: true,
-      allow_dynamic_import: true,
+      // allow_dynamic_import: true,
       // dynamic_import_alias: "import",
       externs: ["./tools/externs.js"],
       options: {
         ignoreDynamicImports: true,
         implicitChunkLoadOrder: {
+          // app.ts is always loaded after
+          // index by dynamic import
           "web/src/app.ts": ["web/index.ts"],
         },
         templateFunction,
@@ -103,10 +108,8 @@ if (!dev) {
 }
 
 export default {
-  input: ["web/index.ts", "web/src/app.ts"],
-  // input: ["web/index.ts"],
+  input: ["web/style-inject.ts", "web/index.ts", "web/src/app.ts"],
   output: {
-    // [dev ? "file" : "dir"]: dev ? "public/index.js" : "public",
     dir: "public",
     format: "es",
     sourcemap: dev,
@@ -118,13 +121,19 @@ export default {
   plugins,
 };
 
-function templateFunction(
-  names: string[]
-): { fileName: string; source: string }[] {
+async function templateFunction(names: string[]): Promise<ChunkDescriptor[]> {
+  const template = await importHtml("./web/index.html");
+  template.insertAtEndOf("body", `<script src="${names[0]}"></script>`);
+  template.insertAtEndOf("body", `<script src="${names[1]}"></script>`);
+  template.insertAtEndOf(
+    "body",
+    `<script>window.wblinds={inj:{ip:"$$$IP$$$",mac:"$$$MAC$$$"}};</script>`
+  );
+
   return [
     {
       fileName: "index.html",
-      source: `<!DOCTYPE html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><meta charset="utf-8"><meta content="yes" name="apple-mobile-web-app-capable"><title>WBlinds</title></head><body><noscript><div class="overlay" style="opacity:1;">WBlinds UI needs JS!</div></noscript><div id="bg"></div><div id="toast"></div><div id="app"></div><div id="nav"></div><script>window.ns = "tesssst"; window.stynj=function(a){if(a&&"undefined"!==typeof document){var d=document.head||document.getElementsByTagName("head")[0],b=document.createElement("style");d.appendChild(b);b.appendChild(document.createTextNode(a))}};</script><script src="${names[0]}"></script></body></html>`,
+      source: template.toString(),
     },
   ];
 }

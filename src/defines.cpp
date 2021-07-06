@@ -23,7 +23,8 @@ namespace stdBlinds {
     const char* MT_JPG = "image/jpeg";
 }
 
-// TODO: move these to header globals
+// ESP
+uint32_t lastHeap = 0;
 
 // AP
 char apSSID[MAX_SSID_LENGTH] = "";
@@ -43,7 +44,7 @@ String macAddress = "";
 String ipAddress = "";
 
 // Controls
-bool forceReconnect = false;
+bool lowHeap = false;
 bool doReboot = false;
 bool doRestore = false;
 void DO_REBOOT() {
@@ -55,9 +56,7 @@ void DO_RESTORE() {
 
 void uniqueTag(char* out, size_t maxLen, const char* tag) {
     uint8_t mac[6];
-    WLOG_I(TAG, "max len: %i", maxLen);
-
     esp_efuse_mac_get_default(mac);
-    WLOG_I(TAG, "%s-%02X%02X%02X", tag, mac[3], mac[4], mac[5]);
+    WLOG_D(TAG, "%s-%02X%02X%02X", tag, mac[3], mac[4], mac[5]);
     snprintf(out, maxLen, "%s-%02X%02X%02X", tag, mac[3], mac[4], mac[5]);
 }

@@ -128,14 +128,18 @@ export interface ClosureCompilerOptions {
   json_streams?: undefined;
 }
 
+export interface ChunkDescriptor {
+  fileName: string;
+  source: any;
+}
+
 export interface CompilerOptions {
   /**
    * Function that returns a templated file
    */
-  templateFunction?: (chunkNames: string[]) => {
-    fileName: string;
-    source: any;
-  }[];
+  templateFunction?: (
+    chunkNames: string[]
+  ) => ChunkDescriptor[] | Promise<ChunkDescriptor[]>;
   /**
    * Map from input file to other input files that will be loaded first.
    *

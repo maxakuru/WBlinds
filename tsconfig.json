@@ -41,6 +41,7 @@
     },
     "include": [
         "web/**/*",
+        "tools/**/*"
     ],
     "exclude": [
         "node_modules"

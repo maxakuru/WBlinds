@@ -2,6 +2,7 @@
 #include "defines.h"
 #include "datagram.h"
 #include "api_http_websocket.h"
+#define ASYNCWEBSERVER_REGEX 1
 #include <ESPAsyncWebServer.h>
 
 // Errors
@@ -11,6 +12,44 @@ const char* jsonSuffix = "\"}";
 char errStr[50] = "";
 char valStr[50] = "";
 
+enum class CacheMode {
+   // No caching at all
+   // Cache-Control: no-store
+   // Use for: always changing responses
+   kNone = 0,
+
+   // Revalidate with etag on each request
+   // Cache-Control: no-cache
+   // Used for: index.html, since it embeds device info into window.
+   //           If the Etag cached is an older version, 
+   //           the global flag `clearCache: true` is injected.
+   //           If the web UI encounters that flag, it will force reload
+   //           the app.js module with `max-age: 0`. 
+   kRevalidate = 1,
+
+   // Short term cache, 1 day, revalidate afterwards
+   // Cache-Control: max-age=86400, must-revalidate
+   kShortTerm = 2,
+
+   // Long term cache, 28 days
+   // Cache-Control: public, max-age=2419400, immutable
+   // Used for: assets, static js (gzipped), this will be served from
+   //           cache with no conditional request. Since the Etag is based on 
+   //           the version number, the cache is explicitly purged by the logic
+   //           in the `kRevalidate` description.
+   kLongTerm = 3,
+
+   // Throttle requests by setting a cache time for that action and no revalidate.
+   // Cache-Control: private, max-age=X, immutable
+   // Used for: Actions that cause some expensive action on the ESP,
+   //           or data that will likely be the same because it's 
+   //           updated on an interval AND that isn't important enough
+   //           to store and update Etags.
+   //           
+   //           Rather than storing data and taking up heap, assume clients will be well behaved 
+   //           and that usually a single web client is served at a time.
+   kSoftThrottle = 4,
+};
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -77,10 +116,18 @@ static char* errorJson(const char* msg) {
 };
 
 static char* valJson(char* msg) {
+   WLOG_I(TAG, "msg: %s", msg);
    strcpy(valStr, valPrefix);
    strcat(valStr, msg);
    strcat(valStr, jsonSuffix);
    return valStr;
+};
+
+static char* valJson(int num) {
+   WLOG_I(TAG, "msg2: %i", num);
+   char str[12];
+   sprintf(str, "%u", num);
+   return valJson(str);
 };
 
 static String getContentType(AsyncWebServerRequest* request, String filename) {
@@ -115,57 +162,95 @@ static bool handleFileRead(AsyncWebServerRequest* request, String path) {
 
 
 static bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request, String etag) {
-   WLOG_I(TAG, "%s (%d args), etag %s", request->url().c_str(), request->params(), etag);
+   WLOG_D(TAG, "%s (%d args), etag %s", request->url().c_str(), request->params(), etag);
 
-   AsyncWebHeader* header = request->getHeader("If-None-Match");
-   if (header && header->value() == etag) {
-      WLOG_D(TAG, "matched etag, 304");
+   AsyncWebHeader* maxAgeHeader = request->getHeader("Max-Age");
+   if (maxAgeHeader && maxAgeHeader->value() == String("0")) {
+      return false;
+   }
+
+   AsyncWebHeader* etagHeader = request->getHeader("If-None-Match");
+   if (etagHeader && etagHeader->value() == etag) {
+      WLOG_D(TAG, "matched etag, 304 %i", millis());
       request->send(304);
       return true;
    }
    return false;
 }
 
-static void setCacheControlHeaders(AsyncWebServerResponse* response, String etag) {
+static void setCacheControlHeaders(AsyncWebServerResponse* response, CacheMode mode, String etag, int duration) {
    if (response == nullptr) {
-      WLOG_D(TAG, "response nullptr");
       return;
    }
-   response->addHeader(F("Cache-Control"), "no-cache");
+
+   String controlHeader = "";
+   switch (mode) {
+   case CacheMode::kNone:
+      controlHeader = "no-store";
+      break;
+   case CacheMode::kRevalidate:
+      controlHeader = "no-cache";
+      break;
+   case CacheMode::kShortTerm:
+      controlHeader = "max-age=86400, must-revalidate";
+      break;
+   case CacheMode::kLongTerm:
+      controlHeader = "public, max-age=2419400, immutable";
+      break;
+   case CacheMode::kSoftThrottle:
+      controlHeader = "private, max-age=";
+      controlHeader += duration;
+      controlHeader += ", immutable";
+      break;
+   }
+   response->addHeader(F("Cache-Control"), controlHeader);
    response->addHeader(F("ETag"), etag);
 }
 
 static void serveFavicon(AsyncWebServerRequest* request) {
    if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
-   AsyncWebServerResponse* response = request->beginResponse_P(200, "image/x-icon", IMG_FAVICON, IMG_FAVICON_L);
+   AsyncWebServerResponse* response = request->beginResponse_P(200, "image/x-icon", IMG_favicon, IMG_favicon_L);
 
    response->addHeader(F("Content-Encoding"), "gzip");
-   setCacheControlHeaders(response, String(VERSION));
+   setCacheControlHeaders(response, CacheMode::kLongTerm, String(VERSION), 0 /*ignored*/);
 
    request->send(response);
 }
 
 static void serveApp(AsyncWebServerRequest* request) {
+   WLOG_D(TAG, "serving app: %i", millis());
    if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/javascript", JS_app, JS_app_L);
 
    response->addHeader(F("Content-Encoding"), "gzip");
-   setCacheControlHeaders(response, String(VERSION));
+   setCacheControlHeaders(response, CacheMode::kLongTerm, String(VERSION), 0 /*ignored*/);
 
    request->send(response);
+   WLOG_D(TAG, "serving app sent: %i", millis());
+}
+
+String indexProcessor(const String& var) {
+   WLOG_D(TAG, "indexProcessor var: %s", var);
+   if (var == "IP") return ipAddress;
+   if (var == "MAC") return macAddress;
+   return String();
 }
 
 static void serveIndex(AsyncWebServerRequest* request) {
+   WLOG_D(TAG, "serving index: %i", millis());
+
    if (handleIfNoneMatchCacheHeader(request, String(VERSION))) return;
 
-   AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, PAGE_index, PAGE_index_L);
+   AsyncWebServerResponse* response = request->beginResponse_P(200, stdBlinds::MT_HTML, HTML_index, HTML_index_L, indexProcessor);
 
-   response->addHeader(F("Content-Encoding"), "gzip");
-   setCacheControlHeaders(response, String(VERSION));
+   // response->addHeader(F("Content-Encoding"), "gzip");
+   // setCacheControlHeaders(response, String(VERSION));
 
    request->send(response);
+   WLOG_D(TAG, "serving index sent: %i", millis());
+
 }
 
 // void BlindsHTTPAPI::serveBackground(AsyncWebServerRequest* request) {
@@ -184,12 +269,6 @@ static void serveIndex(AsyncWebServerRequest* request) {
 static void getState(AsyncWebServerRequest* request) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
 
-   bool fromFile = request->hasParam("f");
-   if (fromFile) {
-      if (!handleFileRead(request, "/state.json")) {
-         return request->send(404);
-      }
-   };
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
    request->send(response);
 }
@@ -204,7 +283,7 @@ static void getDevices(AsyncWebServerRequest* request) {
 static void getRoutines(AsyncWebServerRequest* request) {
    WLOG_I(TAG, "%s (%d args)", request->url().c_str(), request->params());
    if (handleFileRead(request, "/routines.json")) return;
-   AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, State::getInstance()->serialize());
+   AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, "{}");
    request->send(response);
 }
 
@@ -229,7 +308,7 @@ static void serveOps(AsyncWebServerRequest* request, bool post) {
       char* err = errorJson(stdBlinds::ErrorMessage[errCode]);
       return request->send(400, stdBlinds::MT_JSON, err);
    }
-   request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
+   request->beginResponse_P(200, stdBlinds::MT_HTML, HTML_index, HTML_index_L);
 }
 
 static void updateSettings(AsyncWebServerRequest* request, JsonVariant& json) {
@@ -251,17 +330,17 @@ static void getSettings(AsyncWebServerRequest* request) {
    String etag;
    if (request->hasArg("type")) {
       auto p = request->getParam("type")->value();
-      if (!strcmp(p.c_str(), "mqtt")) {
+      if (0 != strcmp(p.c_str(), "mqtt")) {
          etag = state->getMqttEtag();
          if (handleIfNoneMatchCacheHeader(request, etag)) return;
          data = state->serializeSettings(setting_t::kMqtt);
       }
-      else if (!strcmp(p.c_str(), "hw")) {
+      else if (0 != strcmp(p.c_str(), "hw")) {
          etag = state->getHardwareEtag();
          if (handleIfNoneMatchCacheHeader(request, etag)) return;
          data = state->serializeSettings(setting_t::kHardware);
       }
-      else if (!strcmp(p.c_str(), "gen")) {
+      else if (0 != strcmp(p.c_str(), "gen")) {
          etag = state->getGeneralEtag();
          if (handleIfNoneMatchCacheHeader(request, etag)) return;
          data = state->serializeSettings(setting_t::kGeneral);
@@ -276,7 +355,7 @@ static void getSettings(AsyncWebServerRequest* request) {
       data = state->serializeSettings(setting_t::kAll);
    }
    AsyncWebServerResponse* response = request->beginResponse(200, stdBlinds::MT_JSON, data);
-   setCacheControlHeaders(response, etag);
+   setCacheControlHeaders(response, CacheMode::kRevalidate, etag, 0 /* ignored */);
    request->send(response);
 }
 
@@ -304,9 +383,21 @@ void BlindsHTTPAPI::init() {
    server.on("/favicon.ico", HTTP_GET, serveFavicon);
 
    /**
-    * Fixtures
+    * Modules
     */
    server.on("/app.js", HTTP_GET, serveApp);
+
+   /**
+    * Index serving endpoints (routes)
+    */
+   server.on("^\\/(home|routines|settings)?$", HTTP_GET,
+      [](AsyncWebServerRequest* request) {
+         WLOG_D(TAG, "handle /, /settings, /routines: %s at %i", request->url(), millis());
+         if (captivePortal(request)) return;
+         if (configRedirect(request)) return;
+         return serveIndex(request);
+      }
+   );
 
    /**
     * /api endpoints
@@ -328,12 +419,49 @@ void BlindsHTTPAPI::init() {
       }
    );
 
+   server.on("/api/wifi/scan", HTTP_GET, [](AsyncWebServerRequest* request) {
+      String json = "[";
+      int n = WiFi.scanComplete();
+      if (n == -2) {
+         WiFi.scanNetworks(true);
+      }
+      else if (n) {
+         for (int i = 0; i < n; ++i) {
+            if (i) json += ",";
+            json += "{";
+            json += "\"rssi\":" + String(WiFi.RSSI(i));
+            json += ",\"ssid\":\"" + WiFi.SSID(i) + "\"";
+            json += ",\"bssid\":\"" + WiFi.BSSIDstr(i) + "\"";
+            json += ",\"channel\":" + String(WiFi.channel(i));
+            json += ",\"secure\":" + String(WiFi.encryptionType(i));
+            json += "}";
+         }
+         WiFi.scanDelete();
+         if (WiFi.scanComplete() == -2) {
+            WiFi.scanNetworks(true);
+         }
+      }
+      json += "]";
+      request->send(200, "application/json", json);
+      json = String();
+      }
+   );
+
    /**
     * Utility endpoints
     */
-   server.on("/api/freeheap", HTTP_GET,
+   server.on("/api/esp/freeheap", HTTP_GET,
       [](AsyncWebServerRequest* request) {
-         request->send(200, "text/plain", valJson((char*)ESP.getFreeHeap()));
+         request->send(200, stdBlinds::MT_JSON, valJson(lastHeap));
+      }
+   );
+   server.on("^\\/api\\/files\\/(.*+)$", HTTP_GET,
+      [](AsyncWebServerRequest* request) {
+         String fileName = "/" + request->pathArg(0);
+         if (!handleFileRead(request, fileName)) {
+            return request->send(404);
+         }
+         request->send(200, stdBlinds::MT_JSON, valJson(lastHeap));
       }
    );
 
@@ -355,19 +483,7 @@ void BlindsHTTPAPI::init() {
    settingsHandler->setMethod(HTTP_PUT);
    server.addHandler(settingsHandler);
 
-   /**
-    * Index serving endpoints (routes)
-    */
-   auto handler = [](AsyncWebServerRequest* request) {
-      WLOG_D(TAG, "handle /, /settings, /routines: %s", request->url());
-      if (captivePortal(request)) return;
-      if (configRedirect(request)) return;
-      return serveIndex(request);
-   };
-   server.on("/", HTTP_GET, handler);
-   server.on("/home", HTTP_GET, handler);
-   server.on("/routines", HTTP_GET, handler);
-   server.on("/settings", HTTP_GET, handler);
+
 
    // server.onNotFound(handleNotFound);
 

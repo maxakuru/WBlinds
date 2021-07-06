@@ -1,15 +1,16 @@
-:root {
-	--bg-img: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true)
-}
+/* uncss:ignore */
 
 html {
 	touch-action: manipulation;
 }
 
+/* uncss:ignore */
+
 html>* {
 	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
 }
 
+/* uncss:ignore */
 body {
 	margin: 0;
 	color: #fff;
@@ -21,6 +22,7 @@ body {
 	scrollbar-color: transparent;
 }
 
+/* uncss:ignore */
 html, body {
 	height: 100%;
 	width: 100%;
@@ -28,42 +30,20 @@ html, body {
 	overscroll-behavior: none;
 }
 
+/* uncss:ignore */
+
 *:focus {
 	outline: none;
 }
+
+/* uncss:ignore */
 
 h1, h4 {
 	font-weight: 400;
 }
 
-/* uncss:ignore */
-
-.ic-w {
-	width: 22px;
-}
-
-/* uncss:ignore */
-
-.ic {
-	height: 16px;
-	width: 16px;
-}
-
-/* uncss:ignore */
-
-.ic-home {
-	background: url(home.svg);
-}
-
 h1 {
 	font-size: 32px;
-}
-
-h4 {
-	margin-block-end: 0.1em;
-	margin-block-start: 0.5em;
-	font-size: 14px;
-	padding-left: 5px;
 }
 
 /* uncss:ignore */
@@ -149,29 +129,7 @@ h4 {
 	opacity: 0;
 }
 
-/* uncss:ignore */
 
-ul {
-	display: flex;
-	list-style-type: none;
-	margin-block-start: 0em;
-	margin-block-end: 0em;
-	padding-inline-start: 0px;
-}
-
-/* uncss:ignore */
-
-li {
-	display: list-item;
-	text-align: -webkit-match-parent;
-	color: rgba(255, 255, 255, 0.44);
-}
-
-/* uncss:ignore */
-
-li.s {
-	color: #DB8B1D;
-}
 
 .f {
 	width: 100%;
@@ -196,6 +154,10 @@ li.s {
 	justify-content: space-between;
 }
 
+.fJC {
+	justify-content: center;
+}
+
 .wrap {
 	flex-wrap: wrap;
 }
@@ -218,143 +180,10 @@ li.s {
 	background-size: cover;
 	opacity: 1;
 	transition: opacity 2s;
-	background-image: var(--bg-img), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);
+	background-image: linear-gradient(40deg, #1d0241 0, #293b7c, #300a52);
 }
 
-#app {
-	display: flex;
-	flex-direction: column;
-	padding: 23px 23px 0 23px;
-	height: calc(100% - (50px + 23px));
-	overflow-y: scroll;
-}
-
-.overlay {
-	position: fixed;
-	height: 100%;
-	width: 100%;
-	top: 0;
-	left: 0;
-	background-color: #333;
-	font-size: 24px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 11;
-	opacity: 0.95;
-	transition: 0.7s;
-	pointer-events: none;
-}
-
-/* 
-button {
-	box-shadow: 0px 8px 15px rgb(0 0 0 / 10%);
-    border-radius: 25px;
-    width: 100px;
-    height: 40px;
-    appearance: none;
-    margin: 20px auto;
-    border: none;
-    font-size: 11px;
-    background: #ad6b11;
-    font: unset;
-    color: #FFF;
-} */
-
-button {
-	width: 110px;
-    height: 45px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 2.5px;
-    margin: 20px auto;
-    font-weight: 500;
-	color: black;
-    background: #f0f8ffcc;
-    border: 1px solid #cadae833;
-    border-radius: 45px;
-    box-shadow: 0px 8px 15px rgb(0 0 0 / 10%);
-    transition: all 0.3s ease 0s;
-    cursor: pointer;
-    outline: none;
-	position: relative;
-}
-
-button.btn-t {
-	border: none;
-    background: none;
-    color: white;
-}
-
-/* uncss:ignore */
-button:active:not(:disabled,.btn-t){
-	background-color: #2a637a;
-	box-shadow: 0px 15px 20px #2a637a71;
-	color: #fff;
-}
-
-/* uncss:ignore */
-button:active.btn-s {
-	background-color: #2EE59D;
-	box-shadow: 0px 15px 20px #2ee59c71;
-}
-
-/* uncss:ignore */
-button:active.btn-c {
-	background: #ff5656;
-	box-shadow: 0px 15px 20px #ff565666;
-}
-
-/* uncss:ignore */
-/* .btn-up::before, .btn-down::after {
-    position: absolute;
-    top: 5px;
-	left: 50%;
-	font-family: monospace;
-} */
-
-/* uncss:ignore */
-/* .btn-down::after {
-	content: 'ˇ';
-    font-size: 25px;
-    transform: scale(2, 1.5);
-} */
-
-/* uncss:ignore */
-/* .btn-up::before {
-	font-size: 25px;
-    content: '^';
-    transform: scale(2, 1);
-} */
-
-@media (hover: hover) and (pointer: fine) {
-	button:hover:not(:disabled,.btn-t){
-		transform: translateY(-7px);
-		background-color: #2a637a;
-		box-shadow: 0px 15px 20px #2a637a71;
-		color: #fff;
-	}
-
-	/* uncss:ignore */
-	button:hover.btn-s {
-		background-color: #2EE59D;
-		box-shadow: 0px 15px 20px #2ee59c71;
-	}
-
-	button:hover.btn-c {
-		background: #ff5656;
-		box-shadow: 0px 15px 20px #ff565666;
-	}
-}
-
-
-/* uncss:ignore */
-button:disabled {
-	opacity: 50%;
-}
-
-/* uncss:ignore */
-button>div.loader {
-	transform: translate3d(0, -17px, 0);
-    font-size: 7px;
+#_fr>._frb {
+	background: rgba(0,0,0,.5);
+    height: 50px;
 }

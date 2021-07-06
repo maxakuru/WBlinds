@@ -30,12 +30,6 @@ UDPNotifier* udpNotifier;
 Homekit* homekit;
 #endif
 
-// OTA Update config
-#ifndef DISABLE_OTA
-const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
-uint32_t _lastOTACheck = 0;
-#endif
-
 // ====== Configurable =======
 // ===========================
 // Only A4988 stepper driver supported right now
@@ -46,17 +40,6 @@ MotorA4988* motor;
 
 // ====== Required =======
 // =======================
-// State save interval, only occurs if state is dirty
-const uint16_t STATE_SAVE_INTERVAL = 10000; // ms
-uint32_t _lastStateSave = 0;
-
-// Tick event
-const uint16_t TICK_INTERVAL = 1000; // ms
-uint32_t _lastTick = 0;
-
-// Heap check
-uint32_t _lastHeapCheck = 0;
-uint32_t lastHeap = 0;
 
 // State
 State* state;
@@ -81,6 +64,63 @@ void IRAM_ATTR onHomePinChange() {
   }
 }
 #endif
+
+// State save interval, only occurs if state is dirty
+const uint16_t STATE_SAVE_INTERVAL = 30000; // ms
+const uint16_t TICK_INTERVAL = 1000; // ms
+const uint16_t HEAP_INTERVAL = 10000; // ms
+// OTA Update config
+#ifndef DISABLE_OTA
+const uint16_t OTA_CHECK_INTERVAL = 10000; // ms
+#endif // DISABLE_OTA
+
+#if defined(ARDUINO_ARCH_ESP32)
+void StateSaveTask(void* parameter) {
+  State* state_ = (State*)parameter;
+  const TickType_t delay = STATE_SAVE_INTERVAL / portTICK_PERIOD_MS;
+  while (true) {
+    if (state_->isDirty()) state_->save();
+    vTaskDelay(delay);
+  }
+}
+void TickTask(void* parameter) {
+  State* state_ = (State*)parameter;
+  const TickType_t delay = TICK_INTERVAL / portTICK_PERIOD_MS;
+  while (true) {
+    state_->Notify(nullptr, tickEv);
+    vTaskDelay(delay);
+  }
+}
+void HeapTask(void* parameter) {
+  // State* state = (State*)parameter;
+  const TickType_t delay = HEAP_INTERVAL / portTICK_PERIOD_MS;
+  while (true) {
+    uint32_t heap = ESP.getFreeHeap();
+    if (heap < 9000 && lastHeap < 9000) {
+      lowHeap = true;
+    }
+    lastHeap = heap;
+    vTaskDelay(delay);
+  }
+}
+#ifndef DISABLE_OTA
+void OTATask(void* parameter) {
+  // State* state = (State*)parameter;
+  const TickType_t delay = OTA_CHECK_INTERVAL / portTICK_PERIOD_MS;
+  while (true) {
+    OTAloopHandler();
+    vTaskDelay(delay);
+  }
+}
+#endif // DISABLE_OTA
+#else // ARDUINO_ARCH_ESP32
+uint32_t _lastStateSave = 0;
+uint32_t _lastTick = 0;
+uint32_t _lastHeapCheck = 0;
+#ifndef DISABLE_OTA
+uint32_t _lastOTACheck = millis();
+#endif // DISABLE_OTA
+#endif // ESP8266
 
 WBlinds* WBlinds::getInstance() {
   if (!instance)
@@ -127,9 +167,27 @@ void WBlinds::setup() {
 #endif
 
   lastHeap = ESP.getFreeHeap();
+
+#if defined(ARDUINO_ARCH_ESP32)
+#define STACK_SIZE 1000
+#define PRIORITY configMAX_PRIORITIES
+  xTaskCreate(StateSaveTask, "StateSaveTask", STACK_SIZE, state, PRIORITY, NULL);
+  xTaskCreate(TickTask, "TickTask", STACK_SIZE, state, PRIORITY, NULL);
+  xTaskCreate(HeapTask, "HeapTask", STACK_SIZE, NULL, PRIORITY, NULL);
+#ifndef DISABLE_OTA
+  xTaskCreate(OTATask, "OTATask", STACK_SIZE, NULL, PRIORITY, NULL);
+#endif // DISABLE_OTA
+#endif // ARDUINO_ARCH_ESP32
 }
 
 void WBlinds::handleWiFi_() {
+  if(peersInit_){
+    // already done the setup
+    // but if wifi is disconnected after a while,
+    // try to recover by starting AP
+    return;
+  }
+
   if (!WIFI_CONFIGURED || connFailing_) {
     // Wifi still set to default SSID
     // or connection is taking a long time
@@ -168,7 +226,6 @@ void WBlinds::handleWiFi_() {
   WLOG_D(TAG, "Connected to the WiFi network, IP: %s", ipAddress.c_str());
 
 #ifndef DISABLE_OTA
-  _lastOTACheck = millis();
   OTAinit();
 #endif
 
@@ -190,6 +247,7 @@ void WBlinds::loop() {
   }
   handleWiFi_();
 
+#ifndef ARDUINO_ARCH_ESP32
   if ((millis() - TICK_INTERVAL) > _lastTick) {
     // WLOG_I(TAG, "hall read: %i", hallRead());
     _lastTick = millis();
@@ -210,14 +268,15 @@ void WBlinds::loop() {
   }
 #endif
 
-  if ((millis() - 5000) > _lastHeapCheck) {
+  if ((millis() - HEAP_INTERVAL) > _lastHeapCheck) {
     uint32_t heap = ESP.getFreeHeap();
     if (heap < 9000 && lastHeap < 9000) {
-      forceReconnect = true;
+      lowHeap = true;
     }
     lastHeap = heap;
     _lastHeapCheck = millis();
-  }
+}
+#endif
 }
 
 void WBlinds::initAP_(bool resetAP) {

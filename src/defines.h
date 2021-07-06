@@ -103,6 +103,9 @@ namespace stdBlinds {
     extern const char* MT_HTML;
 }
 
+// ESP
+extern uint32_t lastHeap;
+
 // UDP
 extern const byte MAGIC_NUMBER[4];
 
@@ -124,7 +127,7 @@ extern String macAddress;
 extern String ipAddress;
 
 // Controls
-extern bool forceReconnect;
+extern bool lowHeap;
 extern bool doReboot;
 extern bool doRestore;
 extern void DO_REBOOT();

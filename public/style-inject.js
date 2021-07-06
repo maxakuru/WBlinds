@@ -1,0 +1,1 @@
+window.stynj=function(a){if(a&&"undefined"!==typeof document){var c=document.head||document.getElementsByTagName("head")[0],b=document.createElement("style");c.appendChild(b);b.appendChild(document.createTextNode(a))}};

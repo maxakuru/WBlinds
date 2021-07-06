@@ -27,6 +27,8 @@ import {
 import { WINDOW } from "min";
 import { home, cog, clock } from "./assets";
 
+import "./app.css";
+
 // Bottom nav bar buttons
 const labels = [
   { t: "Home", i: home },
@@ -106,11 +108,12 @@ export const run = (ns: WBlindsNamespace): void => {
         pushToHistory(newPath, undefined, true);
         t.onDeviceClick(handleDeviceClick);
         if (!State.isLoaded(STATE)) {
-          load("settings?type=gen", [], ["settings.gen"]).then(() => {
-            load(STATE);
-            load(PRESETS);
-            load(DEVICES);
-          });
+          load(STATE);
+          // load("settings?type=gen", [], ["settings.gen"]).then(() => {
+          //   load(STATE);
+          //   load(PRESETS);
+          //   load(DEVICES);
+          // });
         }
         currentTab = t;
         break;
