@@ -63,7 +63,10 @@ export default function (
         {}
       );
 
-      if (Array.isArray(inputOptions.input)) {
+      if (!Array.isArray(inputOptions.input)) {
+        // not array of inputs, don't create explicit chunks
+      } else {
+        console.log("inputOptions.input: ", inputOptions.input);
         /**
          * options: {
          *   implicitLoadOrder?: {
@@ -73,25 +76,28 @@ export default function (
          *   }
          * }
          */
-        refs = inputOptions.input.map((o) => {
-          const f: EmittedFile = {
-            type: "chunk",
-            id: o,
-          };
-          if (o in chunkLoadOrderMap) {
-            const arr = chunkLoadOrderMap[o];
-            if (
-              !Array.isArray(arr) ||
-              arr.map((e) => typeof e !== "string").filter((e) => e).length > 0
-            ) {
-              throw Error(
-                "Expecting array of strings for implicitChunkLoadOrder entry value"
-              );
+        refs = inputOptions.input
+          .filter((i) => !!i)
+          .map((o) => {
+            const f: EmittedFile = {
+              type: "chunk",
+              id: o,
+            };
+            if (o in chunkLoadOrderMap) {
+              const arr = chunkLoadOrderMap[o];
+              if (
+                !Array.isArray(arr) ||
+                arr.map((e) => typeof e !== "string").filter((e) => e).length >
+                  0
+              ) {
+                throw Error(
+                  "Expecting array of strings for implicitChunkLoadOrder entry value"
+                );
+              }
+              f.implicitlyLoadedAfterOneOf = chunkLoadOrderMap[o];
             }
-            f.implicitlyLoadedAfterOneOf = chunkLoadOrderMap[o];
-          }
-          return this.emitFile(f);
-        });
+            return this.emitFile(f);
+          });
       }
     },
     transform: async (code: string, id: string): Promise<TransformResult> => {
@@ -163,15 +169,13 @@ export default function (
 
       let outs: any[];
       try {
-        outs = await options.templateFunction(
-          refs.map(this.getFileName.bind(this))
-        );
+        outs = await options.templateFunction(bundle);
       } catch (e) {
         throw Error("Error in templateFunction: " + e);
       }
 
       if (!Array.isArray(outs)) {
-        throw Error("templateFunction must return array");
+        outs = [outs];
       }
 
       outs.map(({ fileName, source }) => {

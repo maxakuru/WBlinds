@@ -1,48 +1,1961 @@
-function w(b){return(...a)=>{var d={};a=b.call(d,...a);a=(new DOMParser).parseFromString(a,"text/html").getElementsByTagName("body").item(0).firstChild;d=d.init(a);d.node=a;return d}}stynj("#nav{background:rgba(0,0,0,.5);height:50px;display:flex;font-size:10px;justify-content:center}.navc{justify-content:space-around;align-self:center;max-width:500px}.navc .sel{color:#db8b1d}#nav>ul>li>.l{-webkit-margin-before:0;margin-block-start:0;-webkit-margin-after:0;margin-block-end:0}");
-const z=DOMTokenList.prototype;function C(b,...a){z.add.call(b.classList,...a)}function E(b,...a){z.remove.call(b.classList,...a)}
-const G=setTimeout,H=document,I=window,L=H.createElement.bind(H),M=H.createElement.bind(H,"div"),O=H.getElementById.bind(H),aa=(b,a=H)=>a.getElementsByTagName.call(a,b),P=(b,a=H)=>a.querySelector.call(a,b),ba=b=>b.stopPropagation(),ca=(b,a)=>Q.call(b,a),Q=H.appendChild,S=b=>b&&"object"===typeof b&&!Array.isArray(b),U=(b,...a)=>{if(!a.length)return b;const d=a.shift();if(S(b)&&S(d))for(const e in d)S(d[e])?(b[e]||Object.assign(b,{[e]:{}}),U(b[e],d[e])):Object.assign(b,{[e]:d[e]});return U(b,...a)},
-da=(b,a)=>Object.keys(a).reduce((d,e)=>{if(b[e]===a[e]||null==a[e])return d;if(S(b[e])&&S(a[e])){const h=da(b[e],a[e]);return 0===Object.keys(h).length?d:{...d,[e]:h}}return{...d,[e]:a[e]}},{}),ea=b=>new Promise(a=>{setTimeout(a,b)}),fa=b=>{const a={};for(const d in b)null!=b[d]&&(a[d]=b[d]);return a},V=[],ha=b=>{const a=V.push(b);return()=>{delete V[a-1]}},ia=()=>{V.forEach(b=>{b&&b()})};let ja=location.search;
-const W=(b,a,d)=>{a=a||{};null==d&&(d=!0);const e=location.pathname,h=location.search;d=new URLSearchParams(d?"":h);for(const p in a)d.set(p,a[p]);a=d.toString();0<a.length&&(a="?"+a);if(b!==e||a!==h)history.pushState(null,"",(b||e)+a),a!==h&&ia()},ka=w(function({labels:b}){let a=0,d=[];const e=[];this.init=h=>{const p=v=>{a=v;e.forEach((q,r)=>{r===a?C(q,"sel"):E(q,"sel")});d.map(q=>q(v))};b.map((v,q)=>{const r=L("li");C(r,"fC");q===a&&C(r,"sel");var f=L("i");Q.call(f,v.i);Q.call(r,f);f=L("p");C(f,
-"l");f.innerText=v.t;Q.call(r,f);e.push(r);Q.call(h,r);r.onclick=()=>p(q)});return{onClick:v=>{d.push(v)},currentIndex:()=>a,destroy:()=>{d=[]},setIndex:p}};return'<ul class="fw navc"></ul>'});stynj(":root{--oc:#1d95db;--cc:#606060}.sc{pointer-events:none;padding:20px;align-self:center;align-items:center;justify-content:center;height:59%;overflow-x:hidden;width:50vh}.slider{pointer-events:all;transform:rotate(90deg);background:linear-gradient(90deg,var(--cc) 0,var(--cc) 50%,var(--oc) 0,var(--oc));height:7px;outline:none;border-radius:15px;height:150px;-webkit-appearance:none;-moz-appearance:none;appearance:none;width:400px}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;transform:translateX(-15px);height:70px;background:transparent;border-right:2px solid #fff;box-shadow:#000;cursor:pointer}");
-const Y=(b,a,d,e,h,p)=>{a=(a-d)/(e-d)*100;b.style.background=`linear-gradient(to right, ${h} 0%, ${h} ${a}%, ${p} ${a}%, ${p} 100%`},la=w(function({value:b}){let a=[];this.init=d=>{const e=P("input",d);e.onmousedown=e.ontouchstart=ba;const h=parseInt,p=h(e.min),v=h(e.max);e.oninput=()=>{const q=h(e.value);Y(e,q,p,v,"#606060","#1d95db")};e.onchange=()=>{const q=h(e.value);a.forEach(r=>r(q))};e.value=`${b}`;Y(e,b,p,v,"#606060","#1d95db");return{destroy:()=>{a=[]},onChange:q=>{a.push(q)}}};return'<div class="sc flex"><input class="slider" type="range" min="0" max="100"></div>'});
-stynj('#card{position:fixed;top:100%;background:rgb(9 9 9/88%);border-radius:30px 30px 0 0;text-align:left;justify-content:center;font-size:12px}#card:after{content:"-";transform:scaleX(20) translate(.5px);position:fixed;color:var(--cc)}#card.an,#card>.an{transition:top .2s ease-in-out}.in{text-align:left}.ca-con{width:80%;max-width:300px;padding-top:50px}.cR{margin-bottom:50px}#card .act{position:fixed;right:23px;top:100%;font-size:20px;font-weight:100;transform:scaleX(1.3)}');stynj(':root{--c:#1d95db}.in{justify-content:space-between;height:50px;align-items:center;background:rgba(0,0,0,.56);padding:0 0 0 15px;border-radius:15px;min-width:300px;font-size:14px}.in.disabled{color:grey}.in>label{font-weight:700}.igroup>.in{margin-top:0;border-radius:0;border-bottom:1px solid hsla(0,0%,100%,.30196078431372547)}.igroup>.in:first-child{border-radius:15px 15px 0 0;margin-top:20px}.igroup>.in:last-child{border-radius:0 0 15px 15px;margin-bottom:20px;border-bottom:none}.in-r{background:linear-gradient(90deg,var(--c) 0,var(--c) 50%,#606060 0,#606060);border-radius:8px;height:7px;width:75%;border-radius:15px;height:6px;-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;outline:none}.in-r::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;background:#fff;box-shadow:#000;border-radius:50%;cursor:pointer}.in>input:not([type=checkbox]),.in>select{flex-grow:1;padding:10px 27px 10px 0;background:transparent;border:none;color:#db8b1d;-moz-text-align-last:right;text-align-last:right;-webkit-appearance:none;-moz-appearance:none;text-align:right}.in>select+span{left:-10px;transform:scale(1.6,.9) translateY(-1px);font-weight:200;color:#db8b1d}.in>span{color:#5f5f5f;position:relative;font-size:12px;pointer-events:none;margin-left:-20px;left:-5px}.in>select{margin-inline:12px}.in:focus-within{box-shadow:inset -1px 0 rgba(219,139,29,.627)}.in>input:is([type=checkbox]){margin-right:15px}.in>input:disabled{color:grey}input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}[type=checkbox]{-webkit-appearance:none;-moz-appearance:none;appearance:none;width:51px;height:31px;border-radius:50px;background-color:rgba(148,148,154,.2)!important}[type=checkbox]:after{content:"";width:50%;border-radius:100%;height:80%;display:block;position:relative;background-color:#fff;top:12%;left:3%;transition:all .2s ease-in-out}[type=checkbox].on{background-color:#34c759!important}[type=checkbox].on:after{left:45%}');
-const na={[1]:"text",[2]:"checkbox",[0]:"number",[3]:"select",[4]:"password",[5]:"range"},oa=w(function({label:b,type:a,enumOpts:d,placeholder:e,value:h,unit:p,embed:v=!0,prevDefault:q=!1,min:r,max:f}){let k=h,g,t=[];const m=c=>{function n(u){""===u&&(u=void 0);k=u;t.forEach(A=>A(k))}c.innerHTML="";v&&C(c,"in");var x=L("label");x.innerText=b;Q.call(c,x);3===a?(g=L("select"),C(c,"in-s"),d.forEach(u=>{const A=L("option");A.value=u.v;A.innerText=u.l;Q.call(g,A)}),g.onchange=u=>{q&&u.preventDefault();
-n(d[g.options.selectedIndex].v)}):(g=L("input"),g.type=na[a],g.placeholder=e||"xxxxx",null!=r&&(g.min=`${r}`),null!=f&&(g.max=`${f}`),5===a&&C(g,"in-r"),2===a?((g.checked=h)&&C(g,"on"),g.onchange=u=>{q&&u.preventDefault();z.toggle.call(g.classList,"on");n(g.checked)}):g.onchange=u=>{q&&u.preventDefault();n(g.value)});null!=h&&(g.value=h);g.id=x.htmlFor=`in-${b.split(" ").join("-")}`;Q.call(c,g);if(3===a||p)x=L("span"),x.innerText=p?p:"v",Q.call(c,x)};this.init=c=>{m(c);return{onChange:n=>{t.push(n)},
-setDisabled:n=>{z.toggle.call(c.classList,"disabled");g.disabled=n},destroy:()=>{t=[]},reset:()=>{m(c)},isDirty:()=>h!==k}};return'<div class="fR"></div>'}),pa=["Speed","Acceleration"],qa=[[1,5E3],[1,4294967294]],ra=w(function({pos:b,accel:a,speed:d,...e}){let h=[],p=!1,v=0,q=0,r=!1,f={},k=[];this.init=g=>{function t(l){null==l&&(l=!1);l!==r&&(l?C(g,"an"):E(g,"an"),l?C(c,"an"):E(c,"an"),r=l)}const m=P(".ca-con",g),c=P(".act",g);t(!0);const n=l=>{h.forEach(D=>D(l))},x=l=>{const D=0===l?d:a,J=oa({type:5,
-label:pa[l],value:D,embed:!1,min:qa[l][0],max:qa[l][1]}),F=P("input",J.node);E(J.node,"fR");C(J.node,"cR");const K=parseInt,N=K(F.min),X=K(F.max);F.oninput=()=>{const R=K(F.value);Y(F,R,N,X,"#1d95db","#606060")};J.onChange(R=>{0===l?n({speed:R,...e}):1===l&&n({accel:R,...e})});Q.call(m,J.node);Y(F,D,N,X,"#1d95db","#606060");k.push(J)};x(0);x(1);const u=la({value:b});u.onChange(l=>{n({tPos:l,...e})});Q.call(m,u.node);const A=()=>{t(!0);g.ontransitionend=B;const l=g.clientHeight;g.style.top=`${l}px`;
-c.style.top=`${l+12}px`};c.onclick=A;const B=()=>{h=[];u.destroy();k.forEach(l=>l.destroy());k=[];g.remove()},y=l=>{let {x:D,y:J}=l;null==D&&(D=l.touches[0].clientX,J=l.touches[0].clientY);return{x:D,y:J}};g.onmousedown=g.ontouchstart=l=>{f=l=y(l);q=l.y;p=!0;t(!1)};g.onmouseup=g.onmouseout=g.ontouchend=()=>{if(p){p=!1;t(!0);if(v>g.clientHeight/2)return A();g.style.top="8px";c.style.top="20px";v=q=8}};g.onmousemove=g.ontouchmove=l=>{l=y(l);p&&(8>l.y-q?f=l:(v+=l.y-f.y,f=l,g.style.top=`${v}px`,c.style.top=
-`${v+12}px`))};return{destroy:B,onChange:l=>{h.push(l)},show:()=>{g.style.top="8px";c.style.top="20px"}}};return'<div id="card" class="an f flex"><div class="ca-con flex fC"></div><div class="act">X</div></div>'});stynj(":root{--wid:min(calc(33.3vw - 20px),110px,110px)}.tile{background:rgba(0,0,0,.3);border-radius:12px;display:flex}.tile.sq{width:var(--wid);height:var(--wid);margin:5px 0;position:relative}.tile.sq>span{width:calc(var(--wid) - 1px);max-height:90px;top:10px;position:absolute;right:0;border-right:1px groove #fff}.tile.sq p{font-size:12px;margin:auto 21px 10px 9px;font-weight:500}");
-const sa=w(function({name:b,id:a,...d}){let e=[];this.init=h=>{h.id=a;h.onclick=()=>{e.forEach(p=>p({id:a,name:b,...d}))};P("p",h).innerText=b;return{onClick:p=>{e.push(p)},destroy:()=>{e=[]}}};return'<div class="tile sq"><span></span><p>Bedroom Left</p></div>'});stynj(':root{--bord:1px solid rgba(0,0,0,0.034)}#pas{border-radius:7px;justify-content:center;max-width:400px;border:transparent;background:rgba(118,118,128,.24);margin:auto}#pas>div{padding:2px 0;flex-grow:1;text-align:center;font-size:14px;border:1px transparent}#pas>div.sel{background-color:rgba(103,103,105,.64);border-radius:7px;border:1px solid rgba(0,0,0,.14)}#pas>div:after{height:13px;content:"";display:block;position:absolute;border-left:1px solid rgba(142,142,147,.45);border-radius:.5px;transform:translate(-1px,-110%)}#pas>div:first-child:after{border-left:none}');
-const ta=w(function({items:b,queries:a}){let d=0,e=[],h=[];this.init=p=>{const v=()=>{if(!(1>a.length)){a:{var f=location.search;f=f.substring(1).split("&");for(let k=0;k<f.length;k++){const g=f[k].split("=");if("tab"==g[0]){f=g[1];break a}}f=!1}f=f&&f.toLowerCase();f=a.indexOf(f);0>f&&(f=0);d!==f&&r(f)}},q=ha(v),r=f=>{E(h[d],"sel");d=f;C(h[d],"sel");e.map(k=>k(f))};b.map((f,k)=>{const g=M();g.innerText=f;k===d&&C(g,"sel");g.onclick=()=>{a[k]&&W(void 0,{tab:a[k]});r(k)};h.push(g);Q.call(p,g)});v();
-return{destroy:()=>{q();e=[];d=0;h=[]},index:()=>d,onChange:f=>{e.push(f)},setIndex:f=>{a[f]&&W(void 0,{tab:a[f]});r(f)}}};return'<div id="pas" class="fw flex fR"></div>'});stynj(".toast{background-color:rgba(0,0,0,.44);box-shadow:1px 1px 8px rgba(84,84,84,.451);border-radius:10px;font-size:13px;margin:10px;height:60px;display:flex;min-width:250px;max-width:500px;position:relative;transition:bottom .5s ease-in-out;pointer-events:all;align-self:center}.tom{margin:auto}");
-const ua=w(function({message:b,id:a}){let d=[];this.init=e=>{e.onclick=()=>{d.forEach(h=>h({id:a}))};P("p",e).innerText=b;return{onClick:h=>{d.push(h)},destroy:()=>{d=[]}}};return'<div class="toast"><p class="tom"></p></div>'});stynj(".tc{display:flex;position:absolute;top:0;flex-flow:column-reverse;pointer-events:none;height:calc(100% - 50px);padding-bottom:50px}");
-const va=w(function(){let b=0,a=[];this.init=d=>({destroy:()=>{a.map(e=>e.destroy());a=[];b=0},pushToast:(e,h,p,v)=>{h&&console.error(e);const q=()=>{f.node.style.bottom=`-${50+200*(a.length+1)}px`},r=()=>{q();setTimeout(()=>{f.node.remove()},500)},f=ua({message:e,isError:h,id:b++});q();f.onClick(r);a.push(f);Q.call(d,f.node);setTimeout(()=>{f.node.style.bottom="0px";!p&&setTimeout(r,v||h?5E3:2500)})}});return'<div id="toc" class="fw tc"></div>'}),wa={gen:{deviceName:"WBlinds",mdnsName:"WBlinds",
-emitSync:!1},hw:{pStep:19,pDir:18,pEn:13,pSleep:21,pReset:3,pMs1:1,pMs2:5,pMs3:17,pHome:4,cLen:1650,cDia:.1,axDia:15,stepsPerRev:200,res:16},mqtt:{enabled:!1,host:"192.168.0.99",port:1833,topic:"wblinds",user:"user"}},xa={state:{pos:0,tPos:0,accel:0,speed:0},settings:U({},wa),pendingState:U({},wa),devices:{},presets:{}};
-class ya{constructor(){this._observers={};this._state=U({},xa);const b={};Object.keys(this._state).map(a=>{b[a]=!1});this._loadedKeys={...b};this._savingKeys={...b}}get(b){b=b.split(".");let a=this._state;for(;0<b.length;){if("object"!==typeof a)return;a=a[b.shift()]}return a}set(b,a){b=b.split(".");const d=b.pop();let e=this._state;for(;0<b.length;){if("object"!==typeof e)return;e=e[b.shift()]}e[d]=a}isLoaded(b){return this._loadedKeys[b]}setSaving(b,a){this._savingKeys[b]=a}isSaving(b){return this._savingKeys[b]}update(b,
-a){this._observers[b]=this._observers[b]||[];const d=this._state[b];this._state[b]=U({},d,fa(a));this._loadedKeys[b]=!0;this._observers[b].forEach(e=>{e({value:{...a},prev:d})})}observe(b,a){this._observers[b]=this._observers[b]||[];this._observers[b].push(a);this._loadedKeys[b]&&a({value:U({},this._state[b]),prev:void 0})}}const Z=new ya;stynj(".dt{justify-content:space-between}.pt>.sq{height:50px;width:auto;min-width:150px}.pt>.sq>span{display:none}#hlc>h2{-webkit-margin-after:.1em;margin-block-end:.1em;-webkit-margin-before:.5em;margin-block-start:.5em;font-size:16px;padding-left:5px}");
-const za=w(function(){let b=!0,a=[],d=[],e;this.init=()=>{const h=()=>{if(b){var f=O("hl"),k=O("hlc");f.style.display="none";E(k,"hide");b=!1}},p=f=>{f=O(`${f}-tiles`);return{container:f,tiles:f.querySelectorAll("div")}},v=f=>{const {container:k,tiles:g}=p(f);f=Math.floor(k.clientWidth/110);let t=g.length;for(;0!==t%f;){const m=M();C(m,"tile","sq","em");Q.call(k,m);t++}},q=(f,k)=>{"device"===f&&d.forEach(g=>g(k))},r=(f,k)=>{const {container:g,tiles:t}=p(f);t.forEach(m=>{const {id:c}=m;c.endsWith(e)||
-c in k?k[c]=void 0:m.remove()});for(const [m,c]of Object.entries(k)){if(!c)continue;const n=sa({id:`tile-${m}`,name:c.name||m,...c});n.onClick(x=>q(f,x));a.push(n);Q.call(g,n.node)}v(f)};G(()=>{Z.observe("presets",({value:f})=>{h();r("preset",f)});Z.observe("state",({value:f})=>{e=Z.get("settings.gen.deviceName");h();const k=Z.get("settings.gen"),g=Z.get("state");r("device",{[k.deviceName]:{...k,...f,...g}})});Z.observe("devices",({value:f})=>{h();r("device",f)})});return{onDeviceClick:f=>{d.push(f)},
-destroy:()=>{d=[];a.forEach(f=>f.destroy());a=[]}}};return'<div id="h" class="f flex"><div id="hl" class="loader"></div><div id="hlc" class="hide fw" style="text-align: left;"><h1 id="ht">WBlinds</h1>\x3c!-- <h4 class="hst">Presets</h4> --\x3e<div id="preset-tiles" class="pt fw flex wrap"></div><h2 class="hst">Devices</h2><div id="device-tiles" class="dt fw flex wrap"></div></div></div>'});stynj("#stcc{display:flex}#stcc>span{margin:auto}#stcc>span:last-child{margin-bottom:70px}#stcc>div{justify-content:center}#slc-act{position:fixed;bottom:55px;justify-content:space-evenly;left:0}");
-stynj(".calib-btn{margin-top:40px}#calib-c,#calib-x{position:fixed;left:100%;transition:left .4s ease-in-out;top:0}#calib-c{background:url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true),#000;background-position:50%;background-size:cover;overflow:hidden}#calib-c>div{width:100vw;height:100vh}#calib-c>div>h2{margin:80px 30px 10px}#calib-c>div>p{font-size:13px;margin:5px 30px 10px}#calib-x{margin:10px;width:90px;transition-delay:0s;transition-duration:.4s}.cal-conc{margin:20px auto;max-width:300px;display:flex;flex-wrap:wrap}");
-const Aa=[{t:"Find home position",d:"Move to the fully open position then tap 'Done'. \nBe careful not to wind the cord too tight."},{t:"Find closed position",d:"Move to the fully closed position then tap 'Done'"},{o:!0,t:"Repeat",d:"Alternate between open and closed, tap the corresponding button in between. Repeat as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed."}],Ba=w(function(){let b,a,d=!1,e=[],h,p=0;const v=window.wblinds.tc,
-q=(k,g,t)=>{var m=L("div");C(m,"fC");var c=L("h2");c.innerText=`${g+1}. ${k.t}`;Q.call(m,c);c=L("p");c.innerText=`${k.d}`;Q.call(m,c);var n=L("div");n.style.height="90%";C(n,"fC");Q.call(m,n);c=L("div");C(c,"fR");Q.call(m,c);const x={div:m,c:n};m=B=>async()=>{const y=B?"preNext":"preBack";try{x[y]&&await x[y]()}catch(l){v.pushToast(`"[Calib] Error in pre: ${l}"`)}p+=B?1:-1;h.style.left=`-${I.innerWidth*p}px`};0<g&&(n=L("button"),n.innerText="Back",Q.call(c,n),n.onclick=m(!1));const u=L("button"),
-A=g===t-1?"Done":"Next";k.o||(u.disabled=!0);x.showNext=B=>{B?(u.innerText="",B=L("div"),C(B,"loader"),Q.call(u,B)):(u.innerText=A,u.disabled=!1)};u.innerText=A;u.onclick=m(!0);Q.call(c,u);return x},r=()=>{const k=L("div");C(k,"cal-conc");["speed \u25b2","move \u25b2","speed \u25bc","move \u25bc"].forEach(g=>{const t=L("button");t.innerText=g;-1<g.indexOf("up")?C(t,"btn-up"):C(t,"btn-down");Q.call(k,t)});return k},f=()=>{Aa.forEach((k,g)=>{const t=q(k,g,Aa.length);k=r();Q.call(t.c,k);k=L("button");
-k.innerText="Done";Q.call(t.c,k);k.onclick=async()=>{t.showNext(!0);setTimeout(()=>{t.showNext()},4E3)};Q.call(h,t.div)});h.style.width=`${I.innerWidth*Aa.length}px`;h.style.left="0";b.style.left="0"};this.init=k=>{h=P("div",k);const g=aa("button",k);a=g.item(0);b=g.item(1);a.onclick=()=>{d||(d=!0,E(b,"hide"),E(h,"hide"),G(f))};b.onclick=()=>{const t=.2*(p+1);h.style.transitionDuration=`${t}s`;b.style.transitionDelay=`${.2*(p-.5)}s`;b.style.transitionDuration="0.2s";h.style.left=`${I.innerWidth}px`;
-b.style.left=`${I.innerWidth}px`;setTimeout(()=>{p=0;h.style.transitionDuration="0.4s";b.style.transitionDuration="0.4s";b.style.transitionDelay="0s";h.innerHTML="";C(h,"hide");d=!1},1E3*t)};return{destroy:()=>{e=[];k.remove()},setDisabled:t=>{a.disabled=t},onSave:t=>{e.push(t)}}};return'<div class="f fC"><button class="calib-btn">Calibrate</button><div id="calib-c" class="hide fR"></div><button id="calib-x" class="btn-t hide">&lt; cancel</button></div>'}),Ca={gen:{ssid:{t:1,l:"SSID",g:0},pass:{t:4,
-l:"Password",g:0},deviceName:{t:1,l:"Device name",g:0},mdnsName:{t:1,l:"mDNS Name",g:0},emitSync:{t:2,l:"Emit sync data"}},hw:{axDia:{l:"Axis diameter",g:2,u:"mm"},cDia:{l:"Cord diameter",g:2,u:"mm"},cLen:{l:"Cord length",g:2,u:"mm"},pDir:{l:"Direction pin",g:1},pEn:{l:"Enable pin",g:1},pHome:{l:"Home switch pin",g:1},pMs1:{l:"Microstep pin 1",g:1},pMs2:{l:"Microstep pin 2",g:1},pMs3:{l:"Microstep pin 3",g:1},pReset:{l:"Reset pin",g:1},pSleep:{l:"Sleep pin",g:1},pStep:{l:"Step pin",g:1},stepsPerRev:{l:"Steps/revolution",
-g:2},res:{t:3,l:"Resolution",g:2,o:[{l:"1",v:1},{l:"1/2",v:2},{l:"1/4",v:4},{l:"1/8",v:8},{l:"1/16",v:16}]}},mqtt:{enabled:{t:2,l:"Enabled",g:3,cg:!0},host:{t:1,l:"Host",g:3},port:{l:"Port",g:3},topic:{t:1,l:"Topic",g:3},user:{t:1,l:"Username",g:3},pass:{t:4,l:"Password",g:3}}},Da=w(function(){let b=!0,a=!1,d=!1,e=[],h=[],p=[];const v=[],q=["General","Hardware","MQTT"],r=Object.keys(Ca);let f,k,g,t,m;this.init=()=>{const n=ta({items:q,queries:r}),x=y=>{const l=O("stcc");if(l){var D;0===y?D=f:1===
-y?D=k:2===y&&(D=g);l.innerHTML="";Q.call(l,D)}else t=()=>x(y)};n.onChange(x);const u=()=>{if(b||a)if(b||!Z.isSaving("settings")){var y=O("sl"),l=O("slc");y.style.display="none";E(l,"hide");l.prepend(n.node);b=!1;a&&A(!1);y=O("stcc");y||(y=M(),y.id="stcc",Q.call(l,y));f=B(r[0]);m=Ba();Q.call(f,m.node);k=B(r[1]);g=B(r[2]);if(!t)return n.setIndex(n.index());t();t=void 0}};G(()=>{Z.observe("settings",()=>{u()})});const A=y=>{y!==d&&(a=!1,d=y,m&&m.setDisabled(d),y=O("slc-act"),d?(O("s-save").onclick=()=>
-{a=!0;e.map(l=>l())},O("s-can").onclick=()=>{a=!0;h.map(l=>l());u()},E(y,"hide")):C(y,"hide"))},B=y=>{const l=L("span"),D=[],J=(F,K)=>{if(null==F)return Q.call(l,K.node);if(null==D[F]){const N=M();C(N,"igroup");D[F]=[N,[]];Q.call(l,N)}D[F][1].push(K);Q.call(D[F][0],K.node)};for(const F in Ca[y]){const {g:K,cg:N,l:X,t:R=0,o:Ha,u:Ia}=Ca[y][F],Ja=`${"pendingState"}.${y}.${F}`,T=oa({label:X,type:R,enumOpts:Ha,value:Z.get(`${"settings"}.${y}.${F}`),unit:Ia});J(K,T);const Ka=p.push(T);T.onChange(ma=>{N&&
-c(ma,T,D[K][0],D[K][1]);v[Ka]=T.isDirty();A(0<v.filter(La=>!0===La).length);Z.set(Ja,ma)})}return l};return{destroy:()=>{n.destroy();p.forEach(y=>y.destroy());p=[];e=[];h=[]},onCancel:y=>{h.push(y)},onSave:y=>{e.push(y)}}};const c=(n,x,u,A)=>{n?E(u,"disabled"):C(u,"disabled");A.forEach(B=>{x!==B&&B.setDisabled(!n)})};return'<div id="ps" class="f fC"><div id="sl" class="loader"></div><div id="slc" class="hide fw" style="text-align: left;"><div id="slc-act" class="fR fw hide"><button id="s-can" class="btn-c">Cancel</button> <button id="s-save" class="btn-s">Save</button></div></div></div>'}),
-Fa=(b,a,d)=>Ea(b,a,d),Ea=(b,a,d,e)=>{e=e||0;d=d||{};a=a||"GET";const h=S(d.body)?JSON.stringify(d.body):d.body,p={...(d.headers||{})};h&&(p["content-type"]="application/json");const v=`${"/api"}/${b}`;return fetch(v,{body:h,method:a,headers:p}).then(q=>{if(!q.ok){e+=1;if(8<e||500>q.status){const r=Error(`[${a}] ${v} failed (${q.status})`);r.response=q;throw r;}return ea(5E3*e).then(()=>Ea(b,a,d,e))}return"GET"===a?q.json():void 0})},Ga=[4,5,22,24],Ma="pos tPos speed accel deviceName mdnsName emitSyncData pinStep pinDir pinEn pinSleep pinReset pinMs1 pinMs2 pinMs3 pinHomeSw cordLength cordDiameter axisDiameter stepsPerRev resolution mqttEnabled mqttHost mqttPort mqttTopic moveUp moveDown moveStop tick".split(" "),
-Na=(b={})=>{let a,d=!1,e=0;const {onMessage:h,onDisconnect:p,onConnect:v,onError:q}=b,r=!!q,f=!!v,k=!!h,g=!!p,t=()=>{a=new WebSocket(`ws://${location.hostname}/ws`);a.onopen=m=>{d=!0;e=0;f&&v(m,e)};a.onclose=m=>{d=!1;g&&p(m,e);setTimeout(t,Math.min(5E3*++e,6E4))};a.onmessage=m=>{console.log("[ws] onMessage(): ",m,m.data);m=m.data;m.endsWith("/")&&(m=m.substr(0,m.length-1));var c=m.split("/");m=c.shift();parseInt(c.shift());const n=parseInt(c.shift());n.toString(2).split("1").length-1!==c.length&&
-r&&q("Event flags and data don't match",0);const x={},u={};let A=1;for(let B=0,y=Ma.length;B<y&&0<c.length;B++){if(A&n){const l=Ma[B],D=c.shift();4>B?x[l]=parseInt(D):u[l]=B in Ga?D:parseInt(D)}A<<=1}c=[];0<Object.keys(x).length&&c.push({type:0,mac:m,data:x});0<Object.keys(u).length&&c.push({type:1,mac:m,data:u});console.log("[ws] onMessage() unpacked: ",c);k&&c.forEach(h)};a.onerror=m=>{d=!1;r&&q(m,e)}};t();return{ws:a,push:(m,c)=>{if(d){var n=c.mac;var x=0===m?[c.pos,c.tPos,c.speed,c.accel]:2===
-m?[c.moveBy,c.stop]:[];a:{switch(m){case 0:const A=[];c="";for(var u in x){const B=x[u];null!=B?(c+=`${B}/`,A.push(1)):A.push(0)}u=parseInt(A.reverse().join(""),2);m=`${n}/${m}/${u}/${c}`;break a;default:r?q("Unexpected event type",0):console.error("Unexpected event type")}m=void 0}a.send(m)}}}},Oa=b=>{const a=document.createElementNS("http://www.w3.org/2000/svg","svg"),d=document.createElementNS("http://www.w3.org/2000/svg","path");d.setAttribute("fill","currentColor");d.setAttribute("d",b.data);
-a.setAttribute("viewBox",b.box);Q.call(a,d);a.style.width=`${b.w}px`;return a},Pa=Oa({data:"M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z",
-box:"0 0 576 512",w:22}),Qa=Oa({data:"M256,8C119,8,8,119,8,256S119,504,256,504,504,393,504,256,393,8,256,8Zm92.49,313h0l-20,25a16,16,0,0,1-22.49,2.5h0l-67-49.72a40,40,0,0,1-15-31.23V112a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V256l58,42.5A16,16,0,0,1,348.49,321Z",box:"0 0 512 512",w:20}),Ra=Oa({data:"M487.4 315.7l-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3L380.8 110c-17.9-15.4-38.5-27.3-60.8-35.1V25.8c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7V75c-22.2 7.9-42.8 19.8-60.8 35.1L88.7 85.5c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14L67.3 221c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zM256 336c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z",
-box:"0 0 512 512",w:20});stynj(".ic-w{width:22px}.ic{height:16px;width:16px}.ic-home{background:url(home.svg)}#bg{background-image:url(bg-0.0.1.jpg),linear-gradient(40deg,#1d0143,#293b7c,#300a52)}#bg>#_fr{display:none}.overlay{position:fixed;height:100%;width:100%;top:0;left:0;background-color:#333;font-size:24px;display:flex;align-items:center;justify-content:center;z-index:11;opacity:.95;transition:.7s;pointer-events:none}button{width:110px;height:45px;font-size:11px;text-transform:uppercase;letter-spacing:2.5px;margin:20px auto;font-weight:500;color:#000;background:rgba(240,248,255,.8);border:1px solid rgba(202,218,232,.2);border-radius:45px;box-shadow:0 8px 15px rgb(0 0 0/10%);transition:all .3s ease 0s;cursor:pointer;outline:none;position:relative}button.btn-t{border:none;background:none;color:#fff}button:active:not(:disabled,.btn-t){background-color:#2a637a;box-shadow:0 15px 20px rgba(42,99,122,.44313725490196076);color:#fff}button:active.btn-s{background-color:#2ee59d;box-shadow:0 15px 20px rgba(46,229,156,.44313725490196076)}button:active.btn-c{background:#ff5656;box-shadow:0 15px 20px rgba(255,86,86,.4)}@media (hover:hover) and (pointer:fine){button:hover:not(:disabled,.btn-t){transform:translateY(-7px);background-color:#2a637a;box-shadow:0 15px 20px rgba(42,99,122,.44313725490196076);color:#fff}button:hover.btn-s{background-color:#2ee59d;box-shadow:0 15px 20px rgba(46,229,156,.44313725490196076)}button:hover.btn-c{background:#ff5656;box-shadow:0 15px 20px rgba(255,86,86,.4)}}button:disabled{opacity:1%}button>div.loader{transform:translate3d(0,-17px,0);font-size:7px}#app{flex-direction:column;padding:23px 23px 0;height:calc(100% - 73px);overflow-y:scroll}#app,ul{display:flex}ul{list-style-type:none;-webkit-margin-before:0;margin-block-start:0;-webkit-margin-after:0;margin-block-end:0;-webkit-padding-start:0;padding-inline-start:0}li{display:list-item;text-align:-webkit-match-parent;color:hsla(0,0%,100%,.44)}li.s{color:#db8b1d}");
-const Sa=[{t:"Home",i:Pa},{t:"Routines",i:Qa},{t:"Settings",i:Ra}];
-var run=b=>{function a(){Z.setSaving("settings",!0);const c=da(Z._state.settings,Z._state.pendingState);Fa("settings","PUT",{body:c}).then(()=>{Z.setSaving("settings",!1);var n=Z.update,x=Z._state.pendingState;x?.gen?.pass&&(x.gen.pass=void 0);x?.mqtt?.pass&&(x.mqtt.pass=void 0);n.call(Z,"settings",x);k.pushToast("Settings saved")}).catch(n=>{k.pushToast("Failed to save settings");throw n;})}function d(){Z.update("pendingState",Z._state.settings)}function e(c){c=ra(c);Q.call(v,c.node);c.onChange(n=>
-{g.push(0,n)});setTimeout(c.show)}function h(c,n,x=[]){n=n||[c];return Ea(c,void 0,void 0).then(u=>{n.forEach(A=>Z.update(A,u));x.forEach(A=>Z.set(A,u));return u}).catch(p)}function p(c){c=S(c)?(c?.message||"Error encountered, check console")+"\n"+c.stack:c;k.pushToast(c,!0)}console.log("onLoad(): ",b);O("favicon").href="favicon.ico";const v=P("body"),q=O("app");let r=-1,f;b.state=Z;const k=va();b.tc=k;Q.call(v,k.node);I.onerror=p;I.onpopstate=()=>{m(location.pathname);{const c=location.search;c!==
-ja&&(ja=c,ia())}};const g=Na({onMessage(c){1===c.type&&Z.update("settings",{...Z.get("settings"),...c.data});0===c.type&&Z.update("state",{...Z.get("state"),...c.data})},onError(c,n){n||k.pushToast("Websocket disconnected!",!0,!1,5E3)},onConnect(c,n){n&&k.pushToast("Websocket connected!")},onDisconnect(){}}),t=ka({labels:Sa});ca(O("nav"),t.node);t.onClick(function(c){if(r!==c){var n=0<c?`/${Sa[c].t.toLowerCase()}`:"/";r=c;f?.destroy?.();f?.node.remove();switch(c){case 0:c=za();W(n,void 0,!0);c.onDeviceClick(e);
-f=c;break;case 1:W(n,void 0,!0);f=null;break;case 2:c=Da(),W(n,void 0,!1),c.onSave(a),c.onCancel(d),f=c,Z.isLoaded("settings")||h("settings",["pendingState","settings"])}f&&Q.call(q,f.node)}});const m=c=>{c=Sa.map(n=>n.t.toLowerCase()).indexOf(c.substr(1));0>c&&(c=0);t.setIndex(c)};m(location.pathname)};export{run,Z as s}
+function Component(c) {
+    return (...args) => {
+        const ctx = {};
+        const toRender = c.call(ctx, ...args);
+        const elem = new DOMParser().parseFromString(toRender, "text/html");
+        const node = elem.getElementsByTagName("body").item(0).firstChild;
+        const api = ctx.init(node);
+        api.node = node;
+        return api;
+    };
+}
+
+var template$a = "<ul class=\"fw navc\"></ul>";
+
+var css_248z$b = "#nav {\n\tbackground: rgba(0,0,0,0.5);\n\theight: 50px;\n\tdisplay: flex;\n\tfont-size: 10px;\n\tjustify-content: center;\n}\n\n.navc {\n\tjustify-content: space-around;\n\talign-self: center;\n\tmax-width: 500px;\n}\n\n/* uncss:ignore */\n\n.navc .sel {\n\tcolor: #DB8B1D;\n}\n\n/* uncss:ignore */\n\n#nav>ul>li>.l {\n\t-webkit-margin-before: 0em;\n\t        margin-block-start: 0em;\n    -webkit-margin-after: 0em;\n            margin-block-end: 0em;\n}";
+stynj(css_248z$b);
+
+const DomTokenProto = DOMTokenList.prototype;
+function addClass(elem, ...tokens) {
+    DomTokenProto.add.call(elem.classList, ...tokens);
+}
+function removeClass(elem, ...tokens) {
+    DomTokenProto.remove.call(elem.classList, ...tokens);
+}
+const toggleClass = (elem, token) => {
+    DomTokenProto.toggle.call(elem.classList, token);
+    // elem.classList.toggle.call(elem, token);
+};
+const nextTick = setTimeout;
+const DOCUMENT = document;
+const WINDOW = window;
+const createElement = DOCUMENT.createElement.bind(DOCUMENT);
+const createDiv = DOCUMENT.createElement.bind(DOCUMENT, "div");
+const innerWidth = () => {
+    return WINDOW.innerWidth;
+};
+/**
+ * Alias to document.getElementById,
+ * so closure can trim a few extra characters.
+ */
+const getElement = DOCUMENT.getElementById.bind(DOCUMENT);
+const getElementsByTagName = (tags, elem = DOCUMENT) => elem.getElementsByTagName.call(elem, tags);
+const querySelector = (selectors, elem = DOCUMENT) => elem.querySelector.call(elem, selectors);
+const stopPropagation = (e) => e.stopPropagation();
+function setStyle(elem, key, value) {
+    // CSSStyleDeclaration.prototype.setProperty.call(elem, key, value);
+    elem.style[key] = value;
+}
+function displayNone(elem) {
+    setStyle(elem, "display", "none");
+}
+const appendChild = (parent, child) => {
+    return _appendChild.call(parent, child);
+};
+const _appendChild = DOCUMENT.appendChild;
+
+const isObject = (o) => {
+    return o && typeof o === "object" && !Array.isArray(o);
+};
+function isNullish(o) {
+    return o == null;
+}
+const mergeDeep = (target, ...sources) => {
+    if (!sources.length)
+        return target;
+    const source = sources.shift();
+    if (isObject(target) && isObject(source)) {
+        for (const key in source) {
+            if (isObject(source[key])) {
+                if (!target[key])
+                    Object.assign(target, { [key]: {} });
+                mergeDeep(target[key], source[key]);
+            }
+            else {
+                Object.assign(target, { [key]: source[key] });
+            }
+        }
+    }
+    return mergeDeep(target, ...sources);
+};
+/**
+ * Returns new object that is the difference between source and target.
+ * Entries that exist or are different in target are returned.
+ * If source contains keys that target doesn't, they are ignored.
+ * Ignores arrays, only returns them as is from target.
+ *
+ * @param source
+ * @param target
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const diffDeep = (source, target) => {
+    return Object.keys(target).reduce((diff, key) => {
+        if (source[key] === target[key] || target[key] == null)
+            return diff;
+        if (isObject(source[key]) && isObject(target[key])) {
+            // both keys are objects, diff recursively
+            const oDiff = diffDeep(source[key], target[key]);
+            if (Object.keys(oDiff).length === 0)
+                return diff;
+            return {
+                ...diff,
+                [key]: oDiff,
+            };
+        }
+        return {
+            ...diff,
+            [key]: target[key],
+        };
+    }, {});
+};
+const getQueryParam = (param, qpStr) => {
+    qpStr = qpStr || location.search;
+    const query = qpStr.substring(1);
+    const vars = query.split("&");
+    for (let i = 0; i < vars.length; i++) {
+        const pair = vars[i].split("=");
+        if (pair[0] == param) {
+            return pair[1];
+        }
+    }
+    return false;
+};
+const wait = (duration) => {
+    return new Promise((res) => {
+        setTimeout(res, duration);
+    });
+};
+const debug = (...msgs) => {
+    // TODO: enable debugging by localstorage
+    console.debug.call(console, ...msgs);
+};
+const getFromNamespace = (key) => {
+    return window.wblinds[key];
+};
+const pruneUndef = (obj) => {
+    const o = {};
+    for (const k in obj) {
+        if (obj[k] != null) {
+            o[k] = obj[k];
+        }
+    }
+    return o;
+};
+const _queryChangeHandlers = [];
+const onQueryChange = (h) => {
+    const ind = _queryChangeHandlers.push(h);
+    return () => {
+        delete _queryChangeHandlers[ind - 1];
+    };
+};
+const query = () => location.search;
+const pathname = () => location.pathname;
+const _callQueryHandlers = () => {
+    _queryChangeHandlers.forEach((h) => {
+        h && h();
+    });
+};
+let _lastQp = query();
+const emitQueryChange = () => {
+    const q = query();
+    debug("q === query: ", q, _lastQp, location.search);
+    if (q === _lastQp)
+        return;
+    _lastQp = q;
+    _callQueryHandlers();
+};
+const pushToHistory = (path, qps, resetQps) => {
+    qps = qps || {};
+    if (isNullish(resetQps))
+        resetQps = true;
+    const cPath = pathname();
+    const cSearch = query();
+    const params = new URLSearchParams(resetQps ? "" : cSearch);
+    for (const k in qps) {
+        params.set(k, qps[k]);
+    }
+    let qpStr = params.toString();
+    if (qpStr.length > 0)
+        qpStr = "?" + qpStr;
+    if (path === cPath && qpStr === cSearch) {
+        // no change
+        debug("no change: ", path, cPath, qpStr, cSearch);
+        return;
+    }
+    const fullPath = (path || cPath) + qpStr;
+    debug("push history: ", fullPath);
+    history.pushState(null, "", fullPath);
+    if (qpStr !== cSearch) {
+        _callQueryHandlers();
+    }
+};
+
+const _Nav = function ({ labels }) {
+    let _i = 0;
+    let _clickHandlers = [];
+    const _lis = [];
+    this.init = (elem) => {
+        const setIndex = (index) => {
+            _i = index;
+            _lis.forEach((l2, i2) => {
+                if (i2 === _i)
+                    addClass(l2, "sel");
+                else
+                    removeClass(l2, "sel");
+            });
+            _clickHandlers.map((c) => c(index));
+        };
+        labels.map((label, i) => {
+            const l = createElement("li");
+            addClass(l, "fC");
+            if (i === _i) {
+                addClass(l, "sel");
+            }
+            // Add icon
+            const ic = createElement("i");
+            appendChild(ic, label.i);
+            // ic.innerHTML = label.i;
+            appendChild(l, ic);
+            // Add label
+            const p = createElement("p");
+            addClass(p, "l");
+            p.innerText = label.t;
+            appendChild(l, p);
+            _lis.push(l);
+            appendChild(elem, l);
+            l.onclick = () => setIndex(i);
+        });
+        return {
+            onClick: (h) => {
+                _clickHandlers.push(h);
+            },
+            currentIndex: () => _i,
+            destroy: () => {
+                _clickHandlers = [];
+            },
+            setIndex,
+        };
+    };
+    return template$a;
+};
+const Nav = Component(_Nav);
+
+var template$9 = "<div class=\"sc flex\"><input class=\"slider\" type=\"range\" min=\"0\" max=\"100\"></div>";
+
+var css_248z$a = ":root {\n\t--oc: #1d95db;\n\t--cc: #606060;\n}\n\n.sc {\n\tpointer-events: none;\n\tpadding: 20px;\n\talign-self: center;\n\talign-items: center;\n\tjustify-content: center;\n\theight: 59%;\n\toverflow-x: hidden;\n\twidth: 50vh;\n}\n\n.slider {\n\tpointer-events: all;\n\ttransform: rotate( 90deg);\n\tbackground: linear-gradient(to right, var(--cc) 0%, var(--cc) 50%, var(--oc) 50%, var(--oc) 100%);\n\theight: 7px;\n\toutline: none;\n\tborder-radius: 15px;\n\theight: 150px;\n\t-webkit-appearance: none;\n\t-moz-appearance: none;\n\tappearance: none;\n\twidth: 400px;\n}\n\n.slider::-webkit-slider-thumb {\n\t-webkit-appearance: none;\n\tappearance: none;\n\twidth: 30px;\n\ttransform: translateX(-15px);\n\theight: 70px;\n\tbackground: rgba(0, 0, 0, 0);\n\tborder-right: 2px solid white;\n\tbox-shadow: black;\n\tcursor: pointer;\n}";
+stynj(css_248z$a);
+
+const OPEN_COLOR = "#1d95db";
+const CLOSED_COLOR = "#606060";
+const setGradientStyle = (input, val, min, max, activeColor, inactiveColor) => {
+    const pVal = ((val - min) / (max - min)) * 100;
+    setStyle(input, "background", `linear-gradient(to right, ${activeColor} 0%, ${activeColor} ${pVal}%, ${inactiveColor} ${pVal}%, ${inactiveColor} 100%`);
+};
+const _Slider = function ({ value, }) {
+    let _onChangeHandlers = [];
+    this.init = (elem) => {
+        const slider = querySelector("input", elem);
+        slider.onmousedown = (slider.ontouchstart = stopPropagation);
+        const parse = parseInt;
+        const min = parse(slider.min);
+        const max = parse(slider.max);
+        slider.oninput = () => {
+            const val = parse(slider.value);
+            setGradientStyle(slider, val, min, max, CLOSED_COLOR, OPEN_COLOR);
+            // _onChangeHandlers.forEach((h) => h(val));
+        };
+        slider.onchange = () => {
+            const val = parse(slider.value);
+            _onChangeHandlers.forEach((h) => h(val));
+        };
+        slider.value = `${value}`;
+        // initial gradient
+        setGradientStyle(slider, value, min, max, CLOSED_COLOR, OPEN_COLOR);
+        return {
+            destroy: () => {
+                _onChangeHandlers = [];
+                // todo
+            },
+            onChange: (h) => {
+                _onChangeHandlers.push(h);
+            },
+        };
+    };
+    return template$9;
+};
+const Slider = Component(_Slider);
+
+var template$8 = "<div id=\"card\" class=\"an f flex\"><div class=\"ca-con flex fC\"></div><div class=\"act\">X</div></div>";
+
+var css_248z$9 = "#card {\n    position: fixed;\n    top: 100%;\n\tbackground: rgb(9 9 9 / 88%);\n    border-radius: 30px 30px 0 0;\n    text-align: left;\n    justify-content: center;\n    font-size: 12px;\n}\n\n/* uncss:ignore */\n\n#card::after {\n    content: \"-\";\n    transform: scale(20, 1) translate(0.5px);\n    position: fixed;\n    color: var(--cc);\n}\n\n/* uncss:ignore */\n\n#card.an, #card>*.an {\n    transition: 0.2s top ease-in-out;\n}\n\n.in {\n    text-align: left;\n}\n\n.ca-con {\n    width: 80%;\n    max-width: 300px;\n    padding-top: 50px;\n}\n\n/* uncss:ignore */\n\n.cR {\n    margin-bottom: 50px;\n}\n\n/* uncss:ignore */\n\n#card .act {\n    position: fixed;\n    right: 23px;\n    top: 100%;\n    font-size: 20px;\n    font-weight: 100;\n    transform: scaleX(1.3);\n}";
+stynj(css_248z$9);
+
+var template$7 = "<div class=\"fR\"></div>";
+
+var css_248z$8 = ":root {\n\t--c: #1d95db;\n}\n\n/* uncss:ignore */\n\n.in {\n  justify-content: space-between;\n  height: 50px;\n  align-items: center;\n  background: rgba(0,0,0,.56);\n  padding: 0px 0px 0px 15px;\n  border-radius: 15px;\n  min-width: 300px;\n  font-size: 14px;\n}\n\n/* uncss:ignore */\n\n.in.disabled {\n  color: grey;\n}\n\n/* uncss:ignore */\n\n.in>label {\n  font-weight: bold;\n}\n\n/* uncss:ignore */\n\n.igroup>.in {\n  margin-top: 0px;\n  border-radius: 0px;\n  border-bottom: 1px solid #FFFFFF4D;\n}\n\n/* uncss:ignore */\n\n.igroup>.in:first-child {\n  border-radius: 15px 15px 0px 0px;\n  margin-top: 20px;\n}\n\n/* uncss:ignore */\n\n.igroup>.in:last-child {\n  border-radius: 0px 0px 15px 15px;\n  margin-bottom: 20px;\n  border-bottom: none;\n}\n\n/* uncss:ignore */\n\n.in-r {\n\tbackground: linear-gradient(to right, var(--c) 0%, var(--c) 50%, #606060 50%, #606060 100%);\n\tborder-radius: 8px;\n\theight: 7px;\n\twidth: 75%;\n\toutline: none;\n\t-webkit-appearance: none;\n}\n\n/* uncss:ignore */\n\n.in-r {\n\tborder-radius: 15px;\n\theight: 6px;\n\t-webkit-appearance: none;\n\t-moz-appearance: none;\n\tappearance: none;\n\twidth: 100%;\n\toutline: none;\n}\n\n/* uncss:ignore */\n\n.in-r::-webkit-slider-thumb {\n\t-webkit-appearance: none;\n\tappearance: none;\n\twidth: 16px;\n\theight: 16px;\n\tbackground: white;\n\tbox-shadow: black;\n\tborder-radius: 50%;\n\tcursor: pointer;\n}\n\n/* uncss:ignore */\n\n.in>input:not([type=checkbox]),.in>select {\n  flex-grow: 1;\n  padding: 10px 27px 10px 0px;\n  background: rgba(0,0,0,0);\n  border: none;\n  color: #DB8B1D;\n  -moz-text-align-last: right;\n  text-align-last: right;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  text-align: right;\n}\n\n/* uncss:ignore */\n\n.in>select + span {\n  left: -10px;\n  transform: scale(1.6, 0.9) translateY(-1px);\n  font-weight: 200;\n  color:#DB8B1D;\n}\n\n/* uncss:ignore */\n\n.in>span {\n  color: #5f5f5f;\n  position: relative;\n  font-size: 12px;\n  pointer-events: none;\n  margin-left: -20px;\n  left: -5px;\n}\n\n/* uncss:ignore */\n\n.in>select {\n  margin-inline: 12px;\n}\n\n/* uncss:ignore */\n\n.in:focus-within {\n  box-shadow: -1px 0px rgba(219, 139, 29, 0.627) inset;\n}\n\n/* uncss:ignore */\n\n.in>input:is([type=checkbox]) {\n  margin-right: 15px;\n}\n\n/* uncss:ignore */\n\n.in>input:disabled {\n  color: grey;\n}\n\n/* uncss:ignore */\n\ninput::-webkit-outer-spin-button,\ninput::-webkit-inner-spin-button {\n  -webkit-appearance: none;\n  margin: 0;\n}\n\n/* uncss:ignore */\n\ninput[type=number] {\n  -moz-appearance: textfield;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"] {\n  -webkit-appearance: none;\n     -moz-appearance: none;\n          appearance: none;\n  width: 51px;\n  height: 31px;\n  border-radius: 50px;\n  background-color: rgba(148, 148, 154, 0.2) !important;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"]:after {\n  content: \"\";\n  width: 50%;\n  border-radius: 100%;\n  height: 80%;\n  display: block;\n  position: relative;\n  background-color: white;\n  top: 12%;\n  left: 3%;\n  /* transition: all 0.3s ease 0s; */\n  transition: 0.2s all ease-in-out;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"].on {\n  background-color: #34C759 !important;\n}\n\n/* uncss:ignore */\n\n[type=\"checkbox\"].on::after {\n  left: 45%;\n}";
+stynj(css_248z$8);
+
+const InputType_Number = 0;
+const InputType_String = 1;
+const InputType_Boolean = 2;
+const InputType_Enum = 3;
+const InputType_Password = 4;
+const InputType_Range = 5;
+const InputTypeMap = {
+    [InputType_String]: "text",
+    [InputType_Boolean]: "checkbox",
+    [InputType_Number]: "number",
+    [InputType_Enum]: "select",
+    [InputType_Password]: "password",
+    [InputType_Range]: "range",
+};
+const _Input = function ({ label, type, enumOpts, placeholder, value, unit, embed = true, prevDefault = false, min, max, }) {
+    let _currentValue = value;
+    const _firstValue = value;
+    let _input;
+    let _onChangeHandlers = [];
+    const setup = (elem) => {
+        elem.innerHTML = "";
+        if (embed) {
+            addClass(elem, "in");
+        }
+        const l = createElement("label");
+        l.innerText = label;
+        appendChild(elem, l);
+        if (type === InputType_Enum) {
+            // make select with options
+            _input = createElement("select");
+            addClass(elem, "in-s");
+            enumOpts.forEach((o) => {
+                const opt = createElement("option");
+                opt.value = o.v;
+                opt.innerText = o.l;
+                appendChild(_input, opt);
+            });
+            _input.onchange = (e) => {
+                if (prevDefault)
+                    e.preventDefault();
+                _onChange(enumOpts[_input.options.selectedIndex].v);
+            };
+        }
+        else {
+            // all others are input type
+            _input = createElement("input");
+            _input.type = InputTypeMap[type];
+            _input.placeholder = placeholder || "xxxxx";
+            if (!isNullish(min))
+                _input.min = `${min}`;
+            if (!isNullish(max))
+                _input.max = `${max}`;
+            if (type === InputType_Range) {
+                addClass(_input, "in-r");
+            }
+            if (type === InputType_Boolean) {
+                // checkbox/select inputs, use checked for bool, value for enum
+                _input.checked = value;
+                value && addClass(_input, "on");
+                _input.onchange = (e) => {
+                    if (prevDefault)
+                        e.preventDefault();
+                    toggleClass(_input, "on");
+                    _onChange(_input.checked);
+                };
+            }
+            else {
+                // text/number inputs
+                _input.onchange = (e) => {
+                    if (prevDefault)
+                        e.preventDefault();
+                    _onChange(_input.value);
+                };
+            }
+        }
+        // set initial value
+        if (value != null)
+            _input.value = value;
+        _input.id = l.htmlFor = `in-${label.split(" ").join("-")}`;
+        const _showError = (err) => {
+            // TODO:
+        };
+        function _onChange(v) {
+            if (v === "")
+                v = undefined;
+            _currentValue = v;
+            const err = _validate();
+            if (err) {
+                return _showError();
+            }
+            _onChangeHandlers.forEach((h) => h(_currentValue));
+        }
+        function _validate() {
+            // TODO: show error hint
+            return;
+        }
+        appendChild(elem, _input);
+        // Add unit if it exists,
+        // or an arrow for selects.
+        if (type === InputType_Enum || unit) {
+            const suf = createElement("span");
+            suf.innerText = unit ? unit : "v";
+            appendChild(elem, suf);
+        }
+    };
+    this.init = (elem) => {
+        setup(elem);
+        return {
+            onChange: (h) => {
+                _onChangeHandlers.push(h);
+            },
+            setDisabled: (val) => {
+                toggleClass(elem, "disabled");
+                _input.disabled = val;
+            },
+            destroy: () => {
+                _onChangeHandlers = [];
+            },
+            reset: () => {
+                setup(elem);
+            },
+            isDirty: () => {
+                return _firstValue !== _currentValue;
+            },
+        };
+    };
+    return template$7;
+};
+const Input = Component(_Input);
+
+const MIN_TOP = 8;
+const ACT_Y_OFFSET = 12;
+const INPUT_SPEED = 0;
+const INPUT_ACCEL = 1;
+const INPUT_LABEL_MAP = ["Speed", "Acceleration"];
+const INPUT_LIMIT_MAP = [
+    [1, 5000],
+    [1, 4294967294],
+];
+const _Card = function ({ pos, accel, speed, ...data }) {
+    let _onChangeHandlers = [];
+    let draggingCard = false;
+    let yOffset = 0;
+    let yStart = 0;
+    let animated = false;
+    let lastCoords = {};
+    let _inputs = [];
+    this.init = (elem) => {
+        const container = querySelector(".ca-con", elem);
+        const act = querySelector(".act", elem);
+        toggleAnimations(true);
+        debug("card data: ", data);
+        const notify = (d) => {
+            _onChangeHandlers.forEach((h) => h(d));
+        };
+        const makeRangeInput = (input) => {
+            const value = input === INPUT_SPEED ? speed : accel;
+            const range = Input({
+                type: InputType_Range,
+                label: INPUT_LABEL_MAP[input],
+                value,
+                embed: false,
+                min: INPUT_LIMIT_MAP[input][0],
+                max: INPUT_LIMIT_MAP[input][1],
+            });
+            const node = range.node;
+            const inp = querySelector("input", node);
+            removeClass(range.node, "fR");
+            addClass(range.node, "cR");
+            const parse = parseInt;
+            const min = parse(inp.min);
+            const max = parse(inp.max);
+            inp.oninput = () => {
+                const val = parse(inp.value);
+                setGradientStyle(inp, val, min, max, OPEN_COLOR, CLOSED_COLOR);
+            };
+            const _handleChange = (val) => {
+                // let accel, speed;
+                if (input === INPUT_SPEED) {
+                    notify({ speed: val, ...data });
+                }
+                else if (input === INPUT_ACCEL) {
+                    // accel = val;
+                    notify({ accel: val, ...data });
+                }
+            };
+            range.onChange(_handleChange);
+            appendChild(container, range.node);
+            setGradientStyle(inp, value, min, max, OPEN_COLOR, CLOSED_COLOR);
+            _inputs.push(range);
+        };
+        makeRangeInput(INPUT_SPEED);
+        makeRangeInput(INPUT_ACCEL);
+        const slider = Slider({ value: pos });
+        slider.onChange((tPos) => {
+            notify({ tPos, ...data });
+        });
+        appendChild(container, slider.node);
+        const onPress = (coords) => {
+            lastCoords = coords;
+            yStart = coords.y;
+            draggingCard = true;
+            toggleAnimations(false);
+        };
+        const closeAndDestroy = () => {
+            toggleAnimations(true);
+            elem.ontransitionend = destroy;
+            const o = elem.clientHeight;
+            setStyle(elem, "top", `${o}px`);
+            setStyle(act, "top", `${o + ACT_Y_OFFSET}px`);
+        };
+        act.onclick = closeAndDestroy;
+        const onRelease = () => {
+            if (!draggingCard)
+                return;
+            draggingCard = false;
+            toggleAnimations(true);
+            if (yOffset > elem.clientHeight / 2) {
+                return closeAndDestroy();
+            }
+            setStyle(elem, "top", `${MIN_TOP}px`);
+            setStyle(act, "top", `${MIN_TOP + ACT_Y_OFFSET}px`);
+            yOffset = yStart = MIN_TOP;
+        };
+        const onMove = (coords) => {
+            if (!draggingCard)
+                return;
+            if (coords.y - yStart < MIN_TOP) {
+                lastCoords = coords;
+                return;
+            }
+            const movedY = coords.y - lastCoords.y;
+            yOffset += movedY;
+            lastCoords = coords;
+            setStyle(elem, "top", `${yOffset}px`);
+            setStyle(act, "top", `${yOffset + ACT_Y_OFFSET}px`);
+        };
+        function toggleAnimations(newState) {
+            if (isNullish(newState))
+                newState = false;
+            if (newState === animated)
+                return;
+            newState ? addClass(elem, "an") : removeClass(elem, "an");
+            newState ? addClass(act, "an") : removeClass(act, "an");
+            animated = newState;
+        }
+        const destroy = () => {
+            _onChangeHandlers = [];
+            slider.destroy();
+            _inputs.forEach((inp) => inp.destroy());
+            _inputs = [];
+            elem.remove();
+        };
+        const firstTouchXY = (e) => {
+            let { x, y } = e;
+            if (x == null) {
+                // touch event
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            }
+            return {
+                x,
+                y,
+            };
+        };
+        elem.onmousedown = elem.ontouchstart = (e) => onPress(firstTouchXY(e));
+        elem.onmouseup = elem.onmouseout = elem.ontouchend = onRelease;
+        elem.onmousemove = elem.ontouchmove = (e) => onMove(firstTouchXY(e));
+        return {
+            destroy,
+            onChange: (h) => {
+                _onChangeHandlers.push(h);
+            },
+            show: () => {
+                setStyle(elem, "top", `${MIN_TOP}px`);
+                setStyle(act, "top", `${MIN_TOP + ACT_Y_OFFSET}px`);
+            },
+        };
+    };
+    return template$8;
+};
+const Card = Component(_Card);
+
+var template$6 = "<div class=\"tile sq\"><span></span><p>Bedroom Left</p></div>";
+
+var css_248z$7 = ":root {\n\t/* --wid: calc((100vw - 30px) / 3);  */\n\t/* Always 3 columns */\n\t--wid: min(calc(33.3vw - 20px),110px, 110px);\n}\n\n.tile {\n\tbackground: rgba(0,0,0,.3);\n\tborder-radius: 12px;\n\tdisplay: flex;\n\t/* justify-content: space-around; */\n}\n\n/* uncss:ignore */\n\n.tile.sq {\n\twidth: var(--wid);\n\theight: var(--wid);\n\t/* margin: 20px; */\n\tmargin: 5px 0px 5px 0px;\n\tposition: relative;\n}\n\n/* uncss:ignore */\n\n.tile.sq>span {\n\twidth: calc(var(--wid) - 1px);\n\tmax-height: 90px;\n\ttop: 10px;\n\tposition: absolute;\n\tright: 0px;\n\tborder-right: 1px dashed white;\n\tborder-right-style: groove;\n}\n\n/* uncss:ignore */\n\n.tile.sq p {\n\tfont-size: 12px;\n\tmargin: auto 21px 10px 9px;\n\tfont-weight: 500;\n\toverflow-wrap: anywhere;\n}";
+stynj(css_248z$7);
+
+const _Tile = function ({ name, id, ...data }) {
+    let _clickHandlers = [];
+    this.init = (elem) => {
+        elem.id = id;
+        elem.onclick = () => {
+            _clickHandlers.forEach((h) => h({ id, name, ...data }));
+        };
+        querySelector("p", elem).innerText = name;
+        return {
+            onClick: (h) => {
+                _clickHandlers.push(h);
+            },
+            destroy: () => {
+                _clickHandlers = [];
+            },
+        };
+    };
+    return template$6;
+};
+const Tile = Component(_Tile);
+
+var template$5 = "<div id=\"pas\" class=\"fw flex fR\"></div>";
+
+var css_248z$6 = "/* uncss:ignore */\n:root {\n\t--bord: 1px solid rgba(0, 0, 0, 0.034);\n}\n/* uncss:ignore */\n#pas {\n\tborder-radius: 7px;\n    justify-content: center;\n\tmargin-bottom: 20px;\n    max-width: 400px;\n    border: rgba(0,0,0,0);\n    background: rgba(118, 118, 128, 0.24);\n    margin: auto;\n}\n/* uncss:ignore */\n#pas>div {\n\t/* width: 10px; */\n\tpadding: 2px 0 2px;\n\tflex-grow: 1;\n\ttext-align: center;\n\tfont-size: 14px;\n\tborder: 1px rgba(0,0,0,0);\n}\n/* uncss:ignore */\n#pas>div.sel {\n\tbackground-color: rgb(103, 103, 105, .64);\n\tborder-radius: 7px;\n\tborder: 1px rgba(0,0,0,0.14) solid\n}\n/* uncss:ignore */\n#pas>div::after {\n\theight: 13px;\n    content: \"\";\n    display: block;\n    position: absolute;\n    border-left: 1px solid rgba(142, 142, 147, 0.45);\n    border-radius: 0.5px;\n    transform: translate(-1px, -110%);\n}\n/* uncss:ignore */\n#pas>div:first-child::after {\n\tborder-left: none;\n}";
+stynj(css_248z$6);
+
+const _Selector = function ({ items, queries, }) {
+    let _index = 0;
+    let _changeHandlers = [];
+    let _items = [];
+    this.init = (elem) => {
+        const onChange = (h) => {
+            _changeHandlers.push(h);
+        };
+        const handleQueryChange = () => {
+            if (queries.length < 1)
+                return;
+            let tab = getQueryParam("tab");
+            tab = tab && tab.toLowerCase();
+            let ind = queries.indexOf(tab);
+            debug("handleQueryChange: ", ind);
+            if (ind < 0)
+                ind = 0;
+            if (_index !== ind)
+                _onChange(ind);
+        };
+        const removeQh = onQueryChange(handleQueryChange);
+        const _onClick = (index) => {
+            queries[index] && pushToHistory(undefined, { tab: queries[index] });
+            _onChange(index);
+        };
+        const _onChange = (index) => {
+            removeClass(_items[_index], "sel");
+            _index = index;
+            addClass(_items[_index], "sel");
+            _changeHandlers.map((c) => c(index));
+        };
+        items.map((i, index) => {
+            const e = createDiv();
+            e.innerText = i;
+            index === _index && addClass(e, "sel");
+            e.onclick = () => _onClick(index);
+            _items.push(e);
+            appendChild(elem, e);
+        });
+        handleQueryChange();
+        return {
+            destroy: () => {
+                removeQh();
+                _changeHandlers = [];
+                _index = 0;
+                _items = [];
+            },
+            index: () => {
+                return _index;
+            },
+            onChange,
+            setIndex: (index) => {
+                _onClick(index);
+            },
+        };
+    };
+    return template$5;
+};
+const Selector = Component(_Selector);
+
+var template$4 = "<div class=\"toast\"><p class=\"tom\"></p></div>";
+
+var css_248z$5 = ".toast {\n\tbackground-color: rgba(0,0,0,.44);\n    box-shadow: 1px 1px 8px rgba(84, 84, 84, 0.451);\n    border-radius: 10px;\n\tfont-size: 13px;\n\tmargin: 10px;\n\theight: 60px;\n\tdisplay: flex;\n\tmin-width: 250px;\n\tmax-width: 500px;\n\tposition: relative;\n\ttransition: 0.5s bottom ease-in-out;\n\tpointer-events: all;\n\talign-self: center;\n}\n\n.tom {\n\tmargin: auto;\n}";
+stynj(css_248z$5);
+
+const _Toast = function ({ message, id, isError = false, }) {
+    let _clickHandlers = [];
+    this.init = (elem) => {
+        elem.onclick = (e) => {
+            _clickHandlers.forEach((h) => h({ id }));
+        };
+        querySelector("p", elem).innerText = message;
+        return {
+            onClick: (h) => {
+                _clickHandlers.push(h);
+            },
+            destroy: () => {
+                _clickHandlers = [];
+            },
+        };
+    };
+    return template$4;
+};
+const Toast = Component(_Toast);
+
+var template$3 = "<div id=\"toc\" class=\"fw tc\"></div>";
+
+var css_248z$4 = "\n.tc {\n\tdisplay: flex;\n\tposition: absolute;\n    top: 0;\n    flex-flow: column-reverse;\n\tpointer-events: none;\n\theight: calc(100% - 50px);\n\tpadding-bottom: 50px;\n}";
+stynj(css_248z$4);
+
+const _ToastContainer = function () {
+    let _index = 0;
+    let _toasts = [];
+    this.init = (elem) => {
+        const pushToast = (message, isError, isPersistent, timeout) => {
+            if (isError)
+                console.error(message);
+            const setBottomStyle = () => {
+                setStyle(t.node, "bottom", `-${50 + 200 * (_toasts.length + 1)}px`);
+            };
+            const remove = () => {
+                setBottomStyle();
+                setTimeout(() => {
+                    t.node.remove();
+                }, 500);
+            };
+            const t = Toast({ message, isError, id: _index++ });
+            setBottomStyle();
+            t.onClick(remove);
+            _toasts.push(t);
+            appendChild(elem, t.node);
+            setTimeout(() => {
+                setStyle(t.node, "bottom", "0px");
+                !isPersistent && setTimeout(remove, timeout || isError ? 5000 : 2500);
+            });
+        };
+        return {
+            destroy: () => {
+                _toasts.map((t) => t.destroy());
+                _toasts = [];
+                _index = 0;
+            },
+            pushToast,
+        };
+    };
+    return template$3;
+};
+const ToastContainer = Component(_ToastContainer);
+
+var template$2 = "<div id=\"h\" class=\"f flex\"><div id=\"hl\" class=\"loader\"></div><div id=\"hlc\" class=\"hide fw\" style=\"text-align: left;\"><h1 id=\"ht\">WBlinds</h1><!-- <h4 class=\"hst\">Presets</h4> --><div id=\"preset-tiles\" class=\"pt fw flex wrap\"></div><h2 class=\"hst\">Devices</h2><div id=\"device-tiles\" class=\"dt fw flex wrap\"></div></div></div>";
+
+const DEFAULT_SETTINGS_DATA = {
+    gen: {
+        deviceName: "WBlinds",
+        mdnsName: "WBlinds",
+        emitSync: false,
+    },
+    hw: {
+        pStep: 19,
+        pDir: 18,
+        pEn: 13,
+        pSleep: 21,
+        pReset: 3,
+        pMs1: 1,
+        pMs2: 5,
+        pMs3: 17,
+        pHome: 4,
+        cLen: 1650,
+        cDia: 0.1,
+        axDia: 15,
+        stepsPerRev: 200,
+        res: 16,
+    },
+    mqtt: {
+        enabled: false,
+        host: "192.168.0.99",
+        port: 1833,
+        topic: "wblinds",
+        user: "user",
+    },
+};
+const DEFAULT_STATE_DATA = {
+    state: {
+        pos: 0,
+        tPos: 0,
+        accel: 0,
+        speed: 0,
+    },
+    settings: mergeDeep({}, DEFAULT_SETTINGS_DATA),
+    pendingState: mergeDeep({}, DEFAULT_SETTINGS_DATA),
+    devices: {},
+    presets: {},
+};
+class _State {
+    //   private _observers: Record<string, StateHandler[]>;
+    //   private _state: any;
+    constructor() {
+        this._observers = {};
+        this._state = mergeDeep({}, DEFAULT_STATE_DATA);
+        const t = {};
+        Object.keys(this._state).map((k) => {
+            t[k] = false;
+        });
+        this._loadedKeys = { ...t };
+        this._savingKeys = { ...t };
+    }
+    get(path) {
+        const spl = path.split(".");
+        let curr = this._state;
+        while (spl.length > 0) {
+            if (typeof curr !== "object")
+                return;
+            curr = curr[spl.shift()];
+        }
+        return curr;
+    }
+    set(path, val) {
+        const spl = path.split(".");
+        const last = spl.pop();
+        let curr = this._state;
+        while (spl.length > 0) {
+            if (typeof curr !== "object")
+                return;
+            curr = curr[spl.shift()];
+        }
+        curr[last] = val;
+    }
+    isLoaded(key) {
+        return this._loadedKeys[key];
+    }
+    setSaving(key, v) {
+        this._savingKeys[key] = v;
+    }
+    isSaving(key) {
+        return this._savingKeys[key];
+    }
+    /**
+     *
+     * @param key
+     * @param value
+     */
+    update(key, value) {
+        this._observers[key] = this._observers[key] || [];
+        const prev = this._state[key];
+        this._state[key] = mergeDeep({}, prev, pruneUndef(value));
+        this._loadedKeys[key] = true;
+        this._observers[key].forEach((h) => {
+            h({
+                value: { ...value },
+                prev,
+            });
+        });
+    }
+    observe(key, handler) {
+        this._observers[key] = this._observers[key] || [];
+        this._observers[key].push(handler);
+        if (this._loadedKeys[key]) {
+            handler({
+                value: mergeDeep({}, this._state[key]),
+                prev: undefined,
+            });
+        }
+    }
+}
+const State = new _State();
+
+var css_248z$3 = ".dt {\n\t/* margin: 0 10px 0 -10px; */\n\tjustify-content: space-between;\n}\n\n/* uncss:ignore */\n\n.pt>.sq {\n\theight: 50px;\n\twidth: auto;\n\tmin-width: 150px;\n}\n\n/* uncss:ignore */\n\n.pt>.sq>span {\n\tdisplay: none;\n}\n\n#hlc > h2 {\n\t-webkit-margin-after: 0.1em;\n\t        margin-block-end: 0.1em;\n\t-webkit-margin-before: 0.5em;\n\t        margin-block-start: 0.5em;\n\tfont-size: 16px;\n\tpadding-left: 5px;\n}";
+stynj(css_248z$3);
+
+const STATE = "state";
+const SETTINGS = "settings";
+const PENDING_STATE = "pendingState";
+const DEVICES = "devices";
+const PRESETS = "presets";
+const DEFAULT_ERROR = "Error encountered, check console";
+
+const DEVICE_TILE = "device";
+const PRESET_TILE = "preset";
+const _Home = function () {
+    let _loading = true;
+    let _tiles = [];
+    let _deviceClickHandlers = [];
+    let _currentDeviceName;
+    this.init = (elem) => {
+        // initially spinner is showing,
+        // rest is hidden in a div
+        const loaded = () => {
+            if (!_loading)
+                return;
+            const spinner = getElement("hl");
+            const content = getElement("hlc");
+            displayNone(spinner);
+            removeClass(content, "hide");
+            _loading = false;
+        };
+        const getAllTiles = (type) => {
+            const container = getElement(`${type}-tiles`);
+            return { container, tiles: container.querySelectorAll("div") };
+        };
+        const padTiles = (type) => {
+            const { container, tiles } = getAllTiles(type);
+            const w = container.clientWidth;
+            const perRow = Math.floor(w / 110);
+            let len = tiles.length;
+            while (len % perRow !== 0) {
+                const e = createDiv();
+                addClass(e, "tile", "sq", "em");
+                appendChild(container, e);
+                len++;
+            }
+        };
+        const handleTileClick = (type, data) => {
+            if (type === "device") {
+                _deviceClickHandlers.forEach((h) => h(data));
+            }
+        };
+        const updateTiles = (type, o) => {
+            const { container, tiles } = getAllTiles(type);
+            let cDeviceExists = false;
+            tiles.forEach((tile) => {
+                const { id } = tile;
+                if (!(id in o)) {
+                    // Existing tile, but doesn't exist in new device list.
+                    if (id === _currentDeviceName) {
+                        // Don't remove current device, even when device
+                        // list is updated with peers.
+                        cDeviceExists = true;
+                    }
+                    else {
+                        tile.remove();
+                    }
+                }
+                else {
+                    // Exists, remove from list so it isn't added again
+                    o[id] = undefined;
+                }
+            });
+            for (const [k, v] of Object.entries(o)) {
+                if (!v || (k === _currentDeviceName && cDeviceExists))
+                    continue;
+                const t = Tile({
+                    id: `tile-${k}`,
+                    name: v.name || k,
+                    ...v,
+                });
+                t.onClick((data) => handleTileClick(type, data));
+                _tiles.push(t);
+                appendChild(container, t.node);
+            }
+            padTiles(type);
+        };
+        nextTick(() => {
+            State.observe(PRESETS, ({ value, prev }) => {
+                debug("presets updated: ", value, prev);
+                loaded();
+                // TODO: define PresetRecord
+                updateTiles(PRESET_TILE, value);
+            });
+            State.observe(STATE, ({ value, prev }) => {
+                debug("state updated: ", value, prev);
+                _currentDeviceName = State.get("settings.gen.deviceName");
+                console.log("_currentDeviceName:", _currentDeviceName);
+                loaded();
+                // TODO: add mac address, etc. to window before sending from ESP
+                // for now just use 'c' to identify the current device
+                const gen = State.get("settings.gen");
+                const state = State.get("state");
+                debug("set tile: ", gen.deviceName, {
+                    ...gen,
+                    ...value,
+                    ...state,
+                });
+                updateTiles(DEVICE_TILE, {
+                    [gen.deviceName]: { ...gen, ...value, ...state },
+                });
+            });
+            State.observe(DEVICES, ({ value, prev }) => {
+                debug("devices updated: ", value, prev);
+                loaded();
+                updateTiles(DEVICE_TILE, value);
+            });
+        });
+        return {
+            onDeviceClick: (h) => {
+                _deviceClickHandlers.push(h);
+            },
+            destroy: () => {
+                _deviceClickHandlers = [];
+                _tiles.forEach((t) => t.destroy());
+                _tiles = [];
+            },
+        };
+    };
+    return template$2;
+};
+const Home = Component(_Home);
+
+var template$1 = "<div id=\"ps\" class=\"f fC\"><div id=\"sl\" class=\"loader\"></div><div id=\"slc\" class=\"hide fw\" style=\"text-align: left;\"><div id=\"slc-act\" class=\"fR fw hide\"><button id=\"s-can\" class=\"btn-c\">Cancel</button> <button id=\"s-save\" class=\"btn-s\">Save</button></div></div></div>";
+
+var css_248z$2 = "/* uncss:ignore */\n#stcc {\n    display: flex;\n}\n/* uncss:ignore */\n#stcc>span {\n    margin: auto;\n}\n/* uncss:ignore */\n#stcc>span:last-child {\n    margin-bottom: 70px;\n}\n/* uncss:ignore */\n#stcc>div {\n    justify-content: center;\n}\n/* uncss:ignore */\n#slc-act {\n    position: fixed;\n    bottom: 55px;\n    justify-content: space-evenly;\n    left: 0%;\n}\n";
+stynj(css_248z$2);
+
+var template = "<div class=\"f fC\"><button class=\"calib-btn\">Calibrate</button><div id=\"calib-c\" class=\"hide fR\"></div><button id=\"calib-x\" class=\"btn-t hide\">&lt; cancel</button></div>";
+
+var css_248z$1 = ".calib-btn {\n    margin-top: 40px;\n}\n\n#calib-c, #calib-x {\n    position: fixed;\n    left: 100%;\n    transition: 0.4s left ease-in-out;\n    top: 0;\n}\n\n#calib-c {\n    background: url(bg-dev.jpg), #000;\n    background-position: center;\n    background-size: cover;\n    overflow: hidden;\n}\n\n/* uncss:ignore */\n\n#calib-c>div {\n    width: 100vw;\n    height: 100vh;\n}\n\n/* uncss:ignore */\n\n#calib-c>div>h2 {\n    margin: 80px 30px 10px 30px;\n}\n\n/* uncss:ignore */\n\n#calib-c>div>p {\n    font-size: 13px;\n    margin: 5px 30px 10px 30px;\n}\n\n#calib-x {\n    margin: 10px;\n    width: 90px;\n    transition-delay: 0s;\n    transition-duration: 0.4s;\n}\n\n/* uncss:ignore */\n\n.cal-conc {\n    /* margin: auto; */\n    margin: 20px auto;\n    max-width: 300px;\n    display: flex;\n    flex-wrap: wrap;\n}";
+stynj(css_248z$1);
+
+// speed to clear steps on cancel
+const FLOW_SPEED = 0.4;
+const WIPE_SPEED = FLOW_SPEED / 2;
+const CALIBRATION_STEPS = [
+    {
+        t: "Find home position",
+        d: "Move to the fully open position then tap 'Done'. \nBe careful not to wind the cord too tight.",
+    },
+    {
+        t: "Find closed position",
+        d: "Move to the fully closed position then tap 'Done'",
+    },
+    {
+        o: true,
+        t: "Repeat",
+        d: "Alternate between open and closed, tap the corresponding button in between. Repeat as many times as you like. \n\nDue to the differences in how the cord may wrap around the axis, this may or may not be needed.",
+    },
+];
+const _Calibration = function () {
+    let _cancelBtn;
+    let _initBtn;
+    let _active = false;
+    let _saveHandlers = [];
+    let _container;
+    let _stepIndex = 0;
+    const _tc = getFromNamespace("tc");
+    const makeStep = (data, index, totalStepCount) => {
+        const div = createElement("div");
+        addClass(div, "fC");
+        const title = createElement("h2");
+        title.innerText = `${index + 1}. ${data.t}`;
+        appendChild(div, title);
+        const desc = createElement("p");
+        desc.innerText = `${data.d}`;
+        appendChild(div, desc);
+        const content = createElement("div");
+        setStyle(content, "height", "90%");
+        addClass(content, "fC");
+        appendChild(div, content);
+        const acts = createElement("div");
+        addClass(acts, "fR");
+        appendChild(div, acts);
+        const ctx = {
+            div,
+            c: content,
+        };
+        const goFwdOrBack = (isNext) => {
+            return async () => {
+                const preFn = isNext ? "preNext" : "preBack";
+                try {
+                    if (ctx[preFn])
+                        await ctx[preFn]();
+                }
+                catch (e) {
+                    _tc.pushToast(`"[Calib] Error in pre: ${e}"`);
+                }
+                _stepIndex += isNext ? 1 : -1;
+                setStyle(_container, "left", `-${innerWidth() * _stepIndex}px`);
+            };
+        };
+        if (index > 0) {
+            const backBtn = createElement("button");
+            backBtn.innerText = "Back";
+            appendChild(acts, backBtn);
+            backBtn.onclick = goFwdOrBack(false);
+        }
+        const nextBtn = createElement("button");
+        const lastStep = index === totalStepCount - 1;
+        const nextText = lastStep ? "Done" : "Next";
+        if (!data.o)
+            nextBtn.disabled = true;
+        ctx.showNext = (loading) => {
+            if (loading) {
+                nextBtn.innerText = "";
+                const loader = createElement("div");
+                addClass(loader, "loader");
+                appendChild(nextBtn, loader);
+            }
+            else {
+                // remove loading div and add back text
+                nextBtn.innerText = nextText;
+                nextBtn.disabled = false;
+            }
+        };
+        nextBtn.innerText = nextText;
+        nextBtn.onclick = goFwdOrBack(true);
+        appendChild(acts, nextBtn);
+        return ctx;
+    };
+    const makeControls = () => {
+        const div = createElement("div");
+        addClass(div, "cal-conc");
+        ["speed ▲", "move ▲", "speed ▼", "move ▼"].forEach((l) => {
+            const btn = createElement("button");
+            btn.innerText = l;
+            if (l.indexOf("up") > -1)
+                addClass(btn, "btn-up");
+            else
+                addClass(btn, "btn-down");
+            appendChild(div, btn);
+        });
+        return div;
+    };
+    const beginCalibFlow = () => {
+        CALIBRATION_STEPS.forEach((d, i) => {
+            const s = makeStep(d, i, CALIBRATION_STEPS.length);
+            // add step specific content
+            // right now, each step has the same controls
+            // but different actions on commit
+            const controls = makeControls();
+            appendChild(s.c, controls);
+            const btn = createElement("button");
+            btn.innerText = "Done";
+            appendChild(s.c, btn);
+            btn.onclick = async () => {
+                s.showNext(true);
+                // TODO: call API
+                setTimeout(() => {
+                    s.showNext();
+                }, 4000);
+            };
+            appendChild(_container, s.div);
+        });
+        setStyle(_container, "width", `${innerWidth() * CALIBRATION_STEPS.length}px`);
+        setStyle(_container, "left", "0");
+        setStyle(_cancelBtn, "left", "0");
+    };
+    this.init = (elem) => {
+        _container = querySelector("div", elem);
+        const btns = getElementsByTagName("button", elem);
+        _initBtn = btns.item(0);
+        _cancelBtn = btns.item(1);
+        _initBtn.onclick = () => {
+            if (_active)
+                return;
+            _active = true;
+            removeClass(_cancelBtn, "hide");
+            removeClass(_container, "hide");
+            nextTick(beginCalibFlow);
+        };
+        const TRANSITION_DUR = "transitionDuration";
+        const TRANSITION_DELAY = "transitionDelay";
+        _cancelBtn.onclick = () => {
+            // speed up animations
+            const wipeDuration = (_stepIndex + 1) * WIPE_SPEED;
+            setStyle(_container, TRANSITION_DUR, `${wipeDuration}s`);
+            // some fudge here for the delay to make
+            // the button move with the last step
+            setStyle(_cancelBtn, TRANSITION_DELAY, `${(_stepIndex - 0.5) * WIPE_SPEED}s`);
+            setStyle(_cancelBtn, TRANSITION_DUR, `${WIPE_SPEED}s`);
+            setStyle(_container, "left", `${innerWidth()}px`);
+            setStyle(_cancelBtn, "left", `${innerWidth()}px`);
+            setTimeout(() => {
+                _stepIndex = 0;
+                // reset styles
+                setStyle(_container, TRANSITION_DUR, `${FLOW_SPEED}s`);
+                setStyle(_cancelBtn, TRANSITION_DUR, `${FLOW_SPEED}s`);
+                setStyle(_cancelBtn, TRANSITION_DELAY, "0s");
+                // clear the container
+                _container.innerHTML = "";
+                // hide
+                addClass(_container, "hide");
+                _active = false;
+            }, wipeDuration * 1000);
+        };
+        return {
+            destroy: () => {
+                _saveHandlers = [];
+                elem.remove();
+            },
+            setDisabled: (v) => {
+                _initBtn.disabled = v;
+            },
+            onSave: (h) => {
+                _saveHandlers.push(h);
+            },
+        };
+    };
+    return template;
+};
+const Calibration = Component(_Calibration);
+
+const InputGroup_Wifi = 0;
+const InputGroup_Pins = 1;
+const InputGroup_Physical = 2;
+const InputGroup_MQTT = 3;
+const SETTING_INPUT_MAP = {
+    gen: {
+        ssid: {
+            t: InputType_String,
+            l: "SSID",
+            g: InputGroup_Wifi,
+        },
+        pass: {
+            t: InputType_Password,
+            l: "Password",
+            g: InputGroup_Wifi,
+        },
+        deviceName: {
+            t: InputType_String,
+            l: "Device name",
+            g: InputGroup_Wifi,
+        },
+        mdnsName: {
+            t: InputType_String,
+            l: "mDNS Name",
+            g: InputGroup_Wifi,
+        },
+        emitSync: {
+            t: InputType_Boolean,
+            l: "Emit sync data",
+        },
+    },
+    hw: {
+        axDia: {
+            l: "Axis diameter",
+            g: InputGroup_Physical,
+            u: "mm",
+        },
+        cDia: {
+            l: "Cord diameter",
+            g: InputGroup_Physical,
+            u: "mm",
+        },
+        cLen: {
+            l: "Cord length",
+            g: InputGroup_Physical,
+            u: "mm",
+        },
+        pDir: {
+            l: "Direction pin",
+            g: InputGroup_Pins,
+        },
+        pEn: {
+            l: "Enable pin",
+            g: InputGroup_Pins,
+        },
+        pHome: {
+            l: "Home switch pin",
+            g: InputGroup_Pins,
+        },
+        pMs1: {
+            l: "Microstep pin 1",
+            g: InputGroup_Pins,
+        },
+        pMs2: {
+            l: "Microstep pin 2",
+            g: InputGroup_Pins,
+        },
+        pMs3: {
+            l: "Microstep pin 3",
+            g: InputGroup_Pins,
+        },
+        pReset: {
+            l: "Reset pin",
+            g: InputGroup_Pins,
+        },
+        pSleep: {
+            l: "Sleep pin",
+            g: InputGroup_Pins,
+        },
+        pStep: {
+            l: "Step pin",
+            g: InputGroup_Pins,
+        },
+        stepsPerRev: {
+            l: "Steps/revolution",
+            g: InputGroup_Physical,
+        },
+        res: {
+            t: InputType_Enum,
+            l: "Resolution",
+            g: InputGroup_Physical,
+            o: [
+                { l: "1", v: 1 },
+                { l: "1/2", v: 2 },
+                { l: "1/4", v: 4 },
+                { l: "1/8", v: 8 },
+                { l: "1/16", v: 16 },
+            ],
+        },
+    },
+    mqtt: {
+        enabled: {
+            t: InputType_Boolean,
+            l: "Enabled",
+            g: InputGroup_MQTT,
+            cg: true,
+        },
+        host: {
+            t: InputType_String,
+            l: "Host",
+            g: InputGroup_MQTT,
+        },
+        port: {
+            l: "Port",
+            g: InputGroup_MQTT,
+        },
+        topic: {
+            t: InputType_String,
+            l: "Topic",
+            g: InputGroup_MQTT,
+        },
+        user: {
+            t: InputType_String,
+            l: "Username",
+            g: InputGroup_MQTT,
+        },
+        pass: {
+            t: InputType_Password,
+            l: "Password",
+            g: InputGroup_MQTT,
+        },
+    },
+};
+const _Settings = function () {
+    let _loading = true;
+    let _savingOrCanceling = false;
+    let _dirty = false;
+    let _saveHandlers = [];
+    let _cancelHandlers = [];
+    let _inputs = [];
+    const _inputsDirty = [];
+    const id = "stcc";
+    const tabs = ["General", "Hardware", "MQTT"];
+    const shortTabs = Object.keys(SETTING_INPUT_MAP); // = ["gen", "hw", "mqtt"]
+    let general;
+    let hardware;
+    let mqtt;
+    let _afterLoad;
+    let _calib;
+    this.init = (elem) => {
+        const selector = Selector({ items: tabs, queries: shortTabs });
+        const displayTab = (index) => {
+            // set query param
+            // pushToHistory(undefined, { tab: shortTabs[index] });
+            const div = getElement(id);
+            if (!div) {
+                _afterLoad = () => displayTab(index);
+                return;
+            }
+            let content;
+            if (index === 0) {
+                // General
+                content = general;
+            }
+            else if (index === 1) {
+                // Hardware
+                content = hardware;
+            }
+            else if (index === 2) {
+                // MQTT
+                content = mqtt;
+            }
+            div.innerHTML = "";
+            appendChild(div, content);
+        };
+        selector.onChange(displayTab);
+        const loaded = () => {
+            debug("settings loaded: ", State._state);
+            // Events that come from WS shouldn't overwrite existing data.
+            // TODO: add map of key -> inputs, check state of input and allow overwriting
+            // if the input hasn't been modified by the user. Would be pretty rare in normal
+            // household use.
+            if (!_loading && !_savingOrCanceling)
+                return;
+            // Still loading, event came in between save press and response.
+            if (!_loading && State.isSaving(SETTINGS))
+                return;
+            const spinner = getElement("sl");
+            const container = getElement("slc");
+            displayNone(spinner);
+            removeClass(container, "hide");
+            container.prepend(selector.node);
+            _loading = false;
+            _savingOrCanceling && _setDirty(false);
+            // make content container, add it
+            let div = getElement(id);
+            if (!div) {
+                div = createDiv();
+                div.id = id;
+                appendChild(container, div);
+            }
+            general = makeTab(shortTabs[0]);
+            _calib = Calibration();
+            appendChild(general, _calib.node);
+            hardware = makeTab(shortTabs[1]);
+            mqtt = makeTab(shortTabs[2]);
+            if (!_afterLoad)
+                return selector.setIndex(selector.index());
+            _afterLoad();
+            _afterLoad = undefined;
+        };
+        nextTick(() => {
+            State.observe(SETTINGS, ({ value, prev }) => {
+                debug("settings updated: ", value, prev);
+                loaded();
+            });
+        });
+        const _setDirty = (newState) => {
+            if (newState !== _dirty) {
+                _savingOrCanceling = false;
+                _dirty = newState;
+                if (_calib)
+                    _calib.setDisabled(_dirty);
+                const act = getElement("slc-act");
+                if (_dirty) {
+                    // show save
+                    getElement("s-save").onclick = () => {
+                        _savingOrCanceling = true;
+                        _saveHandlers.map((h) => h());
+                    };
+                    getElement("s-can").onclick = () => {
+                        _savingOrCanceling = true;
+                        _cancelHandlers.map((h) => h());
+                        loaded();
+                    };
+                    removeClass(act, "hide");
+                }
+                else {
+                    addClass(act, "hide");
+                }
+            }
+        };
+        const makeTab = (key) => {
+            const container = createElement("span");
+            const groupDivs = [];
+            const addToContainer = (groupNum, input) => {
+                if (groupNum == null) {
+                    return appendChild(container, input.node);
+                }
+                // first entry in group, create the entry
+                if (groupDivs[groupNum] == null) {
+                    const d = createDiv();
+                    addClass(d, "igroup");
+                    groupDivs[groupNum] = [d, []];
+                    appendChild(container, d);
+                }
+                // add to group divs input list
+                groupDivs[groupNum][1].push(input);
+                // add to group
+                appendChild(groupDivs[groupNum][0], input.node);
+            };
+            for (const k in SETTING_INPUT_MAP[key]) {
+                // group, controls group, label, type, enum options
+                const { g, cg, l, t = InputType_Number, o, u, } = SETTING_INPUT_MAP[key][k];
+                const stateKey = `${SETTINGS}.${key}.${k}`;
+                const pendingKey = `${PENDING_STATE}.${key}.${k}`;
+                const inp = Input({
+                    label: l,
+                    type: t,
+                    enumOpts: o,
+                    value: State.get(stateKey),
+                    unit: u,
+                });
+                addToContainer(g, inp);
+                const ind = _inputs.push(inp);
+                inp.onChange((v) => {
+                    if (cg) {
+                        _enableDisableGroup(v, inp, groupDivs[g][0], groupDivs[g][1]);
+                    }
+                    _inputsDirty[ind] = inp.isDirty();
+                    _setDirty(_inputsDirty.filter((d) => d === true).length > 0);
+                    State.set(pendingKey, v);
+                });
+            }
+            return container;
+        };
+        return {
+            destroy: () => {
+                // removeQh();
+                selector.destroy();
+                _inputs.forEach((t) => t.destroy());
+                _inputs = [];
+                _saveHandlers = [];
+                _cancelHandlers = [];
+            },
+            onCancel: (h) => {
+                _cancelHandlers.push(h);
+            },
+            onSave: (h) => {
+                _saveHandlers.push(h);
+            },
+        };
+    };
+    /**
+     * Set a group and it's inputs disabled or enabled based on state change
+     * @param value   - True = green/ON/enabled
+     * @param toggler - The input that triggered the state change
+     * @param groupDiv
+     * @param inputs
+     */
+    const _enableDisableGroup = (value, toggler, groupDiv, inputs) => {
+        const d = "disabled";
+        value ? removeClass(groupDiv, d) : addClass(groupDiv, d);
+        inputs.forEach((i) => {
+            if (toggler !== i)
+                i.setDisabled(!value);
+        });
+    };
+    return template$1;
+};
+const Settings = Component(_Settings);
+
+const HTTP_PUT = "PUT";
+const HTTP_GET = "GET";
+/**
+ * Begins with /
+ * Does not end with /
+ */
+const api = "http://192.168.1.17/api";
+/**
+ * Do fetch on some route of the API
+ * @param resource - The resource, without "/" prefix
+ * @param method - HTTP method
+ * @param [opts]
+ */
+const doFetch = (resource, method, opts) => {
+    return _doFetch(resource, method, opts);
+};
+const _doFetch = (resource, method, opts, attempt) => {
+    attempt = attempt || 0;
+    opts = opts || {};
+    method = method || HTTP_GET;
+    const body = isObject(opts.body) ? JSON.stringify(opts.body) : opts.body;
+    const headers = { ...(opts.headers || {}) };
+    if (body)
+        headers["content-type"] = "application/json";
+    const url = `${api}/${resource}`;
+    return fetch(url, {
+        body,
+        method,
+        headers,
+    }).then((res) => {
+        debug("got res: ", res);
+        if (!res.ok) {
+            attempt += 1;
+            if (attempt > 8 || res.status < 500) {
+                const e = new Error(`[${method}] ${url} failed (${res.status})`);
+                e.response = res;
+                throw e;
+            }
+            return wait(attempt * 5000).then(() => _doFetch(resource, method, opts, attempt));
+        }
+        return method === HTTP_GET ? res.json() : undefined;
+    });
+};
+
+/**
+ * The indices of OrderedEventFlags that are string values.
+ * Indicates the data should not be parsed to int.
+ */
+const EventFlagStringIndices = [4, 5, 22, 24];
+// TODO: Make these match the values in the web state
+// so that updating the state can be done without checking.
+// The strings can be anything (including minified)
+// but the order matters.
+// Also strip some of these out, once the event flags
+// that are sent from the cpp is defined.
+const OrderedEventFlags = [
+    "pos",
+    "tPos",
+    "speed",
+    "accel",
+    "deviceName",
+    "mdnsName",
+    "emitSyncData",
+    "pinStep",
+    "pinDir",
+    "pinEn",
+    "pinSleep",
+    "pinReset",
+    "pinMs1",
+    "pinMs2",
+    "pinMs3",
+    "pinHomeSw",
+    "cordLength",
+    "cordDiameter",
+    "axisDiameter",
+    "stepsPerRev",
+    "resolution",
+    "mqttEnabled",
+    "mqttHost",
+    "mqttPort",
+    "mqttTopic",
+    "moveUp",
+    "moveDown",
+    "moveStop",
+    "tick",
+];
+
+const makeWebsocket = (opts = {}) => {
+    let ws;
+    let _enabled = false;
+    let _reconnectAttempt = 0;
+    const { onMessage: oM, onDisconnect: oD, onConnect: oC, onError: oE } = opts;
+    const _hasOnError = !!oE;
+    const _hasOnConnect = !!oC;
+    const _hasOnMessage = !!oM;
+    const _hasOnDisconnect = !!oD;
+    const connect = () => {
+        ws = new WebSocket(`ws://${"192.168.1.17" }/ws`);
+        ws.onopen = (e) => {
+            debug("[ws] onOpen(): ", e);
+            _enabled = true;
+            _reconnectAttempt = 0;
+            if (_hasOnConnect)
+                oC(e, _reconnectAttempt);
+        };
+        ws.onclose = (e) => {
+            debug("[ws] onClose(): ", e);
+            _enabled = false;
+            if (_hasOnDisconnect)
+                oD(e, _reconnectAttempt);
+            setTimeout(connect, Math.min(5000 * ++_reconnectAttempt, 60000));
+        };
+        ws.onmessage = (e) => {
+            debug("[ws] onMessage(): ", e, e.data);
+            console.log("[ws] onMessage(): ", e, e.data);
+            const unpacked = unpackMessages(e.data);
+            console.log("[ws] onMessage() unpacked: ", unpacked);
+            if (_hasOnMessage) {
+                unpacked.forEach(oM);
+            }
+        };
+        ws.onerror = (e) => {
+            debug("[ws] onError(): ", e);
+            _enabled = false;
+            _hasOnError && oE(e, _reconnectAttempt);
+        };
+    };
+    connect();
+    /**
+     * Order matters for events, this is the expected data.
+     * If undefined, it becomes a 0 in the event flags mask.
+     * @param data
+     * @returns
+     */
+    const sortData = (ev, data) => {
+        if (ev === 0 /* State */) {
+            const d = data;
+            return [d.pos, d.tPos, d.speed, d.accel];
+        }
+        if (ev === 2 /* Calibration */) {
+            const d = data;
+            return [d.moveBy, d.stop];
+        }
+        return [];
+    };
+    const push = (ev, data) => {
+        debug("[ws] push(): ", ev, data);
+        if (_enabled) {
+            const s = packMessage(ev, data.mac, sortData(ev, data));
+            debug("[ws] push() str: ", s);
+            ws.send(s);
+        }
+    };
+    function packMessage(ev, mac, data) {
+        switch (ev) {
+            case 0 /* State */: {
+                const f = [];
+                let s = "";
+                for (const k in data) {
+                    const d = data[k];
+                    if (d != null) {
+                        s += `${d}/`;
+                        f.push(1);
+                    }
+                    else {
+                        f.push(0);
+                    }
+                }
+                debug("[packMessage] f: ", f);
+                const flags = parseInt(f.reverse().join(""), 2);
+                return `${mac}/${ev}/${flags}/${s}`;
+            }
+            default: {
+                const e = "Unexpected event type";
+                if (_hasOnError)
+                    oE(e, 0);
+                else
+                    console.error(e);
+            }
+        }
+    }
+    function unpackMessages(data) {
+        // TODO: convert string message to object
+        debug("unpackMessages: ", data);
+        if (data.endsWith("/"))
+            data = data.substr(0, data.length - 1);
+        const spl = data.split("/");
+        const mac = spl.shift();
+        parseInt(spl.shift());
+        const mask = parseInt(spl.shift());
+        // Check the message contents before unpacking.
+        // It should have the same number of data segments
+        // as bits flipped in the mask.
+        const bits = mask.toString(2).split("1").length - 1;
+        if (bits !== spl.length) {
+            if (_hasOnError)
+                oE("Event flags and data don't match", 0);
+        }
+        // for each event flag, add to corresponding event
+        const stateEvData = {};
+        const settingsEvData = {};
+        // Right now this loop handles any incoming event.
+        // In the future, may be better to drop the ordered flags list
+        // and use the event type & a switch.
+        let j = 1;
+        for (let i = 0, len = OrderedEventFlags.length; i < len && spl.length > 0; i++) {
+            if (j & mask) {
+                const k = OrderedEventFlags[i];
+                const v = spl.shift();
+                if (i < 4) {
+                    // All state updates are numbers
+                    stateEvData[k] = parseInt(v);
+                }
+                else {
+                    // Some settings are strings, most are numbers.
+                    // Some are also bools, but will be parsed as
+                    // ints and used as 0/1, just can't do strict
+                    // equivalence checks.
+                    settingsEvData[k] = i in EventFlagStringIndices ? v : parseInt(v);
+                }
+            }
+            j = j << 1;
+        }
+        const evs = [];
+        if (Object.keys(stateEvData).length > 0) {
+            evs.push({
+                type: 0 /* State */,
+                mac,
+                data: stateEvData,
+            });
+        }
+        if (Object.keys(settingsEvData).length > 0) {
+            evs.push({
+                type: 1 /* Setting */,
+                mac,
+                data: settingsEvData,
+            });
+        }
+        return evs;
+    }
+    return { ws, push };
+};
+
+const svg$2 = {
+    data: "M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z",
+    box: "0 0 576 512",
+    w: 22,
+};
+
+const svg$1 = {
+    data: "M256,8C119,8,8,119,8,256S119,504,256,504,504,393,504,256,393,8,256,8Zm92.49,313h0l-20,25a16,16,0,0,1-22.49,2.5h0l-67-49.72a40,40,0,0,1-15-31.23V112a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V256l58,42.5A16,16,0,0,1,348.49,321Z",
+    box: "0 0 512 512",
+    w: 20,
+};
+
+const svg = {
+    data: "M487.4 315.7l-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3L380.8 110c-17.9-15.4-38.5-27.3-60.8-35.1V25.8c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7V75c-22.2 7.9-42.8 19.8-60.8 35.1L88.7 85.5c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14L67.3 221c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zM256 336c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z",
+    box: "0 0 512 512",
+    w: 20,
+};
+
+const makeSvg = (d) => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("fill", "currentColor");
+    path.setAttribute("d", d.data);
+    svg.setAttribute("viewBox", d.box);
+    appendChild(svg, path);
+    //   addClass(svg as any, "ic-w");
+    svg.style.width = `${d.w}px`;
+    return svg;
+};
+const home = makeSvg(svg$2);
+const clock = makeSvg(svg$1);
+const cog = makeSvg(svg);
+
+var css_248z = "/* uncss:ignore */\n.ic-w {\n\twidth: 22px;\n}\n/* uncss:ignore */\n.ic {\n\theight: 16px;\n\twidth: 16px;\n}\n/* uncss:ignore */\n.ic-home {\n\tbackground: url(home.svg);\n}\n#bg {\n    background-image: url(bg-dev.jpg), linear-gradient(40deg, #1d0143 0, #293b7c, #300a52);\n}\n/* uncss:ignore */\n#bg > #_fr {\n    display: none;\n}\n.overlay {\n\tposition: fixed;\n\theight: 100%;\n\twidth: 100%;\n\ttop: 0;\n\tleft: 0;\n\tbackground-color: #333;\n\tfont-size: 24px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tz-index: 11;\n\topacity: 0.95;\n\ttransition: 0.7s;\n\tpointer-events: none;\n}\nbutton {\n\twidth: 110px;\n\theight: 45px;\n\tfont-size: 11px;\n\ttext-transform: uppercase;\n\tletter-spacing: 2.5px;\n\tmargin: 20px auto;\n\tfont-weight: 500;\n\tcolor: black;\n\tbackground: #f0f8ffcc;\n\tborder: 1px solid #cadae833;\n\tborder-radius: 45px;\n\tbox-shadow: 0px 8px 15px rgb(0 0 0 / 10%);\n\ttransition: all 0.3s ease 0s;\n\tcursor: pointer;\n\toutline: none;\n\tposition: relative;\n}\nbutton.btn-t {\n\tborder: none;\n\tbackground: none;\n\tcolor: white;\n}\n/* uncss:ignore */\nbutton:active:not(:disabled, .btn-t) {\n\tbackground-color: #2a637a;\n\tbox-shadow: 0px 15px 20px #2a637a71;\n\tcolor: #fff;\n}\n/* uncss:ignore */\nbutton:active.btn-s {\n\tbackground-color: #2EE59D;\n\tbox-shadow: 0px 15px 20px #2ee59c71;\n}\n/* uncss:ignore */\nbutton:active.btn-c {\n\tbackground: #ff5656;\n\tbox-shadow: 0px 15px 20px #ff565666;\n}\n/* uncss:ignore */\n@media (hover: hover) and (pointer: fine) {\n\tbutton:hover:not(:disabled, .btn-t) {\n\t\ttransform: translateY(-7px);\n\t\tbackground-color: #2a637a;\n\t\tbox-shadow: 0px 15px 20px #2a637a71;\n\t\tcolor: #fff;\n\t}\n\t/* uncss:ignore */\n\tbutton:hover.btn-s {\n\t\tbackground-color: #2EE59D;\n\t\tbox-shadow: 0px 15px 20px #2ee59c71;\n\t}\n\tbutton:hover.btn-c {\n\t\tbackground: #ff5656;\n\t\tbox-shadow: 0px 15px 20px #ff565666;\n\t}\n}\n/* uncss:ignore */\nbutton:disabled {\n\topacity: 50%;\n}\n/* uncss:ignore */\nbutton>div.loader {\n\ttransform: translate3d(0, -17px, 0);\n\tfont-size: 7px;\n}\n#app {\n\tdisplay: flex;\n\tflex-direction: column;\n\tpadding: 23px 23px 0 23px;\n\theight: calc(100% - (50px + 23px));\n\toverflow-y: scroll;\n}\n/* uncss:ignore */\nul {\n\tdisplay: flex;\n\tlist-style-type: none;\n\t-webkit-margin-before: 0em;\n\t        margin-block-start: 0em;\n\t-webkit-margin-after: 0em;\n\t        margin-block-end: 0em;\n\t-webkit-padding-start: 0px;\n\t        padding-inline-start: 0px;\n}\n/* uncss:ignore */\nli {\n\tdisplay: list-item;\n\ttext-align: -webkit-match-parent;\n\tcolor: rgba(255, 255, 255, 0.44);\n}\n/* uncss:ignore */\nli.s {\n\tcolor: #DB8B1D;\n}";
+stynj(css_248z);
+
+// Bottom nav bar buttons
+const labels = [
+    { t: "Home", i: home },
+    { t: "Routines", i: clock },
+    { t: "Settings", i: cog },
+];
+const s = State;
+const run = (ns) => {
+    console.log("onLoad(): ", ns);
+    // Hack to make favicon cacheable in Chrome
+    // add href after document load, replacing empty data url
+    getElement("favicon").href = "favicon.ico";
+    const body = querySelector("body");
+    const app = getElement("app");
+    let currentIndex = -1;
+    let currentTab;
+    ns.state = State;
+    // Toasts
+    const tc = ToastContainer();
+    ns.tc = tc;
+    appendChild(body, tc.node);
+    WINDOW.onerror = handleError;
+    WINDOW.onpopstate = (e) => {
+        handleRoute(pathname());
+        emitQueryChange();
+    };
+    // Websocket
+    const wsc = makeWebsocket({
+        onMessage(msg) {
+            debug("WS msg: ", msg);
+            if (msg.type === 1 /* Setting */) {
+                State.update(SETTINGS, {
+                    ...State.get(SETTINGS),
+                    ...msg.data,
+                });
+            }
+            if (msg.type === 0 /* State */) {
+                State.update(STATE, {
+                    ...State.get(STATE),
+                    ...msg.data,
+                });
+            }
+        },
+        onError(e, num) {
+            if (!num) {
+                tc.pushToast("Websocket disconnected!", true, false, 5000);
+            }
+        },
+        onConnect(e, num) {
+            debug("WS connect: ", e);
+            if (num) {
+                tc.pushToast("Websocket connected!");
+            }
+        },
+        onDisconnect(e) {
+            debug("WS disconnect: ", e);
+        },
+    });
+    // Nav
+    const nav = Nav({ labels });
+    appendChild(getElement("nav"), nav.node);
+    nav.onClick(handleTabChange);
+    const handleRoute = (path) => {
+        let i = labels.map((l) => l.t.toLowerCase()).indexOf(path.substr(1));
+        if (i < 0)
+            i = 0;
+        nav.setIndex(i);
+    };
+    handleRoute(pathname());
+    function handleTabChange(nextIndex) {
+        if (currentIndex === nextIndex)
+            return;
+        const newPath = nextIndex > 0 ? `/${labels[nextIndex].t.toLowerCase()}` : `/`;
+        currentIndex = nextIndex;
+        currentTab?.destroy?.();
+        currentTab?.node.remove();
+        // change app screen
+        switch (nextIndex) {
+            // Home
+            case 0: {
+                const t = Home();
+                pushToHistory(newPath, undefined, true);
+                t.onDeviceClick(handleDeviceClick);
+                // if (!State.isLoaded(STATE)) {
+                //   load(STATE);
+                // load("settings?type=gen", [], ["settings.gen"]).then(() => {
+                //   load(STATE);
+                //   load(PRESETS);
+                //   load(DEVICES);
+                // });
+                // }
+                currentTab = t;
+                break;
+            }
+            // Routines
+            case 1: {
+                pushToHistory(newPath, undefined, true);
+                currentTab = null;
+                break;
+            }
+            // Settings
+            case 2: {
+                const t = Settings();
+                pushToHistory(newPath, undefined, false);
+                t.onSave(saveSettings);
+                t.onCancel(cancelSettings);
+                currentTab = t;
+                if (!State.isLoaded(SETTINGS)) {
+                    load(SETTINGS, [PENDING_STATE, SETTINGS]);
+                }
+                break;
+            }
+        }
+        currentTab && appendChild(app, currentTab.node);
+    }
+    const stripPasswords = (data) => {
+        // remove wifi password
+        if (data?.gen?.pass) {
+            data.gen.pass = undefined;
+        }
+        // remove mqtt password
+        if (data?.mqtt?.pass) {
+            data.mqtt.pass = undefined;
+        }
+        return data;
+    };
+    function saveSettings() {
+        debug("saveSettings: ", State._state);
+        State.setSaving(SETTINGS, true);
+        debug("State._state.settings: ", State._state.settings);
+        debug("State._state.pendingState: ", State._state.pendingState);
+        const body = diffDeep(State._state.settings, State._state.pendingState);
+        debug("diffed: ", body);
+        doFetch(SETTINGS, HTTP_PUT, { body })
+            .then(() => {
+            State.setSaving(SETTINGS, false);
+            State.update(SETTINGS, stripPasswords(State._state.pendingState));
+            tc.pushToast("Settings saved");
+        })
+            .catch((e) => {
+            tc.pushToast("Failed to save settings");
+            throw e;
+        });
+    }
+    function cancelSettings() {
+        debug("cancelSettings: ", State._state);
+        State.update(PENDING_STATE, State._state.settings);
+    }
+    function handleDeviceClick(data) {
+        // Show device card
+        const card = Card(data);
+        appendChild(body, card.node);
+        card.onChange((e) => {
+            wsc.push(0 /* State */, e);
+        });
+        setTimeout(card.show);
+    }
+    function load(key, updates, sets = []) {
+        updates = updates || [key];
+        return doFetch(key)
+            .then((r) => {
+            updates.forEach((k) => State.update(k, r));
+            sets.forEach((k) => State.set(k, r));
+            return r;
+        })
+            .catch(handleError);
+    }
+    function handleError(err) {
+        const m = isObject(err)
+            ? (err?.message || DEFAULT_ERROR) + "\n" + err.stack
+            : err;
+        tc.pushToast(m, true);
+    }
+};
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// goog.exportSymbol("run", run);
+
+export { run, s };
+//# sourceMappingURL=app.js.map

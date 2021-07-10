@@ -78,11 +78,19 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       o: Record<string, DeviceRecord>
     ) => {
       const { container, tiles } = getAllTiles(type);
+      let cDeviceExists = false;
+
       tiles.forEach((tile) => {
         const { id } = tile;
-        if (!id.endsWith(_currentDeviceName) && !(id in o)) {
-          // Existing, but doesn't exist in devices
-          tile.remove();
+        if (!(id in o)) {
+          // Existing tile, but doesn't exist in new device list.
+          if (id === _currentDeviceName) {
+            // Don't remove current device, even when device
+            // list is updated with peers.
+            cDeviceExists = true;
+          } else {
+            tile.remove();
+          }
         } else {
           // Exists, remove from list so it isn't added again
           o[id] = undefined;
@@ -90,7 +98,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       });
 
       for (const [k, v] of Object.entries(o)) {
-        if (!v) continue;
+        if (!v || (k === _currentDeviceName && cDeviceExists)) continue;
         const t = Tile({
           id: `tile-${k}`,
           name: (v as any).name || k,
@@ -115,6 +123,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       State.observe(STATE, ({ value, prev }) => {
         debug("state updated: ", value, prev);
         _currentDeviceName = State.get("settings.gen.deviceName");
+        console.log("_currentDeviceName:", _currentDeviceName);
         loaded();
 
         // TODO: add mac address, etc. to window before sending from ESP

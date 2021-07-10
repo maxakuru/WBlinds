@@ -10,7 +10,7 @@
 }
 
 #calib-c {
-    background: url(https://github.com/maxakuru/WBlinds/blob/main/public/bg.jpg?raw=true), #000;
+    background: url(bg-__VERSION__.jpg), #000;
     background-position: center;
     background-size: cover;
     overflow: hidden;

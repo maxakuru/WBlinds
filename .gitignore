@@ -18,6 +18,7 @@ node_modules
 .env
 .env.dev
 src/Credentials.h
+**/*/*.priv.*
 
 # temporary
 data/*

@@ -1,13 +1,13 @@
 import { readFile } from "fs/promises";
 
-type InsertableTag = "html" | "body" | "head";
+export type InsertableTag = "html" | "body" | "head";
 export interface NodeHTMLDoc {
   insertAtEndOf(tag: InsertableTag, content: string): void;
   toString(): string;
   originalContent: string;
 }
 
-export default async function importHtml(
+export default async function manipHtml(
   filePath: string
 ): Promise<NodeHTMLDoc> {
   const originalContent = await readFile(filePath, { encoding: "utf-8" });

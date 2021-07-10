@@ -1,6 +1,7 @@
 import {
   NormalizedInputOptions,
   NormalizedOutputOptions,
+  OutputBundle,
   OutputOptions,
 } from "rollup";
 import path from "path";
@@ -139,7 +140,7 @@ export interface CompilerOptions {
    * Function that returns a templated file
    */
   templateFunction?: (
-    chunkNames: string[]
+    bundle: OutputBundle
   ) => ChunkDescriptor[] | Promise<ChunkDescriptor[]>;
   /**
    * Map from input file to other input files that will be loaded first.
@@ -224,7 +225,7 @@ export function getOptions(
   }
 
   if (pluginOptions.ignoreDynamicImports) {
-    overrides.externs ??= [];
+    overrides.externs = overrides.externs || [];
     overrides.externs.push(path.resolve(__dirname, "./import_externs.js"));
   }
 
