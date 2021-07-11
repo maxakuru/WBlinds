@@ -12,6 +12,7 @@ MotorA4988::MotorA4988() {
   this->stepsPerRev_ = state->getStepsPerRev();
   this->maxTurns_ = calculateMaxTurns((double)axisDiameter_mm_, cordDiameter_mm_, (double)cordLength_mm_);
   setResolution(state->getResolution());
+  if(state->isCalibrated()) setMaximumPosition(state->getMaxPosition());
 
   pinMode(state->getMs1Pin(), OUTPUT);
   pinMode(state->getMs2Pin(), OUTPUT);
@@ -56,6 +57,7 @@ bool MotorA4988::handleMoveEvt_(const WBlindsEvent& event) {
   interesting.moveBySteps_ = true;
 
   if (0 == (interesting.mask_ & event.flags_.mask_)) return false;
+  WLOG_I(TAG, "handle move event...");
 
   if (event.flags_.moveStop_) {
     this->stop(true);
@@ -77,6 +79,8 @@ bool MotorA4988::handleMoveEvt_(const WBlindsEvent& event) {
   if (event.data_ == nullptr || event.data_->calibData == nullptr) return false;
   if (event.flags_.moveBySteps_) {
     int currPos = this->stepper_->getCurrentPosition();
+    WLOG_D(TAG, "moveEvt calib data %i", event.data_->calibData->moveBySteps);
+
     int32_t newPos = currPos + event.data_->calibData->moveBySteps;
     WLOG_D(TAG, "moveEvt move from %i to: %i", currPos, newPos);
     this->moveTo(newPos);
@@ -90,7 +94,24 @@ void MotorA4988::handleEvent(const WBlindsEvent& event) {
   if (handleTick_(event)) return;
   if (handleMoveEvt_(event)) return;
 
+  WLOG_I(TAG, "event mask: %i", event.flags_.mask_);
+
   auto state = State::getInstance();
+  if (event.flags_.atHome_) {
+    WLOG_I(TAG, "handle at home event");
+    return this->setCurrentPositionAsHome();
+  }
+  if (event.flags_.atFullyClosed_) {
+    WLOG_I(TAG, "handle at closed event");
+    int cPos = stepper_->getCurrentPosition();
+    setMaximumPosition(cPos);
+    state->setMaxPosition(cPos);
+    state->setCalibrated(true);
+    state->setTargetPosition(100);
+    // return this->setCurrentPositionAsHome();
+    return;
+  }
+
   if (event.flags_.resolution_) {
     auto resolution = state->getResolution();
     if (this->stepper_->isMotorRunning()) {
@@ -161,7 +182,12 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
   flags.moveUp_ = true;
   flags.moveStop_ = true;
   flags.tick_ = true;
+
+  // calibration
+  flags.atHome_ = true;
+  flags.atFullyClosed_ = true;
   flags.moveBySteps_ = true;
+
   state->Attach(this, flags);
 
   isInit_ = true;
@@ -205,9 +231,9 @@ bool MotorA4988::isEnabled() {
  * @param resolution
  */
 void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
-  WLOG_I(TAG, "setResolution %i", resolution);
   auto state = State::getInstance();
-
+  WLOG_I(TAG, "setResolution %i %i", resolution, state->isCalibrated());
+  
   int ms1 = state->getMs1Pin();
   int ms2 = state->getMs2Pin();
   int ms3 = state->getMs3Pin();
@@ -227,7 +253,7 @@ void MotorA4988::setResolution(const stdBlinds::resolution_t resolution) {
     WLOG_D(TAG, "setResolution 3");
     digitalWrite(ms3, HIGH);
   }
-  setMaximumPosition_(resolution);
+  if (!state->isCalibrated()) setMaximumPosition_(resolution);
 
   if (stepper_ == nullptr) return; // on init
 
@@ -357,6 +383,7 @@ void MotorA4988::setCurrentPositionAsHome() {
   stepper_->forceStopAndNewPosition(0);
   auto state = State::getInstance();
   state->setPosition(this, 0);
+  state->setTargetPosition(0);
 }
 
 int8_t MotorA4988::moveToPercent(uint8_t pct) {
@@ -407,7 +434,7 @@ uint32_t MotorA4988::getMaximumPosition() {
  */
 void MotorA4988::setMaximumPosition(uint32_t pos) {
   this->maxPosition_ = pos;
-  this->stepsPerPct_ = pos / 100;
+  this->stepsPerPct_ = max(pos / 100, (uint32_t)1);
 }
 
 /**

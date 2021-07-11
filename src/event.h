@@ -10,15 +10,18 @@ public:
     }
     union {
         struct {
+            // state
             unsigned int pos_ : 1; // pct
             unsigned int targetPos_ : 1; // pct
             unsigned int speed_ : 1;
             unsigned int accel_ : 1;
 
+            // settings - gen
             unsigned int deviceName_ : 1;
             unsigned int mDnsName_ : 1;
             unsigned int emitSyncData_ : 1;
 
+            // settings - hardware
             unsigned int pinStep_ : 1;
             unsigned int pinDir_ : 1;
             unsigned int pinEn_ : 1;
@@ -34,6 +37,7 @@ public:
             unsigned int stepsPerRev_ : 1;
             unsigned int resolution_ : 1;
 
+            // settings - mqtt
             unsigned int mqttEnabled_ : 1;
             unsigned int mqttHost_ : 1;
             unsigned int mqttPort_ : 1;
@@ -41,14 +45,21 @@ public:
             unsigned int mqttUser_ : 1;
             unsigned int mqttPass_ : 1;
 
+            // movement
             unsigned int moveUp_ : 1;
             unsigned int moveDown_ : 1;
             unsigned int moveStop_ : 1;
+
+            // calibration/limits
+            unsigned int isCalibrated_ : 1;
+            unsigned int maxPosition_ : 1;
             unsigned int moveBySteps_ : 1;
+            unsigned int atHome_ : 1;
+            unsigned int atFullyClosed_ : 1;
 
             unsigned int tick_ : 1;
         };
-        unsigned long mask_;
+        uint64_t mask_;
     };
 };
 
@@ -105,6 +116,8 @@ struct SettingsDataGeneral {
     char* deviceName;
     char* mDnsName;
     bool emitSyncData;
+    bool isCalibrated;
+    int32_t maxPosition;
     int etag;
 };
 

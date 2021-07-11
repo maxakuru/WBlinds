@@ -17,6 +17,7 @@ export interface InputAPI {
   reset(): void;
   destroy(): void;
   isDirty(): boolean;
+  setValue(value: any): void;
 }
 
 export const InputType_Number = 0;
@@ -192,6 +193,10 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
       },
       isDirty: () => {
         return _firstValue !== _currentValue;
+      },
+      setValue: (value: any) => {
+        _currentValue = value;
+        _input.value = _currentValue;
       },
     };
   };

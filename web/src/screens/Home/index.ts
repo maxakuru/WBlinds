@@ -28,6 +28,7 @@ const _Home: ComponentFunction<HomeAPI> = function () {
   let _tiles: Tile[] = [];
   let _deviceClickHandlers: DeviceClickHandler[] = [];
   let _currentDeviceName: string;
+  let _rmObservers: (() => void)[] = [];
 
   this.init = (elem: HTMLElement) => {
     // initially spinner is showing,
@@ -112,15 +113,16 @@ const _Home: ComponentFunction<HomeAPI> = function () {
     };
 
     nextTick(() => {
-      State.observe(PRESETS, ({ value, prev }) => {
+      let rmObs = State.observe(PRESETS, ({ value, prev }) => {
         debug("presets updated: ", value, prev);
         loaded();
 
         // TODO: define PresetRecord
         updateTiles(PRESET_TILE, value as any);
       });
+      _rmObservers.push(rmObs);
 
-      State.observe(STATE, ({ value, prev }) => {
+      rmObs = State.observe(STATE, ({ value, prev }) => {
         debug("state updated: ", value, prev);
         _currentDeviceName = State.get("settings.gen.deviceName");
         console.log("_currentDeviceName:", _currentDeviceName);
@@ -139,13 +141,15 @@ const _Home: ComponentFunction<HomeAPI> = function () {
           [gen.deviceName]: { ...gen, ...value, ...state },
         });
       });
+      _rmObservers.push(rmObs);
 
-      State.observe(DEVICES, ({ value, prev }) => {
+      rmObs = State.observe(DEVICES, ({ value, prev }) => {
         debug("devices updated: ", value, prev);
         loaded();
 
         updateTiles(DEVICE_TILE, value);
       });
+      _rmObservers.push(rmObs);
     });
 
     return {
@@ -153,6 +157,8 @@ const _Home: ComponentFunction<HomeAPI> = function () {
         _deviceClickHandlers.push(h);
       },
       destroy: () => {
+        _rmObservers.forEach((rm) => rm());
+        _rmObservers = [];
         _deviceClickHandlers = [];
         _tiles.forEach((t) => t.destroy());
         _tiles = [];

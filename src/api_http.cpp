@@ -367,8 +367,8 @@ void BlindsHTTPAPI::init() {
    interestingFlags.accel_ = true;
    interestingFlags.speed_ = true;
 
-
-   State::getInstance()->Attach(this, interestingFlags);
+   auto state = State::getInstance();
+   state->Attach(this, interestingFlags);
 
    ws.onEvent(onEvent);
    server.addHandler(&ws);
@@ -491,6 +491,26 @@ void BlindsHTTPAPI::init() {
    settingsHandler->setMethod(HTTP_PUT);
    server.addHandler(settingsHandler);
 
+   /**
+    * Calibration endpoints
+    */
+   server.on("/api/calibration/home", HTTP_POST,
+      [this, state](AsyncWebServerRequest* request) {
+         EventFlags f;
+         f.atHome_ = true;
+         state->Notify(this, WBlindsEvent(f));
+
+         request->send(200);
+      }
+   );
+   server.on("/api/calibration/closed", HTTP_POST,
+      [this, state](AsyncWebServerRequest* request) {
+         EventFlags f;
+         f.atFullyClosed_ = true;
+         state->Notify(this, WBlindsEvent(f));
+         request->send(200);
+      }
+   );
 
 
    // server.onNotFound(handleNotFound);

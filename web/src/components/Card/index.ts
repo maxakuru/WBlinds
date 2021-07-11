@@ -84,10 +84,10 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
       const _handleChange = (val: number) => {
         // let accel, speed;
         if (input === INPUT_SPEED) {
-          notify({ speed: val, ...data });
+          notify({ ...data, speed: val });
         } else if (input === INPUT_ACCEL) {
           // accel = val;
-          notify({ accel: val, ...data });
+          notify({ ...data, accel: val });
         }
       };
       range.onChange(_handleChange);
@@ -100,8 +100,8 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
     makeRangeInput(INPUT_ACCEL);
 
     const slider = Slider({ value: pos });
-    slider.onChange((tPos) => {
-      notify({ tPos, ...data });
+    slider.onChange((val) => {
+      notify({ ...data, tPos: val });
     });
 
     appendChild(container, slider.node);

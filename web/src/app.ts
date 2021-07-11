@@ -146,6 +146,7 @@ export const run = (ns: WBlindsNamespace): void => {
 
         t.onSave(saveSettings);
         t.onCancel(cancelSettings);
+        t.onCalib(handleCalibrationEvent);
 
         currentTab = t;
         if (!State.isLoaded(SETTINGS)) {
@@ -204,6 +205,11 @@ export const run = (ns: WBlindsNamespace): void => {
       wsc.push(WSEventType.State, e);
     });
     setTimeout(card.show);
+  }
+
+  function handleCalibrationEvent(data: DeviceRecord) {
+    console.log("handleCalibrationEvent: ", WSEventType.Calibration, data);
+    wsc.push(WSEventType.Calibration, data);
   }
 
   function load(

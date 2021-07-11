@@ -19,6 +19,23 @@ char mqttPass[MAX_MQTT_PASS_LENGTH] = MQTT_PW;
 char mqttPass[MAX_MQTT_PASS_LENGTH] = "pass";
 #endif
 
+String uint64ToString(uint64_t input) {
+  String result = "";
+  uint8_t base = 10;
+
+  do {
+    char c = input % base;
+    input /= base;
+
+    if (c < 10)
+      c +='0';
+    else
+      c += 'A' - 10;
+    result = c + result;
+  } while (input);
+  return result;
+}
+
 State* State::getInstance() {
     if (!instance)
         instance = new State;
@@ -27,6 +44,12 @@ State* State::getInstance() {
 
 bool State::isDirty() {
     return isDirty_;
+}
+bool State::isSettingsDirty() {
+    return isSettingsDirty_;
+}
+bool State::isConfigDirty() {
+    return isConfigDirty_;
 }
 
 void State::Attach(WBlindsObserver* observer, EventFlags const& flags) {
@@ -47,6 +70,7 @@ void State::Detach(WBlindsObserver* observer) {
         observers_.end());
 }
 void State::Notify(WBlindsObserver* that, WBlindsEvent const& evt) {
+    // WLOG_D(TAG, "flags: %s", uint64ToString(evt.flags_.mask_).c_str());
     for (Observers::iterator i = observers_.begin(); i != observers_.end(); ++i) {
         if (0 != (i->flags_.mask_ & evt.flags_.mask_)) {
             i->observer_->handleEvent(evt);
@@ -77,6 +101,9 @@ String State::serializeSettings(setting_t settingType) {
         genObj["deviceName"] = settingsGeneral_.deviceName;
         genObj["mdnsName"] = settingsGeneral_.mDnsName;
         genObj["emitSync"] = settingsGeneral_.emitSyncData;
+        genObj["isCalibrated"] = settingsGeneral_.isCalibrated;
+        genObj["maxPosition"] = settingsGeneral_.maxPosition;
+
         if (settingType == setting_t::kGeneral) {
             serializeJson(genObj, output);
             return output;
@@ -334,6 +361,24 @@ stdBlinds::error_code_t State::setGeneralSettingsFromJSON_(const JsonObject& obj
             flags.emitSyncData_ = true;
             updateGeneralDirty_(settingsGeneral_.etag == prevEtag);
             settingsGeneral_.emitSyncData = b;
+        }
+    }
+    v = obj["isCalibrated"];
+    if (!v.isNull()) {
+        bool b = v.as<boolean>();
+        if (settingsGeneral_.isCalibrated != b) {
+            flags.isCalibrated_ = true;
+            updateGeneralDirty_(settingsGeneral_.etag == prevEtag);
+            settingsGeneral_.isCalibrated = b;
+        }
+    }
+    v = obj["maxPosition"];
+    if (!v.isNull()) {
+        int32_t vi = v.as<int>();
+        if (settingsGeneral_.maxPosition != vi) {
+            flags.maxPosition_ = true;
+            updateGeneralDirty_(settingsGeneral_.etag == prevEtag);
+            settingsGeneral_.maxPosition = vi;
         }
     }
     return stdBlinds::error_code_t::NoError;
@@ -810,6 +855,12 @@ char* State::getDeviceName() {
 char* State::getmDnsName() {
     return settingsGeneral_.mDnsName;
 }
+bool State::isCalibrated() {
+    return settingsGeneral_.isCalibrated;
+}
+int32_t State::getMaxPosition() {
+    return settingsGeneral_.maxPosition;
+}
 
 bool State::getMqttEnabled() {
     return settingsMQTT_.enabled;
@@ -902,6 +953,14 @@ void State::setDeviceName(char* v) {
 void State::setmDnsName(char* v) {
     updateGeneralDirty_(strcmp(settingsGeneral_.mDnsName, v) != 0);
     settingsGeneral_.mDnsName = v;
+}
+void State::setCalibrated(bool v) {
+    updateGeneralDirty_(settingsGeneral_.isCalibrated != v);
+    settingsGeneral_.isCalibrated = v;
+}
+void State::setMaxPosition(int32_t v) {
+    updateGeneralDirty_(settingsGeneral_.maxPosition != v);
+    settingsGeneral_.maxPosition = v;
 }
 
 void State::setMqttEnabled(bool v) {

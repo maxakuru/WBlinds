@@ -179,10 +179,11 @@ class _State {
     this._state[key] = mergeDeep({}, prev, pruneUndef(value));
     this._loadedKeys[key] = true;
     this._observers[key].forEach((h) => {
-      h({
-        value: { ...(value as U) },
-        prev,
-      });
+      h &&
+        h({
+          value: { ...(value as U) },
+          prev,
+        });
     });
   }
 
@@ -191,13 +192,16 @@ class _State {
     handler: StateHandler<U>
   ) {
     this._observers[key] = this._observers[key] || [];
-    this._observers[key].push(handler);
+    const index = this._observers[key].push(handler) - 1;
     if (this._loadedKeys[key]) {
       handler({
         value: mergeDeep({}, this._state[key] as U),
         prev: undefined,
       });
     }
+    return () => {
+      delete this._observers[key][index];
+    };
   }
 }
 

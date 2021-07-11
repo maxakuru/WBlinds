@@ -31,13 +31,14 @@ import {
   InputType_String,
   InputType_Password,
 } from "components/Input";
-import { Calibration } from "./Calibration";
+import { Calibration, CalibrationHandler } from "./Calibration";
 
 type ActHandler = () => void;
 export interface SettingsAPI {
   destroy(): void;
   onSave: (h: ActHandler) => void;
   onCancel: (h: ActHandler) => void;
+  onCalib(h: CalibrationHandler): void;
 }
 
 const InputGroup_Wifi = 0;
@@ -223,8 +224,9 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
   let general: HTMLElement;
   let hardware: HTMLElement;
   let mqtt: HTMLElement;
+  let _rmObserver: () => void;
   let _afterLoad: () => void;
-  let _calib: Calibration;
+  const _calib: Calibration = Calibration();
 
   this.init = (elem: HTMLElement) => {
     const selector = Selector({ items: tabs, queries: shortTabs });
@@ -280,7 +282,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       }
 
       general = makeTab(shortTabs[0] as "gen");
-      _calib = Calibration();
+      // _calib = Calibration();
       appendChild(general, _calib.node);
 
       hardware = makeTab(shortTabs[1] as "hw");
@@ -293,7 +295,7 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
     };
 
     nextTick(() => {
-      State.observe(SETTINGS, ({ value, prev }) => {
+      _rmObserver = State.observe(SETTINGS, ({ value, prev }) => {
         debug("settings updated: ", value, prev);
         loaded();
       });
@@ -384,6 +386,8 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       destroy: () => {
         // removeQh();
         selector.destroy();
+        _calib.destroy();
+        _rmObserver && _rmObserver();
         _inputs.forEach((t) => t.destroy());
         _inputs = [];
         _saveHandlers = [];
@@ -394,6 +398,9 @@ const _Settings: ComponentFunction<SettingsAPI> = function () {
       },
       onSave: (h) => {
         _saveHandlers.push(h);
+      },
+      onCalib: (h) => {
+        _calib.onCalib(h);
       },
     };
   };

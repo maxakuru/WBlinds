@@ -79,7 +79,18 @@ void StateSaveTask(void* parameter) {
   State* state_ = (State*)parameter;
   const TickType_t delay = STATE_SAVE_INTERVAL / portTICK_PERIOD_MS;
   while (true) {
-    if (state_->isDirty()) state_->save();
+    if (state_->isDirty()) {
+      ESP_LOGI(TAG, "state save task");
+      state_->save();
+    }
+    if (state_->isSettingsDirty()) {
+      ESP_LOGI(TAG, "settings save task");
+      state_->saveSettings();
+    }
+    if (state_->isConfigDirty()) {
+      ESP_LOGI(TAG, "config save task");
+      state_->saveConfig();
+    }
     vTaskDelay(delay);
   }
 }
@@ -171,11 +182,11 @@ void WBlinds::setup() {
 #if defined(ARDUINO_ARCH_ESP32)
 #define STACK_SIZE 1000
 #define PRIORITY configMAX_PRIORITIES
-  xTaskCreate(StateSaveTask, "StateSaveTask", STACK_SIZE, state, PRIORITY, NULL);
-  xTaskCreate(TickTask, "TickTask", STACK_SIZE, state, PRIORITY, NULL);
-  xTaskCreate(HeapTask, "HeapTask", STACK_SIZE, NULL, PRIORITY, NULL);
+  xTaskCreate(StateSaveTask, "StateSaveTask", 2500, state, configMAX_PRIORITIES, NULL);
+  xTaskCreate(TickTask, "TickTask", 2000, state, 1, NULL);
+  xTaskCreate(HeapTask, "HeapTask", 1000, NULL, 1, NULL);
 #ifndef DISABLE_OTA
-  xTaskCreate(OTATask, "OTATask", STACK_SIZE, NULL, PRIORITY, NULL);
+  xTaskCreate(OTATask, "OTATask", 2000, NULL, 1, NULL);
 #endif // DISABLE_OTA
 #endif // ARDUINO_ARCH_ESP32
 }

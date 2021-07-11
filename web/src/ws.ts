@@ -11,7 +11,7 @@ export const enum WSEventType {
 }
 
 interface WSEventBase {
-  mac: string;
+  mac: string; // "" means current device
 }
 export interface WSUpdateSettingsEvent extends WSEventBase {
   todo?: true;
@@ -83,6 +83,7 @@ export interface WSController {
   ws: WebSocket;
   // push(event: WSEventType.UpdateSettings, data: WSUpdateSettingsEvent): void;
   push(event: WSEventType.State, data: WSUpdateStateEvent): void;
+  push(event: WSEventType.Calibration, data: WSCalibrationEvent): void;
 }
 
 /**
@@ -193,6 +194,23 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
           }
         }
         debug("[packMessage] f: ", f);
+        const flags = parseInt(f.reverse().join(""), 2);
+        return `${mac}/${ev}/${flags}/${s}`;
+      }
+      case WSEventType.Calibration: {
+        const f: (0 | 1)[] = [];
+        console.log("data: ", data);
+        let s = "";
+        for (const k in data) {
+          const d = data[k];
+          if (d != null) {
+            s += `${d}/`;
+            f.push(1);
+          } else {
+            f.push(0);
+          }
+        }
+        debug("[packMessage] f2: ", f);
         const flags = parseInt(f.reverse().join(""), 2);
         return `${mac}/${ev}/${flags}/${s}`;
       }

@@ -9,12 +9,18 @@ extern char mqttTopic[MAX_MQTT_TOPIC_LENGTH];
 extern char mqttUser[MAX_MQTT_USER_LENGTH];
 extern char mqttPass[MAX_MQTT_PASS_LENGTH];
 
+String uint64ToString(uint64_t input);
+
 // TODO: move mediator off of state
 class State : WBlindsMediator {
 public:
     static State* instance;
     static State* getInstance();
     bool isDirty();
+    bool isSettingsDirty();
+    bool isConfigDirty();
+    bool isCalibrated();
+    void setCalibrated(bool);
     void save();
     void saveSettings();
     void saveConfig();
@@ -44,6 +50,8 @@ public:
     uint32_t getAccel();
     char* getDeviceName();
     char* getmDnsName();
+    int32_t getMaxPosition();
+
 
     bool getMqttEnabled();
     char* getMqttHost();
@@ -75,6 +83,8 @@ public:
     void setAccel(uint32_t v);
     void setDeviceName(char* v);
     void setmDnsName(char* v);
+    void setMaxPosition(int32_t);
+
 
     // mqtt
     void setMqttEnabled(bool v);
@@ -141,7 +151,9 @@ private:
         settingsGeneral_ = {
             deviceName: deviceName,
             mDnsName : mDnsName,
-            emitSyncData : true
+            emitSyncData : true,
+            isCalibrated: false,
+            maxPosition: 0
         };
         settingsHardware_ = {
             pinStep: DEFAULT_STEP_PIN,
