@@ -71,46 +71,46 @@ interface _State {
 }
 
 export const DEFAULT_SETTINGS_DATA = {
-  gen: {
-    deviceName: "WBlinds",
-    mdnsName: "WBlinds",
-    emitSync: false,
+  ["gen"]: {
+    ["deviceName"]: "WBlinds",
+    ["mdnsName"]: "WBlinds",
+    ["emitSync"]: false,
   },
-  hw: {
-    pStep: 19,
-    pDir: 18,
-    pEn: 13,
-    pSleep: 21,
-    pReset: 3,
-    pMs1: 1,
-    pMs2: 5,
-    pMs3: 17,
-    pHome: 4,
-    cLen: 1650,
-    cDia: 0.1,
-    axDia: 15,
-    stepsPerRev: 200,
-    res: 16,
+  ["hw"]: {
+    ["pStep"]: 19,
+    ["pDir"]: 18,
+    ["pEn"]: 13,
+    ["pSleep"]: 21,
+    ["pReset"]: 3,
+    ["pMs1"]: 1,
+    ["pMs2"]: 5,
+    ["pMs3"]: 17,
+    ["pHome"]: 4,
+    ["cLen"]: 1650,
+    ["cDia"]: 0.1,
+    ["axDia"]: 15,
+    ["stepsPerRev"]: 200,
+    ["res"]: 16,
   },
-  mqtt: {
-    enabled: false,
-    host: "192.168.0.99",
-    port: 1833,
-    topic: "wblinds",
-    user: "user",
+  ["mqtt"]: {
+    ["enabled"]: false,
+    ["host"]: "192.168.0.99",
+    ["port"]: 1833,
+    ["topic"]: "wblinds",
+    ["user"]: "user",
   },
 };
 const DEFAULT_STATE_DATA = {
-  state: {
-    pos: 0,
-    tPos: 0,
-    accel: 0,
-    speed: 0,
+  ["state"]: {
+    ["pos"]: 0,
+    ["tPos"]: 0,
+    ["accel"]: 0,
+    ["speed"]: 0,
   },
-  settings: mergeDeep({}, DEFAULT_SETTINGS_DATA),
-  pendingState: mergeDeep({}, DEFAULT_SETTINGS_DATA),
-  devices: {},
-  presets: {},
+  ["settings"]: mergeDeep({}, DEFAULT_SETTINGS_DATA),
+  ["pendingState"]: mergeDeep({}, DEFAULT_SETTINGS_DATA),
+  ["devices"]: {},
+  ["presets"]: {},
 };
 
 interface _State {

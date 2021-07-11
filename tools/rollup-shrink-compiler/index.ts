@@ -52,7 +52,6 @@ export default function (
     options: (options: InputOptions) => (inputOptions = options),
     outputOptions: (options: OutputOptions) => (outputOptions = options),
     buildStart(opts: NormalizedInputOptions) {
-      // console.log("buildStart: ", this, opts);
       context = this;
       sourceTransforms = createSourceTransforms(
         context,
@@ -66,7 +65,6 @@ export default function (
       if (!Array.isArray(inputOptions.input)) {
         // not array of inputs, don't create explicit chunks
       } else {
-        console.log("inputOptions.input: ", inputOptions.input);
         /**
          * options: {
          *   implicitLoadOrder?: {
@@ -112,13 +110,6 @@ export default function (
       chunk: RenderedChunk,
       nOutOpts: NormalizedOutputOptions
     ) => {
-      // console.log(
-      //   "[ClosureCompiler] render chunk: ",
-      //   chunk,
-      //   chunk.name,
-      //   outputOptions
-      // );
-
       const renderChunkTransforms = createChunkTransforms(
         context,
         options,
@@ -133,10 +124,7 @@ export default function (
         renderChunkTransforms
       );
 
-      // console.log("precompile out: ", preCompileOutput);
-
       const cFlags = getOptions(flags, options, outputOptions);
-      // console.log("precompiled src map: ", preCompileOutput.map);
       const out = await compiler(
         {
           code: preCompileOutput.code,
@@ -148,15 +136,12 @@ export default function (
         cFlags
       );
 
-      // console.log("[Compiler] out: ", out);
-
       const postCompiled = await postCompilation(
         out.code,
         chunk,
         renderChunkTransforms
       );
 
-      // console.log("[Compiler] postCompiled: ", postCompiled);
       return postCompiled;
     },
     generateBundle: async function (
@@ -164,7 +149,6 @@ export default function (
       bundle: OutputBundle,
       isWrite: boolean
     ) {
-      // console.log("generate bundle: ", bundle);
       if (!options.templateFunction) return null;
 
       let outs: any[];

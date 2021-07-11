@@ -80,89 +80,89 @@ const SETTING_INPUT_MAP: Record<
 > &
   Record<"hw", Record<keyof SettingsData["hw"], SettingsInputEntry>> &
   Record<"mqtt", Record<keyof SettingsData["mqtt"], SettingsInputEntry>> = {
-  gen: {
-    ssid: {
+  ["gen"]: {
+    ["ssid"]: {
       t: InputType_String,
       l: "SSID",
       g: InputGroup_Wifi,
     },
-    pass: {
+    ["pass"]: {
       t: InputType_Password,
       l: "Password",
       g: InputGroup_Wifi,
     },
-    deviceName: {
+    ["deviceName"]: {
       t: InputType_String,
       l: "Device name",
       g: InputGroup_Wifi,
     },
-    mdnsName: {
+    ["mdnsName"]: {
       t: InputType_String,
       l: "mDNS Name",
       g: InputGroup_Wifi,
     },
-    emitSync: {
+    ["emitSync"]: {
       t: InputType_Boolean,
       l: "Emit sync data",
     },
   },
-  hw: {
-    axDia: {
+  ["hw"]: {
+    ["axDia"]: {
       l: "Axis diameter",
       g: InputGroup_Physical,
       u: "mm",
     },
-    cDia: {
+    ["cDia"]: {
       l: "Cord diameter",
       g: InputGroup_Physical,
       u: "mm",
     },
-    cLen: {
+    ["cLen"]: {
       l: "Cord length",
       g: InputGroup_Physical,
       u: "mm",
     },
-    pDir: {
+    ["pDir"]: {
       l: "Direction pin",
       g: InputGroup_Pins,
     },
-    pEn: {
+    ["pEn"]: {
       l: "Enable pin",
       g: InputGroup_Pins,
     },
-    pHome: {
+    ["pHome"]: {
       l: "Home switch pin",
       g: InputGroup_Pins,
     },
-    pMs1: {
+    ["pMs1"]: {
       l: "Microstep pin 1",
       g: InputGroup_Pins,
     },
-    pMs2: {
+    ["pMs2"]: {
       l: "Microstep pin 2",
       g: InputGroup_Pins,
     },
-    pMs3: {
+    ["pMs3"]: {
       l: "Microstep pin 3",
       g: InputGroup_Pins,
     },
-    pReset: {
+    ["pReset"]: {
       l: "Reset pin",
       g: InputGroup_Pins,
     },
-    pSleep: {
+    ["pSleep"]: {
       l: "Sleep pin",
       g: InputGroup_Pins,
     },
-    pStep: {
+    ["pStep"]: {
       l: "Step pin",
       g: InputGroup_Pins,
     },
-    stepsPerRev: {
+    ["stepsPerRev"]: {
       l: "Steps/revolution",
       g: InputGroup_Physical,
     },
-    res: {
+    ["res"]: {
       t: InputType_Enum,
       l: "Resolution",
       g: InputGroup_Physical,
@@ -175,33 +175,33 @@ const SETTING_INPUT_MAP: Record<
       ],
     },
   },
-  mqtt: {
-    enabled: {
+  ["mqtt"]: {
+    ["enabled"]: {
       t: InputType_Boolean,
       l: "Enabled",
       g: InputGroup_MQTT,
       cg: true,
     },
-    host: {
+    ["host"]: {
       t: InputType_String,
       l: "Host",
       g: InputGroup_MQTT,
     },
-    port: {
+    ["port"]: {
       l: "Port",
       g: InputGroup_MQTT,
     },
-    topic: {
+    ["topic"]: {
       t: InputType_String,
       l: "Topic",
       g: InputGroup_MQTT,
     },
-    user: {
+    ["user"]: {
       t: InputType_String,
       l: "Username",
       g: InputGroup_MQTT,
     },
-    pass: {
+    ["pass"]: {
       t: InputType_Password,
       l: "Password",
       g: InputGroup_MQTT,

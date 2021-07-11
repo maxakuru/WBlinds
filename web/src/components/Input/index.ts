@@ -5,6 +5,7 @@ import {
   addClass,
   appendChild,
   createElement,
+  debug,
   isNullish,
   querySelector,
   toggleClass,
@@ -88,6 +89,19 @@ const _Input: ComponentFunction<InputAPI, InputProps> = function ({
   let _onChangeHandlers: ChangeHandler[] = [];
 
   const setup = (elem: HTMLElement) => {
+    debug(
+      "input data: ",
+      label,
+      type,
+      enumOpts,
+      placeholder,
+      value,
+      unit,
+      embed,
+      prevDefault,
+      min,
+      max
+    );
     elem.innerHTML = "";
     if (embed) {
       addClass(elem, "in");

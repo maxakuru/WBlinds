@@ -29,17 +29,18 @@ import { home, cog, clock } from "./assets";
 
 import "./app.css";
 
-// Bottom nav bar buttons
-const labels = [
-  { t: "Home", i: home },
-  { t: "Routines", i: clock },
-  { t: "Settings", i: cog },
-];
-
+/** @const */
 export const s = State;
 
+/** @const */
 export const run = (ns: WBlindsNamespace): void => {
-  console.log("onLoad(): ", ns);
+  // Bottom nav bar buttons
+  const labels = [
+    { t: "Home", i: home },
+    { t: "Routines", i: clock },
+    { t: "Settings", i: cog },
+  ];
+
   mock.init();
   // Hack to make favicon cacheable in Chrome
   // add href after document load, replacing empty data url
@@ -162,12 +163,12 @@ export const run = (ns: WBlindsNamespace): void => {
     data: Partial<SettingsData>
   ): Partial<SettingsData> => {
     // remove wifi password
-    if (data?.gen?.pass) {
-      data.gen.pass = undefined;
+    if (data?.["gen"]?.["pass"]) {
+      data["gen"]["pass"] = undefined;
     }
     // remove mqtt password
-    if (data?.mqtt?.pass) {
-      data.mqtt.pass = undefined;
+    if (data?.["mqtt"]?.["pass"]) {
+      data["mqtt"]["pass"] = undefined;
     }
     return data;
   };
@@ -208,7 +209,6 @@ export const run = (ns: WBlindsNamespace): void => {
   }
 
   function handleCalibrationEvent(data: DeviceRecord) {
-    console.log("handleCalibrationEvent: ", WSEventType.Calibration, data);
     wsc.push(WSEventType.Calibration, data);
   }
 

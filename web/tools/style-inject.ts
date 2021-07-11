@@ -1,4 +1,4 @@
-window.stynj = function inject(css: string, ref: any = {}): void {
+window["sty"] = function inject(css: string, ref: any = {}): void {
   if (!css || typeof document === "undefined") {
     return;
   }

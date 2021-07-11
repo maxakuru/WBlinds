@@ -24,6 +24,6 @@ export const initNamespace = (w: Window): WBlindsNamespace => {
   // debug("injecting namespace: ", inject);
   // const ns = (w.wblinds = inject);
 
-  const ns = (w.wblinds = w.wblinds || ({} as any));
+  const ns = (w["wblinds"] = w["wblinds"] || ({} as any));
   return ns;
 };

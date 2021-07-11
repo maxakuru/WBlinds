@@ -34,9 +34,9 @@ const INPUT_LIMIT_MAP = [
 ];
 
 const _Card: ComponentFunction<CardAPI, CardProps> = function ({
-  pos,
-  accel,
-  speed,
+  ["pos"]: pos,
+  ["accel"]: accel,
+  ["speed"]: speed,
   ...data
 }: CardProps) {
   let _onChangeHandlers: OnChangeHandler[] = [];
@@ -60,6 +60,8 @@ const _Card: ComponentFunction<CardAPI, CardProps> = function ({
 
     const makeRangeInput = (input: INPUT) => {
       const value = input === INPUT_SPEED ? speed : accel;
+      debug("input value: ", input, value);
+
       const range = Input({
         type: InputType_Range,
         label: INPUT_LABEL_MAP[input],

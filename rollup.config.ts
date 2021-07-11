@@ -65,7 +65,7 @@ plugins.push(
     config: true,
     inject: (cssVariableName, id) => {
       // global added to window via templateFunction
-      return `stynj(${cssVariableName})`;
+      return `sty(${cssVariableName})`;
     },
   }),
   svg()
@@ -76,7 +76,7 @@ if (!dev) {
     compiler({
       language_in: "ECMASCRIPT_NEXT",
       language_out: "ECMASCRIPT_2020",
-      compilation_level: "SIMPLE",
+      compilation_level: "ADVANCED",
       // assume_function_wrapper: true,
       // allow_dynamic_import: true,
       // dynamic_import_alias: "import",
@@ -186,7 +186,6 @@ function devPlugin(): Plugin {
     options: (options: InputOptions) => (inputOptions = options),
     buildStart: async function () {
       // if dev files don't exit, add them
-      console.log("in dev plugin");
       await copyDevFile("./public/bg.jpg");
 
       // add some other stuff to watch

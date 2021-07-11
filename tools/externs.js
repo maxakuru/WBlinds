@@ -6,6 +6,20 @@
 
 // const DEFAULT_SETTINGS_DATA = {};
 
-const stynj = {};
+const sty = {};
+
+/** @const */
+var wblinds = {};
+wblinds.inj = {};
+wblinds.inj.ip = "";
+wblinds.inj.mac = "";
+wblinds.inj.deviceName = "";
+wblinds.inj.when = "";
+
+// const run = {};
+
+// const s = {};
+
+// const DEFAULT_SETTINGS_DATA = {};
 
 // const run = {};

@@ -127,11 +127,7 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
 
     ws.onmessage = (e: MessageEvent<any>) => {
       debug("[ws] onMessage(): ", e, e.data);
-      console.log("[ws] onMessage(): ", e, e.data);
-
       const unpacked = unpackMessages(e.data);
-      console.log("[ws] onMessage() unpacked: ", unpacked);
-
       if (_hasOnMessage) {
         unpacked.forEach(oM);
       }
@@ -199,7 +195,7 @@ export const makeWebsocket = (opts: WSOptions = {}): WSController => {
       }
       case WSEventType.Calibration: {
         const f: (0 | 1)[] = [];
-        console.log("data: ", data);
+        debug("data: ", data);
         let s = "";
         for (const k in data) {
           const d = data[k];

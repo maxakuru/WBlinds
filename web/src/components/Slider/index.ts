@@ -47,13 +47,11 @@ const _Slider: ComponentFunction<SliderAPI, SliderProps> = function ({
 
     slider.oninput = () => {
       const val = parse(slider.value);
-      console.log("slider on input: ", val);
       setGradientStyle(slider, val, min, max, CLOSED_COLOR, OPEN_COLOR);
       // _onChangeHandlers.forEach((h) => h(val));
     };
     slider.onchange = () => {
       const val = parse(slider.value);
-      console.log("slider on change: ", val);
       _onChangeHandlers.forEach((h) => h(val));
     };
     slider.value = `${value}`;

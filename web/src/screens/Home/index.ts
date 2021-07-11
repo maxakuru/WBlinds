@@ -125,7 +125,6 @@ const _Home: ComponentFunction<HomeAPI> = function () {
       rmObs = State.observe(STATE, ({ value, prev }) => {
         debug("state updated: ", value, prev);
         _currentDeviceName = State.get("settings.gen.deviceName");
-        console.log("_currentDeviceName:", _currentDeviceName);
         loaded();
 
         // TODO: add mac address, etc. to window before sending from ESP
