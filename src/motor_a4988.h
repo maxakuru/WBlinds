@@ -52,6 +52,7 @@ private:
   bool isInit_;
   bool isAsleep_;
   bool isEnabled_;
+  bool justMoved_; // flag set after move completes, to clean up position pct
   uint32_t cordLength_mm_;
   double cordDiameter_mm_;
   uint32_t axisDiameter_mm_;

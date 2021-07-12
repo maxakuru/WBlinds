@@ -71,7 +71,7 @@ const uint16_t TICK_INTERVAL = 1000; // ms
 const uint16_t HEAP_INTERVAL = 10000; // ms
 // OTA Update config
 #ifndef DISABLE_OTA
-const uint16_t OTA_CHECK_INTERVAL = 10000; // ms
+const uint16_t OTA_CHECK_INTERVAL = 5000; // ms
 #endif // DISABLE_OTA
 
 #if defined(ARDUINO_ARCH_ESP32)

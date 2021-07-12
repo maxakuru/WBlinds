@@ -1,12 +1,12 @@
 /* uncss:ignore */
 
-html {
+/* html * {
 	touch-action: manipulation;
-}
+} */
 
 /* uncss:ignore */
 
-html>* {
+html * {
 	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
 }
 

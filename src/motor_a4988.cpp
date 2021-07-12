@@ -35,7 +35,7 @@ MotorA4988::MotorA4988() {
 
 bool MotorA4988::handleTick_(const WBlindsEvent& event) {
   if (!event.flags_.tick_) return false;
-  if (!stepper_->isMotorRunning()) return true;
+  if (!stepper_->isMotorRunning() && !justMoved_) return true;
 
   auto state = State::getInstance();
   // convert steps to pct
@@ -44,6 +44,12 @@ bool MotorA4988::handleTick_(const WBlindsEvent& event) {
   if (cPos != pct) {
     WLOG_D(TAG, "set current pos: %i", pct);
     state->setPosition(this, pct);
+  }
+
+  if(stepper_->isMotorRunning() && !justMoved_) {
+    justMoved_ = true;
+  } else {
+    justMoved_ = false;
   }
   return true;
 }
@@ -163,8 +169,11 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
 
   stepper_->setDirectionPin(state->getDirectionPin());
   stepper_->setEnablePin(state->getEnablePin());
-  stepper_->disableOutputs();
-  stepper_->setAutoEnable(true);
+  // stepper_->disableOutputs();
+  stepper_->enableOutputs();
+  this->invertDirection();
+  // stepper_->setAutoEnable(true);
+  // stepper_->setDelayToDisable(5000);
 
   // restore state
   int steps = percentToSteps(state->getPosition(), stepsPerPct_, maxPosition_);
