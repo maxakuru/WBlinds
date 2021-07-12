@@ -10,8 +10,6 @@ export function removeClass(elem: HTMLElement, ...tokens: string[]): void {
 
 export const toggleClass = (elem: HTMLElement, token: string): void => {
   DomTokenProto.toggle.call(elem.classList, token);
-
-  // elem.classList.toggle.call(elem, token);
 };
 
 export const nextTick = setTimeout;

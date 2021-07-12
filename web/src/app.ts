@@ -120,14 +120,6 @@ export const run = (ns: WBlindsNamespace): void => {
         const t = Home();
         pushToHistory(newPath, undefined, true);
         t.onDeviceClick(handleDeviceClick);
-        // if (!State.isLoaded(STATE)) {
-        //   load(STATE);
-        // load("settings?type=gen", [], ["settings.gen"]).then(() => {
-        //   load(STATE);
-        //   load(PRESETS);
-        //   load(DEVICES);
-        // });
-        // }
         currentTab = t;
         break;
       }
@@ -135,7 +127,6 @@ export const run = (ns: WBlindsNamespace): void => {
       // Routines
       case 1: {
         pushToHistory(newPath, undefined, true);
-
         currentTab = null;
         break;
       }
@@ -176,11 +167,7 @@ export const run = (ns: WBlindsNamespace): void => {
   function saveSettings() {
     debug("saveSettings: ", State._state);
     State.setSaving(SETTINGS, true);
-    debug("State._state.settings: ", State._state.settings);
-    debug("State._state.pendingState: ", State._state.pendingState);
-
     const body = diffDeep(State._state.settings, State._state.pendingState);
-    debug("diffed: ", body);
     doFetch(SETTINGS, HTTP_PUT, { body })
       .then(() => {
         State.setSaving(SETTINGS, false);
@@ -194,7 +181,6 @@ export const run = (ns: WBlindsNamespace): void => {
   }
 
   function cancelSettings() {
-    debug("cancelSettings: ", State._state);
     State.update(PENDING_STATE, State._state.settings);
   }
 
@@ -237,7 +223,3 @@ export const run = (ns: WBlindsNamespace): void => {
     tc.pushToast(m as string, true);
   }
 };
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// goog.exportSymbol("run", run);

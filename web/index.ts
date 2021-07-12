@@ -4,7 +4,8 @@ import "./index.css";
 const ns = initNamespace(window);
 window.onload = () => {
   // #_fr shows a mock screen in css until app.js loads
-  // TODO: adjust this path to include version in rollup plugin chunk tranformer
+  // NOTE: most places where ["squareBrackets"] are used instead
+  // of dot notation is for closure compiler to not mangle the name
   import(`./src/app.js`).then((m) => {
     // inject server rendered data into state
     const k = "settings.gen";
