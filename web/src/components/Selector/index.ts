@@ -51,7 +51,7 @@ const _Selector: ComponentFunction<SelectorAPI, SelectorProps> = function ({
     const removeQh = onQueryChange(handleQueryChange);
 
     const _onClick = (index: number) => {
-      queries[index] && pushToHistory(undefined, { tab: queries[index] });
+      queries[index] && pushToHistory(undefined, { ["tab"]: queries[index] });
       _onChange(index);
     };
 

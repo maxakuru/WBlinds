@@ -128,7 +128,7 @@ I've created PCBs that fit the components, but am still tweaking it -- the desig
 6. On first boot an access point will be started, connect to it:
     * SSID: `WBlinds-XXXXXX`
     * Default password: `Wbl1nds-1337`
-7. After connecting, a webpage should open to configure settings. If not, go to http://4.3.2.1/settings?type=gen
+7. After connecting, a webpage should open to configure settings. If not, go to http://4.3.2.1/settings?tab=gen
 8. Configure SSID, password, pins, etc. and tap "SAVE"
 9. You will be disconnected from the AP. Find the IP address of the device on your network and enter it in your browser.
 > Steps 3-5 assume you have PlatformIO, Node.js, and Yarn installed. You can also flash without Node/Yarn by using the [PlatformIO VSCode Plugin](#tools). You can also use the [scripts](#scripts) to do other stuff.
