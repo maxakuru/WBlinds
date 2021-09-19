@@ -167,11 +167,12 @@ export const run = (ns: WBlindsNamespace): void => {
   function saveSettings() {
     debug("saveSettings: ", State._state);
     State.setSaving(SETTINGS, true);
-    const body = diffDeep(State._state.settings, State._state.pendingState);
+
+    const body = diffDeep(State.get("settings"), State.get("pendingState"));
     doFetch(SETTINGS, HTTP_PUT, { body })
       .then(() => {
         State.setSaving(SETTINGS, false);
-        State.update(SETTINGS, stripPasswords(State._state.pendingState));
+        State.update(SETTINGS, stripPasswords(State.get("pendingState")));
         tc.pushToast("Settings saved");
       })
       .catch((e) => {
@@ -181,7 +182,7 @@ export const run = (ns: WBlindsNamespace): void => {
   }
 
   function cancelSettings() {
-    State.update(PENDING_STATE, State._state.settings);
+    State.update(PENDING_STATE, State.get("settings"));
   }
 
   function handleDeviceClick(data: DeviceRecord) {
