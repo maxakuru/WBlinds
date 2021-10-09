@@ -52,14 +52,14 @@ WBLINDS_GLOBAL char VERSION[] _INIT(TOSTRING(W_VERSION));
 #define DEFAULT_SSID "WBlinds"
 
 // Pin config defaults
-#define DEFAULT_DIR_PIN 18
-#define DEFAULT_STEP_PIN 19
-#define DEFAULT_SLP_PIN 21
+#define DEFAULT_DIR_PIN 17
+#define DEFAULT_STEP_PIN 5
+#define DEFAULT_SLP_PIN 18
 #define DEFAULT_EN_PIN 23
-#define DEFAULT_RST_PIN 3
+#define DEFAULT_RST_PIN 19
 #define DEFAULT_MS1_PIN 1
-#define DEFAULT_MS2_PIN 5
-#define DEFAULT_MS3_PIN 17
+#define DEFAULT_MS2_PIN 3
+#define DEFAULT_MS3_PIN 21
 #define DEFAULT_HOME_SWITCH_PIN 4 // microswitch pin for homing
 
 // Dimensions

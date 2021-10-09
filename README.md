@@ -1,4 +1,4 @@
-<img src="./etc/logo.png" alt="logo" width="400">
+<img src="./images/logo.png" alt="logo" width="400">
 
 ![License](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
 ![Release](https://img.shields.io/static/v1?label=Release&message=WIP&color=blue&style=flat-square)
@@ -68,7 +68,8 @@ These are some suggestions for hardware to use. The first link in each row is th
         • <a href=https://www.pololu.com/product/2267>1.7A 36Ncm (Polulu, $18)</a><br>
         • <a href=https://www.amazon.com/Twotrees-Stepper-17HS4401-Connector-Printer/dp/B07THK76QQ>1.5A 42Ncm (Amazon, $10)</a>
       </td>
-      <td>This may be over/underpowered for your needs, depending on the weight of the blinds. <br> <br> See <a href="#choosing-a-motor">choosing a motor</a>.</td>
+      <td>This may be over/underpowered for your needs, depending on the weight of the blinds. <br> <br> See <a href="#choosing-a-motor">choosing a motor</a>. <br> <br> 
+      Note: The newest 3d designs use a worm gear with a 30:1 reductions so a much smaller motor will work, but the movement speed is greatly reduced with that design.</td>
     </tr>
     <tr>
       <td>3.3V Step-down Regulator</td>
@@ -87,6 +88,13 @@ These are some suggestions for hardware to use. The first link in each row is th
         • <a href=https://www.amazon.com/Converter-100-220V-Transformer-5-5x2-1mm-Accessories/dp/B08C594VNP>12V 5A (Amazon, $10)</a>
       </td>
       <td>You can (and probably want to) use a voltage over the motor's rating.  That's fine, you just need to stay below it's rated current. <br> <br>  The current needed depends on motor rating and how many blinds you'll be moving simultaneously with the same power supply.</td>
+    </tr>
+    <tr>
+      <td>DC barrel jack</td>
+      <td>
+        • <a href=https://www.aliexpress.com/item/4000215113209.html>5.5mm x 2.1mm (AliExpress, $3)</a><br>
+      </td>
+      <td></td>
     </tr>
     <tr>
       <td>Microswitch</td>
@@ -109,10 +117,20 @@ These are some suggestions for hardware to use. The first link in each row is th
 </table>
 
 ### Circuit
-I've created PCBs that fit the components, but am still tweaking it -- the designs will be included in `etc/` when ready. For now, these pretty pictures might help you create your own perfboard/breadboard circuits.
-> If anyone has experience designing PCBs and is interested in helping out, please contact me!
+Schematic files are located in the `pcb/` directory. Currently there is a devkit that can be fabricated that fits header pins and will use the following components. Check the parts list carefully, only the first item in each section will fit, since they are what I ordered, but other parts may not. The gerber output is a 2 layer board created with [JLCPCB](https://jlcpcb.com/)'s CAM generator.
+- 30 pin ESP32 devkit
+- 3 pin buck converter (middle pin GND)
+- 3 pin DC barrel jack
 
-<img src="./etc/circuit.png" alt="logo">
+You'll also want some pin headers to solder on, both male and female. The parts are throughhole and the gerber has drill holes so you can skip them if you'd like, but I'd recommend at least making the A4988 removable in case you pop one.
+
+#### Schematic
+<img src="./images/devkit-r1-schematic.png" alt="schematic">
+
+#### Devkit
+<img src="./images/devkit-r1.jpg" alt="devkit">
+
+
 
 * **Remember to [adjust the current limit](https://youtu.be/89BHS9hfSUk) of the A4988 BEFORE connecting it to the circuit** -- keep the magic smoke inside.
 * The pins can be set via the [web UI](#settings), feel free to use different ones.
@@ -266,10 +284,10 @@ Native Homekit integration allows the ESP32 to be detected as a device without a
 <h2 id="web-ui">💻 Web UI</h2>
 
 ### Home
-<img src="./etc/home-1.png" width="250"> <img src="./etc/home-2.png" width="250">
+<img src="./images/home-1.png" width="250"> <img src="./images/home-2.png" width="250">
 
 ### Settings
-<img src="./etc/settings-1.png" width="250"> <img src="./etc/settings-2.png" width="250"> <img src="./etc/settings-3.png" width="250">
+<img src="./images/settings-1.png" width="250"> <img src="./images/settings-2.png" width="250"> <img src="./images/settings-3.png" width="250">
 
 <h2 id="configuration">🔧 Configuration</h2>
 
@@ -281,19 +299,19 @@ There are a few ways to configure WBlinds. Eventually the goal is to provide a w
 | `DEFAULT_STEPS_PER_REV` | Steps per revolution, varies from motor to motor. May be defined as step angle, in which case you can divide 360/stepAngle for the steps/rev | `200` (1.8°) |
 | `DEFAULT_CORD_LENGTH_MM` | Length of the cord or material that wraps around the axis, in millimeters. Used to calculate maximum turns to fully wrap around axis. | `1650` |
 | `DEFAULT_CORD_DIAMETER_MM` | Diameter of the cord or material, in millimeters. Used to calculate maximum turns to fully wrap around axis. | `0.1` |
-| `DEFAULT_AXIS_DIAMETER_MM` | Diameter of the axis the motor turns, in millimeters. Default is the approx size of the stl in `etc/` | `15` |
+| `DEFAULT_AXIS_DIAMETER_MM` | Diameter of the axis the motor turns, in millimeters. Default is the approx size of the stl in `3d/` | `15` |
 
 ### Default Pins
 | Pin | Use | Description
 | --- | --- | -----------|
-| `18`  | pDir | Controls direction (optional) |
-| `19`  | pStep | Controls steps via PWM with A4988 (required) |
-| `21`  | pSlp | Allows putting motor to sleep to save most power possible. (optional) |
+| `17`  | pDir | Controls direction (optional) |
+| `5`  | pStep | Controls steps via PWM with A4988 (required) |
+| `18`  | pSlp | Allows putting motor to sleep to save most power possible. (optional) |
 | `23`  | pEn | Allows enabling/disabling motor with A4988. By default the motor is disabled and enabled between uses which lowers power consumption. (optional)
-| `3` | pRst | Reset pin (optional)
+| `19` | pRst | Reset pin (optional)
 | `1` | pMs1 | Microstep resolution pin 1, using microsteps can decrease sound (optional)
-| `5` | pMs2 | Microstep resolution pin 2 (optional)
-| `17` | pMs3 | Microstep resolution pin 3 (optional)
+| `3` | pMs2 | Microstep resolution pin 2 (optional)
+| `21` | pMs3 | Microstep resolution pin 3 (optional)
 | `4` | pHomeSw | Home trigger switch, recommended as a way to hard stop when the blinds reach the fully contracted position to avoid damaging hardware when steps are skipped or malfunctions. (optional)
 
 <h2 id="development">📝 Development</h2>
@@ -383,7 +401,9 @@ public:
 <h2 id="appendix">💤 Appendix</h2>
 
 ### Other files
-The `/etc` directory contains some STL files that may be useful for building WBlinds. Those are designed for use with IKEA HOPPVALS, but would be close to the TRIPPVALS, too.
+The `/3d` directory contains some STL files that may be useful for building WBlinds. Those are designed for use with IKEA HOPPVALS, but would be close to the TRIPPVALS, too. There are 2 revisions:
+1. `r0` uses a direct drive mechanism with a center axle along the entire width of the blind bracket. 
+2. `r1` uses a worm gear and single spool in the center of the blinds bracket. This won't work with in window mounting.
 > Note: Like everything else, those designs are a WIP :)
 
 ### Choosing a motor

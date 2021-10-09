@@ -165,6 +165,15 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
 
   this->engine_ = engine;
 
+  WLOG_D(TAG, "PIN step: %i", state->getStepPin());
+  WLOG_D(TAG, "PIN dir: %i", state->getDirectionPin());
+  WLOG_D(TAG, "PIN enable: %i", state->getEnablePin());
+  WLOG_D(TAG, "PIN ms1: %i", state->getMs1Pin());
+  WLOG_D(TAG, "PIN ms2: %i", state->getMs2Pin());
+  WLOG_D(TAG, "PIN ms3: %i", state->getMs3Pin());
+  WLOG_D(TAG, "PIN reset: %i", state->getResetPin());
+  WLOG_D(TAG, "PIN sleep: %i", state->getSleepPin());
+
   stepper_ = this->engine_.stepperConnectToPin(state->getStepPin());
 
   stepper_->setDirectionPin(state->getDirectionPin());
