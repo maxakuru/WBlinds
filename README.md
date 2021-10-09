@@ -128,7 +128,7 @@ You'll also want some pin headers to solder on, both male and female. The parts 
 <img src="./images/devkit-r1-schematic.png" alt="schematic">
 
 #### Devkit
-<img src="./images/devkit-r1.jpg" alt="devkit">
+<img src="./images/devkit-r1.jpg" alt="devkit" width="400">
 
 
 
