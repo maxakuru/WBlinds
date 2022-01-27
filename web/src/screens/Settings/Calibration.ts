@@ -151,7 +151,7 @@ const _Calibration: ComponentFunction<CalibrationAPI> = function () {
     appendChild(div, desc);
 
     const content = createElement("div");
-    setStyle(content, "height", "60vh");
+    setStyle(content, "height", "50vh");
     addClass(content, "fC");
     appendChild(div, content);
 

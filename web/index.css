@@ -8,6 +8,7 @@
 
 html * {
 	font-family: -apple-system, BlinkMacSystemFont, helvetica, sans-serif;
+	touch-action: manipulation;
 }
 
 /* uncss:ignore */
