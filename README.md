@@ -145,11 +145,12 @@ These are screenshots of the design to give you an idea of how parts fit togethe
 
 **Default**
 
-<img src="./images/3d-r1-front.png" alt="r1-front" height="330"><img src="./images/3d-r1-left.png" alt="r1-left" height="330"><img src="./images/3d-r1-back.png" alt="r1-back" height="330"><img src="./images/3d-r1-right.png" alt="r1-right" height="330">
+<img src="./images/3d-r1-front.png" alt="r1-front" height="320"><img src="./images/3d-r1-left.png" alt="r1-left" height="320"><img src="./images/3d-r1-back.png" alt="r1-back" height="320"><img src="./images/3d-r1-right.png" alt="r1-right" height="320">
 
 > The `3d/r1/cam/` contains an experimental (and not great) barrel cam mechanism to guide the string along an alternating path around the center spool, functionally similar to what a fishing reel does with a string guide. This can be sticky with 3D-printed parts, and with a good placement of `string-guide.stl`s, it isn't necessary to keep the spooling even.
 
 **With optional cam exposed**
+
 <img src="./images/3d-r1-optional-cam.png" alt="r1-with-cam" height="400">
 
 
