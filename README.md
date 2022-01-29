@@ -137,6 +137,17 @@ You'll also want some pin headers to solder on, both male and female. The parts 
 * Be sure not to apply 12/24V to your ESP or `Vc` (or VDD) of the driver IC. It only goes to `Vm` to power the motor, everything else can use 3.3v.
 * A4988's `RST` and `SLP` can be connected to each other if you don't care about the ability to sleep the motor.
 
+### 3D Parts
+Included in the `/3d` directory are 2 revisions of printable designs for WBlinds, crafted specifically for Ikea HOPPVALS. The same 2 mechanisms could be reworked for any other blinds. `r1` has the added benefit of a worm gear mechanism, so power doesn't need to be constantly applied to keep the blinds in place, even with heavy materials.
+
+#### Revision 1
+These are screenshots of the design to give you an idea of how parts fit together. It may be useful to put a damper ([Amazon](https://www.amazon.com/Rubber-Stepper-Vibration-Damper-Screws/dp/B07415B39B) | [AliExpress](https://www.aliexpress.com/item/4000058411445.html)) between the bracket and the stepper to cut down on vibration & noise.
+
+<img src="./images/3d-r1-front.png" alt="r1-front" height="400">
+<img src="./images/3d-r1-left.png" alt="r1-left" height="400">
+<img src="./images/3d-r1-back.png" alt="r1-back" height="400">
+<img src="./images/3d-r1-right.png" alt="r1-right" width="400">
+
 ### Software
 1. Connect ESP32 to your computer via USB
 2. `git clone https://github.com/maxakuru/WBlinds.git`
@@ -281,6 +292,8 @@ Where `pos` is %, `speed` is Hz, and `accel` is steps/s^2.
 ### Homekit
 Native Homekit integration allows the ESP32 to be detected as a device without a bridge/emulator. This mode requires percentage-based position values, so it's important to calibrate the settings first.
 
+The default Homekit pin is `111-22-333`, and it will be correctly identified as a "window covering".
+
 <h2 id="web-ui">💻 Web UI</h2>
 
 ### Home
@@ -291,15 +304,7 @@ Native Homekit integration allows the ESP32 to be detected as a device without a
 
 <h2 id="configuration">🔧 Configuration</h2>
 
-There are a few ways to configure WBlinds. Eventually the goal is to provide a way to easily calibrate top and bottom ranges of the blinds, but for now the distances are either manually set or (by default) calculated from configuration values.
-
-### Parameters
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| `DEFAULT_STEPS_PER_REV` | Steps per revolution, varies from motor to motor. May be defined as step angle, in which case you can divide 360/stepAngle for the steps/rev | `200` (1.8°) |
-| `DEFAULT_CORD_LENGTH_MM` | Length of the cord or material that wraps around the axis, in millimeters. Used to calculate maximum turns to fully wrap around axis. | `1650` |
-| `DEFAULT_CORD_DIAMETER_MM` | Diameter of the cord or material, in millimeters. Used to calculate maximum turns to fully wrap around axis. | `0.1` |
-| `DEFAULT_AXIS_DIAMETER_MM` | Diameter of the axis the motor turns, in millimeters. Default is the approx size of the stl in `3d/` | `15` |
+There is a `Calibrate` button at `$HOST/settings?tab=gen` that will guide you through a 2 step calibration to find the correct bottom and top positions for the blinds on first setup. These settings will be persisted across power cycles and flashes of new firmwares, as long as you use the same partition.
 
 ### Default Pins
 | Pin | Use | Description
@@ -350,6 +355,11 @@ yarn build:cpp
 Build & flash using pio:
 ```sh
 yarn flash
+```
+
+Flash over-the-air (requires an initial flash while plugged in and WiFi connection established through settings):
+```sh
+yarn flash:ota $IP_OR_HOSTNAME
 ```
 
 #### Both

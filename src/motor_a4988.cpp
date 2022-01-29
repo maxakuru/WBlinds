@@ -148,6 +148,8 @@ void MotorA4988::handleEvent(const WBlindsEvent& event) {
 
     WLOG_D(TAG, "move to target pos: %i", tPos);
     this->moveToPercent(tPos);
+    stepper_->setDelayToDisable(DEFAULT_DELAY_TO_DISABLE);
+
   }
 }
 
@@ -181,8 +183,8 @@ void MotorA4988::init(FastAccelStepperEngine& engine) {
   // stepper_->disableOutputs();
   stepper_->enableOutputs();
   this->invertDirection();
-  // stepper_->setAutoEnable(true);
-  // stepper_->setDelayToDisable(5000);
+  stepper_->setAutoEnable(true);
+  stepper_->setDelayToDisable(DEFAULT_DELAY_TO_DISABLE);
 
   // restore state
   int steps = percentToSteps(state->getPosition(), stepsPerPct_, maxPosition_);

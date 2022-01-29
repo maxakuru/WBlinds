@@ -46,9 +46,8 @@
 /* uncss:ignore */
 
 .cal-conc {
-    /* margin: auto; */
-    margin: 20px 0px 20px auto;
-    /* max-width: 300px; */
+    margin: 20px auto;
+    padding-left: 20px;
     display: flex;
     flex-wrap: wrap;
 }

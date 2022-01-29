@@ -4,6 +4,10 @@
 #include <FastAccelStepper.h>
 #include "motor.h"
 
+// Motor specific defines
+#define DEFAULT_DELAY_TO_DISABLE 5000
+
+
 typedef struct {
   uint8_t ms1pin;   // pin for microstep resolution 1
   uint8_t ms2pin;   // pin for microstep resolution 2
